@@ -37,7 +37,7 @@ public class HeightCalibration : MonoBehaviour
             return;
         }
 
-        baseHeight = bodyTracker.HeadPosition.y + 0.08f; // Adding offset for better accuracy
+        baseHeight = bodyTracker.HeadPosition.y; 
         IsCalibrated = true;
 
         PlayerPrefs.SetFloat(HeightKey, baseHeight);

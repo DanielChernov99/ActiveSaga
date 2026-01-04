@@ -433,7 +433,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6981642495833523204, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1910536952}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
 --- !u!4 &605794789 stripped
@@ -684,6 +687,11 @@ MonoBehaviour:
   m_Teleporting:
     m_PersistentCalls:
       m_Calls: []
+--- !u!4 &1274377473 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6981642495833523204, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+  m_PrefabInstance: {fileID: 441087506}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1395518226
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -820,6 +828,70 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4856108064011408996, guid: a20ef4adf046a3e41a282dd3f5c1bd75, type: 3}
   m_PrefabInstance: {fileID: 7084359559885142094}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1910536951
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1910536952}
+  - component: {fileID: 1910536954}
+  - component: {fileID: 1910536953}
+  m_Layer: 2
+  m_Name: Run System
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1910536952
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1910536951}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1274377473}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1910536953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1910536951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55fdef3aaa2cb004c8acc772a90d5c36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerLocomotion
+  playerTransform: {fileID: 341799410}
+  headTransform: {fileID: 605794789}
+  runAnalyzer: {fileID: 1910536954}
+  maxSpeed: 4
+--- !u!114 &1910536954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1910536951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e09372dd9acc7c41954711dffa0d22b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RunAnalyzer
+  bodyTracker: {fileID: 2025430512}
+  activationThreshold: 0.15
+  smoothFactor: 5
 --- !u!1 &2025430509
 GameObject:
   m_ObjectHideFlags: 0
@@ -832,7 +904,7 @@ GameObject:
   - component: {fileID: 2025430512}
   - component: {fileID: 2025430511}
   m_Layer: 2
-  m_Name: 'BodyTracking '
+  m_Name: 'Body Tracking '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
