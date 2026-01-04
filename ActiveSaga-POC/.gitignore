@@ -20,3 +20,5 @@
 *.mdb
 *.opendb
 *.VC.db
+.DS_Store
+Thumbs.db
