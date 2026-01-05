@@ -6,89 +6,150 @@ public class PlayerLocomotion : MonoBehaviour
     [SerializeField] private Transform playerTransform;
     [SerializeField] private RunAnalyzer runAnalyzer;
     [SerializeField] private JumpAnalyzer jumpAnalyzer;
+    [SerializeField] private SquatAnalyzer squatAnalyzer; 
     
     [Header("Path Settings")]
-    [Tooltip("Drag an object here to define the forward direction")]
+    [Tooltip("Drag an object here to define the forward direction.")]
     [SerializeField] private Transform pathDirectionReference; 
 
     [Header("Movement Settings")]
     [SerializeField] private float maxRunSpeed = 4.0f;
+    [SerializeField] private float crouchSpeed = 2.0f; 
     [SerializeField] private float jumpForce = 5.0f;
     [SerializeField] private float gravity = 9.81f;
 
-    [Header("Air Control")]
-    [Tooltip("Multiplier for speed while in air. Lower this to jump shorter distances.")]
-    [Range(0.0f, 1.0f)]
-    [SerializeField] private float airSpeedFactor = 0.5f; 
+    [Header("Momentum Settings")]
+    [SerializeField] private float momentumDecayRate = 2.0f; 
 
-    [Tooltip("If speed is below this value when jumping, the jump will be vertical (0 forward speed).")]
-    [SerializeField] private float minMomentumToMaintain = 1.0f;
-    
+    [Header("Momentum Filtering")]
+    [Tooltip("Minimum input intensity to be considered 'Running'. Prevents drift when standing still.")]
+    [SerializeField] private float minRunInputThreshold = 0.15f; 
+
+    [Tooltip("Time in seconds you must run continuously before momentum is 'banked'.")]
+    [SerializeField] private float minRunDurationToBuildMomentum = 0.5f;
+
+    [Tooltip("Time in seconds to remember the last valid running speed.")]
+    [SerializeField] private float jumpMomentumMemoryWindow = 0.5f;
+
+    [Header("Air Control")]
+    [Tooltip("Multiplier for speed while in air.")]
+    [SerializeField] private float airSpeedFactor = 1.0f; 
+
     private float verticalVelocity = 0f;
     private bool isGrounded = true;
     
-    // Store the speed we had just before leaving the ground
-    private float momentumSpeed = 0f;
+    private float currentMomentumSpeed = 0f;
+
+    // MEMORY VARIABLES
+    private float storedRunSpeed = 0f;
+    private float lastRunInputTime = -10f; 
+    private float currentRunDuration = 0f; 
+
+    // Lock flag for stationary jumps
+    private bool isStationaryJumpLock = false;
 
     private void OnEnable()
     {
-        if (jumpAnalyzer != null)
-        {
-            jumpAnalyzer.OnJumpDetected += PerformJump;
-        }
+        if (jumpAnalyzer != null) jumpAnalyzer.OnJumpDetected += PerformJump;
     }
 
     private void OnDisable()
     {
-        if (jumpAnalyzer != null)
-        {
-            jumpAnalyzer.OnJumpDetected -= PerformJump;
-        }
+        if (jumpAnalyzer != null) jumpAnalyzer.OnJumpDetected -= PerformJump;
     }
 
     void Update()
     {
-        if (runAnalyzer == null || playerTransform == null || pathDirectionReference == null)
-        {
-            return;
-        }
-
-        // --- 1. Calculate Horizontal Speed ---
-        float targetSpeed = 0f;
-
+        if (runAnalyzer == null || playerTransform == null || pathDirectionReference == null) return;
+        // --- 1. Calculate Horizontal Speed (Momentum) ---
         if (isGrounded)
         {
-            // On Ground: Speed is determined by how fast the player runs
+            // Reset the jump lock when we are on the ground
+            isStationaryJumpLock = false;
+
             float runIntensity = runAnalyzer.CurrentRunFactor;
-            
-            if (runIntensity > 0.05f) 
+            float targetSpeed = 0f;
+
+            // --- בדיקת סקוואט ---
+            // בודקים האם ה-SquatAnalyzer קיים והאם הוא מדווח שאנחנו בסקוואט
+            bool isSquatting = (squatAnalyzer != null && squatAnalyzer.IsSquatting);
+
+            if (isSquatting)
             {
-                targetSpeed = maxRunSpeed * runIntensity;
+                // לוגיקה של סקוואט:
+                // אם השחקן מנסה לזוז (מנופף בידיים) בזמן סקוואט, ניתן לו לזוז אבל לאט.
+                if (runIntensity > minRunInputThreshold)
+                {
+                    targetSpeed = crouchSpeed; // מהירות מוגבלת
+                }
             }
-            
-            // constantly update momentum while on ground
-            momentumSpeed = targetSpeed;
+            else
+            {
+                // לוגיקה של ריצה רגילה (כמו קודם):
+                if (runIntensity > minRunInputThreshold) 
+                {
+                    targetSpeed = maxRunSpeed * runIntensity;
+                    currentRunDuration += Time.deltaTime;
+
+                    if (currentRunDuration >= minRunDurationToBuildMomentum)
+                    {
+                        storedRunSpeed = targetSpeed;
+                        lastRunInputTime = Time.time;
+                    }
+                }
+                else
+                {
+                    currentRunDuration = 0f;
+                    targetSpeed = 0f;
+                }
+            }
+
+            // החלקת מהירות (Smoothing)
+            if (targetSpeed > currentMomentumSpeed)
+            {
+                currentMomentumSpeed = targetSpeed; 
+            }
+            else
+            {
+                currentMomentumSpeed = Mathf.Lerp(currentMomentumSpeed, targetSpeed, Time.deltaTime * momentumDecayRate);
+                if (currentMomentumSpeed < 0.01f) currentMomentumSpeed = 0f;
+            }
         }
-        else
+
+        // --- 2. Determine Actual Move Speed ---
+        float actualMoveSpeed = currentMomentumSpeed;
+        
+        if (!isGrounded)
         {
-            // In Air: Use momentum calculated at takeoff
-            targetSpeed = momentumSpeed * airSpeedFactor;
+            // CRITICAL FIX: If we are locked into a stationary jump, FORCE speed to 0.
+            if (isStationaryJumpLock)
+            {
+                actualMoveSpeed = 0f;
+            }
+            else
+            {
+                actualMoveSpeed *= airSpeedFactor;
+            }
         }
 
         // Apply Horizontal Movement
-        Vector3 forwardDir = pathDirectionReference.forward;
-        forwardDir.y = 0; 
-        forwardDir.Normalize();
-        Vector3 horizontalMove = forwardDir * targetSpeed * Time.deltaTime;
+        Vector3 horizontalMove = Vector3.zero;
+        if (actualMoveSpeed > 0.001f)
+        {
+            Vector3 forwardDir = pathDirectionReference.forward;
+            forwardDir.y = 0; 
+            forwardDir.Normalize();
+            horizontalMove = forwardDir * actualMoveSpeed * Time.deltaTime;
+        }
 
-        // --- 2. Calculate Vertical Movement (Gravity) ---
+        // --- 3. Vertical & Gravity ---
         ApplyGravity();
         Vector3 verticalMove = Vector3.up * verticalVelocity * Time.deltaTime;
 
-        // --- 3. Apply Total Movement ---
+        // --- 4. Apply Total Movement ---
         playerTransform.Translate(horizontalMove + verticalMove, Space.World);
 
-        // --- 4. Ground Check ---
+        // --- 5. Ground Check ---
         if (playerTransform.position.y <= 0)
         {
             Vector3 pos = playerTransform.position;
@@ -102,18 +163,34 @@ public class PlayerLocomotion : MonoBehaviour
 
     private void PerformJump()
     {
+        // חסימה: אי אפשר לקפוץ אם נמצאים כרגע בסקוואט עמוק
+        if (squatAnalyzer != null && squatAnalyzer.IsSquatting)
+        {
+            Debug.Log("Jump blocked because player is squatting.");
+            return;
+        }
+
         if (isGrounded)
         {
-            // LOGIC FIX:
-            // If we are moving very slowly (likely standing still), kill the momentum entirely.
-            if (momentumSpeed < minMomentumToMaintain)
+            float timeSinceLastValidRun = Time.time - lastRunInputTime;
+
+            // CHECK: Did we have a valid run recently?
+            bool isValidRunJump = (timeSinceLastValidRun <= jumpMomentumMemoryWindow);
+
+            if (isValidRunJump)
             {
-                momentumSpeed = 0f;
-                Debug.Log("Standing Jump (Vertical Only)");
+                // RUNNING JUMP
+                currentMomentumSpeed = Mathf.Max(currentMomentumSpeed, storedRunSpeed);
+                isStationaryJumpLock = false; 
+                Debug.Log($"Running Jump! Speed: {currentMomentumSpeed}");
             }
             else
             {
-                Debug.Log("Running Jump (Forward Momentum)");
+                // STANDING JUMP
+                currentMomentumSpeed = 0f;
+                storedRunSpeed = 0f;
+                isStationaryJumpLock = true; 
+                Debug.Log("Standing Jump: MOVEMENT LOCKED");
             }
 
             verticalVelocity = jumpForce;

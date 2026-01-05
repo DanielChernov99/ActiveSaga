@@ -7,10 +7,10 @@ public class JumpAnalyzer : MonoBehaviour
     [SerializeField] private BodyTracker bodyTracker;
 
     [Header("Detection Settings")]
-    [Tooltip("How fast the head must move up to trigger a jump (Meters/Second)")]
+    [Tooltip("How fast the head must move up to trigger a jump (Meters/Second).")]
     [SerializeField] private float jumpVelocityThreshold = 1.5f;
 
-    [Tooltip("Time in seconds to wait before detecting the next jump")]
+    [Tooltip("Time in seconds to wait before detecting the next jump.")]
     [SerializeField] private float jumpCooldown = 0.8f;
 
     // Event that other scripts can listen to
@@ -35,7 +35,7 @@ public class JumpAnalyzer : MonoBehaviour
         if (cooldownTimer > 0)
         {
             cooldownTimer -= Time.deltaTime;
-            // Update previous position even during cooldown to prevent spikes
+            // Update previous position even during cooldown to prevent spikes when cooldown ends
             previousHeadY = bodyTracker.HeadPosition.y; 
             return;
         }
