@@ -440,6 +440,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6981642495833523204, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1384799427}
+    - targetCorrespondingSourceObject: {fileID: 6981642495833523204, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1270773979}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5167925059111895691, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       insertIndex: -1
@@ -724,6 +727,53 @@ MonoBehaviour:
   m_Teleporting:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1270773978
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1270773979}
+  - component: {fileID: 1270773980}
+  m_Layer: 2
+  m_Name: Squat Logic
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1270773979
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1270773978}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1274377473}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1270773980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1270773978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a7d7158ed85d034db9c625dd68386cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SquatAnalyzer
+  bodyTracker: {fileID: 2025430512}
+  heightCalibration: {fileID: 2025430511}
+  squatThreshold: 0.3
 --- !u!1 &1274377472 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5167925059111895691, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
@@ -746,13 +796,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55fdef3aaa2cb004c8acc772a90d5c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLocomotion
-  playerTransform: {fileID: 341799410}
+  playerRoot: {fileID: 341799410}
+  forwardReference: {fileID: 1048223711}
   runAnalyzer: {fileID: 1910536954}
+  squatAnalyzer: {fileID: 1270773980}
   jumpAnalyzer: {fileID: 1384799428}
-  pathDirectionReference: {fileID: 1048223711}
-  maxRunSpeed: 4
+  runSpeed: 4
+  squatSpeed: 1.5
+  momentumResponsiveness: 5
   jumpForce: 5
   gravity: 9.81
+  minRunForMomentumJump: 0.2
+  groundLevel: 0
 --- !u!1 &1384799426
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,8 +853,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::JumpAnalyzer
   bodyTracker: {fileID: 2025430512}
-  jumpVelocityThreshold: 1.5
-  jumpCooldown: 0.8
+  jumpVelocityThreshold: 1.8
+  cooldownTime: 0.8
 --- !u!1001 &1395518226
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -982,8 +1037,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunAnalyzer
   bodyTracker: {fileID: 2025430512}
-  activationThreshold: 0.15
+  sensitivity: 1.5
   smoothFactor: 5
+  minVelocity: 0.15
+  maxJumpVelocity: 1.2
 --- !u!1 &2025430509
 GameObject:
   m_ObjectHideFlags: 0
@@ -1030,7 +1087,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeightCalibration
   bodyTracker: {fileID: 2025430512}
-  baseHeight: 0
 --- !u!114 &2025430512
 MonoBehaviour:
   m_ObjectHideFlags: 0
