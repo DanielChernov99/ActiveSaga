@@ -3,62 +3,39 @@ using System.Collections;
 
 public class HeightCalibration : MonoBehaviour
 {
-    [Header("Dependencies")]
     [SerializeField] private BodyTracker bodyTracker;
 
-    [Header("Calibration Data")]
-    [SerializeField] private float baseHeight = 0f;
+    public float BaseHeight { get; private set; }
+    public bool IsCalibrated { get; private set; }
 
-    public bool IsCalibrated { get; private set; } = false;
-    public float BaseHeight => baseHeight;
-
-    private const string HeightKey = "BaseHeightValue";
-
-    void Start()
+    private void Start()
     {
-        // Wait 3 seconds before calibrating to allow the player to stand up straight
-        StartCoroutine(CalibrateWithDelay());
+        // We always force a new calibration sequence to support different players.
+        StartCoroutine(CalibrateAfterDelay());
     }
 
-    private IEnumerator CalibrateWithDelay()
+    private IEnumerator CalibrateAfterDelay()
     {
-        Debug.Log("Calibration starting in 3 seconds... Please stand straight.");
+        Debug.Log("HeightCalibration: Stand straight... Calibrating in 3 seconds.");
         
+        // Wait for 3 seconds to let the player get into position
         yield return new WaitForSeconds(3f);
-
+        
         Calibrate();
     }
 
     public void Calibrate()
     {
-        if (bodyTracker == null)
+        if (!bodyTracker)
         {
-            Debug.LogError("HeightCalibration: BodyTracker not assigned!");
+            Debug.LogWarning("HeightCalibration: BodyTracker is missing!");
             return;
         }
 
-        baseHeight = bodyTracker.HeadPosition.y; 
+        // Set the base height to the current head height of the specific player
+        BaseHeight = bodyTracker.HeadPosition.y;
         IsCalibrated = true;
 
-        PlayerPrefs.SetFloat(HeightKey, baseHeight);
-        PlayerPrefs.Save();
-
-        Debug.Log($"Calibration Complete! New Baseline Head Height: {baseHeight:F2} meters.");
-    }
-
-    public float GetHeightDelta()
-    {
-        if (!IsCalibrated || bodyTracker == null) return 0f;
-
-        return bodyTracker.HeadPosition.y - baseHeight;
-    }
-
-    [ContextMenu("Reset Calibration")]
-    public void ResetCalibration()
-    {
-        PlayerPrefs.DeleteKey(HeightKey);
-        baseHeight = 0;
-        IsCalibrated = false;
-        Debug.Log("Calibration reset.");
+        Debug.Log($"Calibration Complete. New Base Height: {BaseHeight}");
     }
 }

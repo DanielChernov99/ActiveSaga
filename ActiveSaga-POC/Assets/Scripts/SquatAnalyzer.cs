@@ -8,25 +8,27 @@ public class SquatAnalyzer : MonoBehaviour
 
     [Header("Squat Settings")]
     [Tooltip("The distance (in meters) the player must lower their head to register a squat.")]
-    [SerializeField] private float squatThreshold = 0.30f; // 30 cm
+    [SerializeField] private float squatThreshold = 0.30f; // 30 cm drop required
 
     // Public properties to read from other scripts
     public bool IsSquatting { get; private set; } = false;
     public int SquatCounter { get; private set; } = 0;
 
+    // Internal state to track transition from squat to standing
     private bool wasSquattingLastFrame = false;
 
-    void Update()
+    private void Update()
     {
-        // Ensure calibration is complete before checking logic
+        // 1. Safety Checks: Ensure everything is ready before calculating
         if (bodyTracker == null || heightCalibration == null || !heightCalibration.IsCalibrated) 
             return;
 
+        // 2. Get Data
         float currentHeadY = bodyTracker.HeadPosition.y;
         float calibratedHeight = heightCalibration.BaseHeight;
 
-        // Check if the player's head is below the threshold
-        // Example: Base 1.80m - Threshold 0.30m = 1.50m. If head is < 1.50m, it's a squat.
+        // 3. Squat Logic
+        // Formula: If current height is lower than (Base Height - 30cm) -> We are squatting
         if (currentHeadY < (calibratedHeight - squatThreshold))
         {
             IsSquatting = true;
@@ -36,14 +38,15 @@ public class SquatAnalyzer : MonoBehaviour
             IsSquatting = false;
         }
 
-        // Count logic: Increment only when the player stands UP (finishes the squat)
+        // 4. Counter Logic
+        // If we were squatting last frame, but are NOT squatting now -> We just stood up
         if (wasSquattingLastFrame && !IsSquatting)
         {
             SquatCounter++;
-            Debug.Log($"Squat Completed! Total Count: {SquatCounter}");
+            Debug.Log($"Squat Completed! Total Reps: {SquatCounter}");
         }
 
-        // Save state for the next frame
+        // 5. Save state for the next frame
         wasSquattingLastFrame = IsSquatting;
     }
 }

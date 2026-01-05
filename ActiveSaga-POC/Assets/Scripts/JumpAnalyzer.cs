@@ -6,58 +6,65 @@ public class JumpAnalyzer : MonoBehaviour
     [Header("Dependencies")]
     [SerializeField] private BodyTracker bodyTracker;
 
-    [Header("Detection Settings")]
-    [Tooltip("How fast the head must move up to trigger a jump (Meters/Second).")]
-    [SerializeField] private float jumpVelocityThreshold = 1.5f;
+    [Header("Jump Settings")]
+    [Tooltip("The vertical speed (meters/second) required to trigger a jump.")]
+    [SerializeField] private float jumpVelocityThreshold = 1.8f;
 
-    [Tooltip("Time in seconds to wait before detecting the next jump.")]
-    [SerializeField] private float jumpCooldown = 0.8f;
+    [Tooltip("Time in seconds to wait before allowing another jump (prevents double jumps).")]
+    [SerializeField] private float cooldownTime = 0.8f;
 
     // Event that other scripts can listen to
-    public event Action OnJumpDetected;
+    public event Action OnJump;
 
     private float previousHeadY;
-    private float cooldownTimer = 0f;
+    private float currentCooldownTimer;
 
-    void Start()
+    private void Start()
     {
         if (bodyTracker != null)
         {
             previousHeadY = bodyTracker.HeadPosition.y;
         }
+        else
+        {
+            Debug.LogError("JumpAnalyzer: BodyTracker is not assigned!");
+        }
     }
 
-    void Update()
+    private void Update()
     {
         if (bodyTracker == null) return;
 
-        // 1. Manage Cooldown
-        if (cooldownTimer > 0)
+        // 1. Handle Cooldown
+        if (currentCooldownTimer > 0)
         {
-            cooldownTimer -= Time.deltaTime;
-            // Update previous position even during cooldown to prevent spikes when cooldown ends
-            previousHeadY = bodyTracker.HeadPosition.y; 
+            currentCooldownTimer -= Time.deltaTime;
+            
+            // Keep updating previous Y so we don't get a huge velocity spike when cooldown ends
+            previousHeadY = bodyTracker.HeadPosition.y;
             return;
         }
 
-        // 2. Calculate Vertical Velocity
+        // 2. Calculate Velocity
         float currentHeadY = bodyTracker.HeadPosition.y;
-        float verticalVelocity = (currentHeadY - previousHeadY) / Time.deltaTime;
+        float heightChange = currentHeadY - previousHeadY;
+        
+        // Velocity = Distance / Time
+        float currentVelocity = heightChange / Time.deltaTime;
 
         // 3. Check for Jump
-        // We only care if velocity is POSITIVE (going up) and above threshold
-        if (verticalVelocity > jumpVelocityThreshold)
+        if (currentVelocity > jumpVelocityThreshold)
         {
-            FireJump();
+            Debug.Log("Jump Detected!"); // Helps you see if it works
+            
+            // Notify other scripts (like PlayerLocomotion)
+            OnJump?.Invoke();
+            
+            // Start cooldown
+            currentCooldownTimer = cooldownTime;
         }
 
+        // 4. Update for next frame
         previousHeadY = currentHeadY;
-    }
-
-    private void FireJump()
-    {
-        Debug.Log("Jump Detected!");
-        OnJumpDetected?.Invoke(); // Notify listeners
-        cooldownTimer = jumpCooldown; // Start cooldown
     }
 }
