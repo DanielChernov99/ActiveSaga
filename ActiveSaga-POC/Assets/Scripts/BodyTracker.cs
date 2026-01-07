@@ -3,7 +3,6 @@ using UnityEngine;
 public class BodyTracker : MonoBehaviour
 {
     [Header("Tracked Transforms")]
-    // Using [SerializeField] private protects these variables from other scripts
     [SerializeField] private Transform head;
     [SerializeField] private Transform leftHand;
     [SerializeField] private Transform rightHand;
@@ -15,7 +14,6 @@ public class BodyTracker : MonoBehaviour
 
     private void Awake()
     {
-        // Your safety check is excellent, keep it!
         if (head == null)
         {
             Debug.LogWarning("BodyTracker: Head transform not assigned! Please assign it in the Inspector.");

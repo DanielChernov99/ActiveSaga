@@ -1,4 +1,5 @@
 using UnityEngine;
+using System; // Required for Action events
 
 public class SquatAnalyzer : MonoBehaviour
 {
@@ -8,18 +9,29 @@ public class SquatAnalyzer : MonoBehaviour
 
     [Header("Squat Settings")]
     [Tooltip("The distance (in meters) the player must lower their head to register a squat.")]
-    [SerializeField] private float squatThreshold = 0.30f; // 30 cm drop required
+    [SerializeField] private float squatThreshold = 0.30f; 
 
-    // Public properties to read from other scripts
+    // --- Events ---
+    // Event fired when entering or exiting the squat posture (true = down, false = up)
+    // Useful for PlayerLocomotion to disable movement while squatting.
+    public event Action<bool> OnSquatStateChanged;
+
+    // Event fired only when a full squat rep is completed (standing back up)
+    // Useful for GameManager to count score.
+    public event Action OnSquatCompleted;
+
+    // Public properties
     public bool IsSquatting { get; private set; } = false;
+    
+    // We keep a local counter for debugging in the Inspector, 
+    // even though GameManager will do the actual game scoring.
     public int SquatCounter { get; private set; } = 0;
 
-    // Internal state to track transition from squat to standing
     private bool wasSquattingLastFrame = false;
 
     private void Update()
     {
-        // 1. Safety Checks: Ensure everything is ready before calculating
+        // 1. Safety Checks
         if (bodyTracker == null || heightCalibration == null || !heightCalibration.IsCalibrated) 
             return;
 
@@ -27,26 +39,28 @@ public class SquatAnalyzer : MonoBehaviour
         float currentHeadY = bodyTracker.HeadPosition.y;
         float calibratedHeight = heightCalibration.BaseHeight;
 
-        // 3. Squat Logic
-        // Formula: If current height is lower than (Base Height - 30cm) -> We are squatting
-        if (currentHeadY < (calibratedHeight - squatThreshold))
+        // 3. Determine current state
+        // Check if head is below the threshold
+        bool isCurrentlyDown = currentHeadY < (calibratedHeight - squatThreshold);
+
+        // 4. Handle State Changes (Entering or Exiting Squat)
+        if (isCurrentlyDown != IsSquatting)
         {
-            IsSquatting = true;
-        }
-        else
-        {
-            IsSquatting = false;
+            IsSquatting = isCurrentlyDown;
+            // Notify listeners (Locomotion) that state changed
+            OnSquatStateChanged?.Invoke(IsSquatting);
         }
 
-        // 4. Counter Logic
-        // If we were squatting last frame, but are NOT squatting now -> We just stood up
-        if (wasSquattingLastFrame && !IsSquatting)
+        // 5. Handle Rep Completion (Rising up from a squat)
+        // If we were down last frame, but we are up now -> Rep complete
+        if (wasSquattingLastFrame && !isCurrentlyDown)
         {
             SquatCounter++;
-            Debug.Log($"Squat Completed! Total Reps: {SquatCounter}");
+            // Notify listeners (GameManager) that a rep is done
+            OnSquatCompleted?.Invoke();
         }
 
-        // 5. Save state for the next frame
-        wasSquattingLastFrame = IsSquatting;
+        // 6. Save state for the next frame
+        wasSquattingLastFrame = isCurrentlyDown;
     }
 }

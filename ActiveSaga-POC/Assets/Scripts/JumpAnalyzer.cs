@@ -1,5 +1,5 @@
 using UnityEngine;
-using System;
+using System; // Required for Action events
 
 public class JumpAnalyzer : MonoBehaviour
 {
@@ -13,8 +13,13 @@ public class JumpAnalyzer : MonoBehaviour
     [Tooltip("Time in seconds to wait before allowing another jump (prevents double jumps).")]
     [SerializeField] private float cooldownTime = 0.8f;
 
-    // Event that other scripts can listen to
+    // --- Events ---
+    // Event fired when a jump is detected. 
+    // Listeners: PlayerLocomotion (Physics), GameManager (Score)
     public event Action OnJump;
+
+    // Public property for debugging in Inspector
+    public int JumpCounter { get; private set; } = 0;
 
     private float previousHeadY;
     private float currentCooldownTimer;
@@ -40,7 +45,7 @@ public class JumpAnalyzer : MonoBehaviour
         {
             currentCooldownTimer -= Time.deltaTime;
             
-            // Keep updating previous Y so we don't get a huge velocity spike when cooldown ends
+            // Important: Update position during cooldown to prevent velocity spikes when cooldown ends
             previousHeadY = bodyTracker.HeadPosition.y;
             return;
         }
@@ -52,19 +57,22 @@ public class JumpAnalyzer : MonoBehaviour
         // Velocity = Distance / Time
         float currentVelocity = heightChange / Time.deltaTime;
 
+        previousHeadY = currentHeadY;
+
         // 3. Check for Jump
         if (currentVelocity > jumpVelocityThreshold)
         {
-            Debug.Log("Jump Detected!"); // Helps you see if it works
+            // Debug Log (Optional)
+            // Debug.Log("Jump Detected!"); 
+
+            // Increment local counter
+            JumpCounter++;
             
-            // Notify other scripts (like PlayerLocomotion)
+            // Notify listeners
             OnJump?.Invoke();
             
             // Start cooldown
             currentCooldownTimer = cooldownTime;
         }
-
-        // 4. Update for next frame
-        previousHeadY = currentHeadY;
     }
 }

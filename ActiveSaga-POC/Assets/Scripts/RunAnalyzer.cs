@@ -1,4 +1,5 @@
 using UnityEngine;
+using System; // Required for Actions/Events
 
 public class RunAnalyzer : MonoBehaviour
 {
@@ -19,7 +20,11 @@ public class RunAnalyzer : MonoBehaviour
     [Tooltip("Maximum vertical speed. Anything faster is considered a Jump, not a Run.")]
     [SerializeField] private float maxJumpVelocity = 1.2f;
 
-    // 0 = Standing, 0.5 = Jogging, 1.0 = Sprints
+    // Event invoked every frame with the current run intensity (0 to 1)
+    // This allows other scripts (Locomotion, GameManager) to react without checking this script constantly.
+    public event Action<float> OnRunIntensity;
+
+    // Public property for debugging or legacy support
     public float RunFactor { get; private set; } = 0f;
 
     private float previousHeadY;
@@ -46,7 +51,6 @@ public class RunAnalyzer : MonoBehaviour
         // 2. Determine Target Run Intensity
         float targetRunFactor = 0f;
 
-        // LOGIC:
         // A. If velocity is too high (Jump) -> Keep current speed (don't stop abruptly)
         if (velocity >= maxJumpVelocity)
         {
@@ -60,11 +64,22 @@ public class RunAnalyzer : MonoBehaviour
         // C. Normal Running -> Calculate intensity based on speed
         else
         {
-            // Convert velocity to a 0-1 factor based on sensitivity
             targetRunFactor = Mathf.Clamp01(velocity * sensitivity);
         }
 
         // 3. Smooth the output
         RunFactor = Mathf.Lerp(RunFactor, targetRunFactor, Time.deltaTime * smoothFactor);
+
+        // 4. Fire the Event
+        // We broadcast the data if there is movement, or if we just stopped.
+        if (RunFactor > 0.01f)
+        {
+            OnRunIntensity?.Invoke(RunFactor);
+        }
+        else if (RunFactor < 0.01f && RunFactor > 0)
+        {
+            // Send a hard 0 to ensure the player stops completely
+            OnRunIntensity?.Invoke(0f);
+        }
     }
 }
