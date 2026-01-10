@@ -5,6 +5,9 @@ public class JumpAnalyzer : MonoBehaviour
 {
     [Header("Dependencies")]
     [SerializeField] private BodyTracker bodyTracker;
+    
+    // New: Required to know the player's standing height
+    [SerializeField] private HeightCalibration heightCalibration;
 
     [Header("Jump Settings")]
     [Tooltip("The vertical speed (meters/second) required to trigger a jump.")]
@@ -12,6 +15,10 @@ public class JumpAnalyzer : MonoBehaviour
 
     [Tooltip("Time in seconds to wait before allowing another jump (prevents double jumps).")]
     [SerializeField] private float cooldownTime = 0.8f;
+
+    [Header("Height Logic")]
+    [Tooltip("If the head is lower than (BaseHeight - this value), upward movement is ignored. Prevents squats from registering as jumps.")]
+    [SerializeField] private float minHeightOffsetForJump = 0.30f;
 
     // --- Events ---
     // Event fired when a jump is detected. 
@@ -33,6 +40,11 @@ public class JumpAnalyzer : MonoBehaviour
         else
         {
             Debug.LogError("JumpAnalyzer: BodyTracker is not assigned!");
+        }
+
+        if (heightCalibration == null)
+        {
+            Debug.LogWarning("JumpAnalyzer: HeightCalibration is missing! The height check will be skipped.");
         }
     }
 
@@ -62,9 +74,14 @@ public class JumpAnalyzer : MonoBehaviour
         // 3. Check for Jump
         if (currentVelocity > jumpVelocityThreshold)
         {
-            // Debug Log (Optional)
-            // Debug.Log("Jump Detected!"); 
+            // New Logic: Check if we are too low (recovering from squat)
+            // If true, we ignore this "jump" because it's just standing up
+            if (IsTooLowForJump(currentHeadY))
+            {
+                return;
+            }
 
+            // Valid Jump detected
             // Increment local counter
             JumpCounter++;
             
@@ -74,5 +91,17 @@ public class JumpAnalyzer : MonoBehaviour
             // Start cooldown
             currentCooldownTimer = cooldownTime;
         }
+    }
+
+    // Helper function to check height relative to calibration
+    private bool IsTooLowForJump(float currentY)
+    {
+        // If calibration is missing or not ready, allow the jump by default
+        if (heightCalibration == null || !heightCalibration.IsCalibrated) return false;
+
+        float minAllowedY = heightCalibration.BaseHeight - minHeightOffsetForJump;
+
+        // If current height is below the threshold, it is considered a squat recovery
+        return currentY < minAllowedY;
     }
 }
