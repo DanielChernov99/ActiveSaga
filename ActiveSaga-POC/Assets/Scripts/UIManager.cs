@@ -9,16 +9,28 @@ public class UIManager : MonoBehaviour
     [Tooltip("The Progress Bar Logic")]
     [SerializeField] private RunningProgressBar progressBar;
     
-    // Future: [SerializeField] private StatsDisplay statsDisplay; 
+    [Tooltip("The Left Side Panel Stats")]
+    [SerializeField] private StatsDisplay statsDisplay; // Uncommented and active!
 
     private void Start()
     {
         if (gameManager != null)
         {
+            // Subscribe to the event
             gameManager.OnStatsUpdated += HandleGameUpdate;
             
-            // Initial reset
-            HandleGameUpdate(0, 0, 0);
+            // 1. New: Send the goals (Target Distance, Jumps, Squats) to the display
+            if (statsDisplay != null)
+            {
+                statsDisplay.SetGoals(
+                    gameManager.levelTargetDistance, 
+                    gameManager.goalJumps, 
+                    gameManager.goalSquats
+                );
+            }
+
+            // Initial reset (Sending 0 time as well)
+            HandleGameUpdate(0, 0, 0, 0f);
         }
         else
         {
@@ -34,11 +46,10 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // This function receives ALL data, but currently only uses what is needed for the bar.
-    // In the future, you simply pass the other variables (jumps, squats) to the Stats module here.
-    private void HandleGameUpdate(float currentDist, int jumps, int squats)
+    // Updated Signature: Now accepts 4 parameters (timeElapsed added at the end)
+    private void HandleGameUpdate(float currentDist, int jumps, int squats, float timeElapsed)
     {
-        // 1. Module A: Progress Bar
+        // 1. Module A: Progress Bar (Logic preserved)
         if (progressBar != null)
         {
             float maxDist = gameManager.levelTargetDistance;
@@ -49,10 +60,10 @@ public class UIManager : MonoBehaviour
             progressBar.UpdateVisuals(progress);
         }
 
-        // 2. Module B: Stats (Future Implementation)
-        // if (statsDisplay != null)
-        // {
-        //     statsDisplay.UpdateStats(currentDist, jumps, squats);
-        // }
+        // 2. Module B: Stats Display (Now Active)
+        if (statsDisplay != null)
+        {
+            statsDisplay.UpdateStats(currentDist, jumps, squats, timeElapsed);
+        }
     }
 }

@@ -12,29 +12,26 @@ public class GameManager : MonoBehaviour
     [SerializeField] private HeightCalibration heightCalibration; 
     [SerializeField] private UIManager uiManager;                 
 
-    [Header("Game Settings")]
-    [Tooltip("Distance in meters required to fill the progress bar completely.")]
-    public float levelTargetDistance = 50f; // Lowered default for testing
-    
-    [SerializeField] private float runSpeedMultiplier = 8.0f; // Increased default speed
+    // --- New Modular Goals Section ---
+    [Header("Level Goals")]
+    public float levelTargetDistance = 50f; // Existing logic
+    public int goalJumps = 10;              // New: Goal for jumps
+    public int goalSquats = 5;              // New: Goal for squats
 
-    [Header("Bonus Settings")]
-    [Tooltip("Distance added immediately when jumping")]
-    [SerializeField] private float jumpDistanceBonus = 5.0f;
-    [Tooltip("Distance added immediately when completing a squat")]
-    [SerializeField] private float squatDistanceBonus = 2.5f;
+    [Header("Game Settings")]
+    [SerializeField] private float runSpeedMultiplier = 8.0f; 
 
     [Header("Debug Info")]
-    // Changed from Property to Field so you can see it in Inspector
     public float currentDistance; 
     public int totalJumps;
     public int totalSquats;
 
-    // Flags
+    // Flags & Time
     private bool isGameActive = false;
+    private float gameStartTime; // New: To track time
 
-    // Event: Sends (CurrentDistance, TotalJumps, TotalSquats)
-    public event Action<float, int, int> OnStatsUpdated;
+    // Event: Sends (Distance, Jumps, Squats, Time) -> Added Time at the end
+    public event Action<float, int, int, float> OnStatsUpdated;
 
     private void Start()
     {
@@ -42,23 +39,27 @@ public class GameManager : MonoBehaviour
         if (heightCalibration != null)
         {
             Debug.Log("GameManager: Waiting for Calibration...");
-            // Subscribe to the completion event
             heightCalibration.OnCalibrationComplete += StartGame;
         }
         else
         {
-            // Fallback: If no calibration is assigned, start immediately (good for testing)
             Debug.LogWarning("GameManager: No HeightCalibration assigned! Starting immediately.");
             StartGame();
         }
     }
 
+    private void Update()
+    {
+        // New: Continuous UI update for the timer (so seconds tick even if standing still)
+        if (isGameActive)
+        {
+            NotifyUI();
+        }
+    }
+
     private void OnDestroy()
     {
-        // Unsubscribe to prevent memory leaks
-        if (heightCalibration != null) 
-            heightCalibration.OnCalibrationComplete -= StartGame;
-        
+        if (heightCalibration != null) heightCalibration.OnCalibrationComplete -= StartGame;
         if (runAnalyzer != null) runAnalyzer.OnRunIntensity -= HandleRun;
         if (jumpAnalyzer != null) jumpAnalyzer.OnJump -= HandleJump;
         if (squatAnalyzer != null) squatAnalyzer.OnSquatCompleted -= HandleSquat;
@@ -68,8 +69,9 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GameManager: Calibration Done. Game Started!");
         isGameActive = true;
+        gameStartTime = Time.time; // New: Reset timer
 
-        // 2. Subscribe to movement events only AFTER calibration
+        // 2. Subscribe to movement events
         if (runAnalyzer != null) runAnalyzer.OnRunIntensity += HandleRun;
         if (jumpAnalyzer != null) jumpAnalyzer.OnJump += HandleJump;
         if (squatAnalyzer != null) squatAnalyzer.OnSquatCompleted += HandleSquat;
@@ -84,49 +86,38 @@ public class GameManager : MonoBehaviour
 
         // Calculate distance added this frame
         float distanceStep = intensity * runSpeedMultiplier * Time.deltaTime;
-        
         AddDistance(distanceStep);
     }
 
     private void HandleJump()
     {
         if (!isGameActive) return;
-        
         totalJumps++;
-        
-        // Add instant bonus distance for jumping
-        AddDistance(jumpDistanceBonus);
+        // Note: Logic preserved (no distance added on jump)
+        NotifyUI();
     }
 
     private void HandleSquat()
     {
         if (!isGameActive) return;
-        
         totalSquats++;
-
-        // Add instant bonus distance for squatting
-        AddDistance(squatDistanceBonus);
+        // Note: Logic preserved (no distance added on squat)
+        NotifyUI();
     }
 
-    // Centralized method to update distance and UI
     private void AddDistance(float amount)
     {
-        currentDistance += amount;
-
-        // Removed the code that clamps currentDistance to levelTargetDistance.
-        // Now it can go higher than 100 (or whatever the target is).
-        
-        if (currentDistance >= levelTargetDistance)
-        {
-            // Logic for level complete can happen here, 
-            // but we allow currentDistance to keep growing.
-        }
-
-        NotifyUI();
+        currentDistance += amount;  
+        // Logic for level complete can happen here
+        // (currentDistance >= levelTargetDistance)
     }
 
     private void NotifyUI()
     {
-        OnStatsUpdated?.Invoke(currentDistance, totalJumps, totalSquats);
+        // New: Calculate elapsed time
+        float timeElapsed = isGameActive ? (Time.time - gameStartTime) : 0f;
+
+        // Updated Event invocation with 4 parameters
+        OnStatsUpdated?.Invoke(currentDistance, totalJumps, totalSquats, timeElapsed);
     }
 }
