@@ -1,59 +1,58 @@
 using UnityEngine;
-using TMPro; // If you use TextMeshPro
 
 public class UIManager : MonoBehaviour
 {
-    [Header("Game Logic Reference")]
+    [Header("Game Manager Connection")]
     [SerializeField] private GameManager gameManager;
 
-    [Header("UI Components")]
+    [Header("Modules")]
+    [Tooltip("The Progress Bar Logic")]
     [SerializeField] private RunningProgressBar progressBar;
-    [SerializeField] private TextMeshProUGUI statsText; // Optional: To show exact numbers
+    
+    // Future: [SerializeField] private StatsDisplay statsDisplay; 
 
     private void Start()
     {
         if (gameManager != null)
         {
-            // Subscribe to the event existing in your GameManager
-            gameManager.OnStatsUpdated += UpdateUI;
+            gameManager.OnStatsUpdated += HandleGameUpdate;
             
-            // Initialize UI immediately
-            UpdateUI(gameManager.CurrentDistance, gameManager.TotalJumps, gameManager.TotalSquats);
+            // Initial reset
+            HandleGameUpdate(0, 0, 0);
+        }
+        else
+        {
+            Debug.LogError("UIManager: Game Manager is missing!");
         }
     }
 
     private void OnDestroy()
     {
-        // IMPORTANT: Unsubscribe to prevent memory leaks
         if (gameManager != null)
         {
-            gameManager.OnStatsUpdated -= UpdateUI;
+            gameManager.OnStatsUpdated -= HandleGameUpdate;
         }
     }
 
-    // This function matches the signature of your Action<float, int, int>
-    private void UpdateUI(float currentDist, int jumps, int squats)
+    // This function receives ALL data, but currently only uses what is needed for the bar.
+    // In the future, you simply pass the other variables (jumps, squats) to the Stats module here.
+    private void HandleGameUpdate(float currentDist, int jumps, int squats)
     {
-        // 1. Calculate Progress Percentage for the bar
-        // We get the target distance directly from your public variable in GameManager
-        float maxDist = gameManager.levelTargetDistance;
-        
-        // Avoid division by zero
-        float progress = (maxDist > 0) ? (currentDist / maxDist) : 0;
-        
-        // Clamp between 0 and 1 just in case
-        progress = Mathf.Clamp01(progress);
-
-        // 2. Update the Bar
+        // 1. Module A: Progress Bar
         if (progressBar != null)
         {
+            float maxDist = gameManager.levelTargetDistance;
+            
+            // Protect against division by zero
+            float progress = (maxDist > 0) ? (currentDist / maxDist) : 0;
+            
             progressBar.UpdateVisuals(progress);
         }
 
-        // 3. Optional: Update Text display
-        if (statsText != null)
-        {
-            statsText.text = $"Dist: {currentDist:F1}m | Jumps: {jumps} | Squats: {squats}";
-        }
+        // 2. Module B: Stats (Future Implementation)
+        // if (statsDisplay != null)
+        // {
+        //     statsDisplay.UpdateStats(currentDist, jumps, squats);
+        // }
     }
 }

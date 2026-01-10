@@ -15,7 +15,7 @@ public class PlayerLocomotion : MonoBehaviour
     [SerializeField] private JumpAnalyzer jumpAnalyzer;
 
     [Header("Movement Settings")]
-    [SerializeField] private float runSpeed = 4.0f;
+    [SerializeField] private float runSpeed = 8.0f;
     [SerializeField] private float squatSpeed = 1.5f;
     [Tooltip("How fast the player accelerates/decelerates. Higher = more responsive.")]
     [SerializeField] private float momentumResponsiveness = 5.0f;

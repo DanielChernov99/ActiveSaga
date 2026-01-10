@@ -20,20 +20,24 @@ public class RunningProgressBar : MonoBehaviour
     }
 
     // This method updates the visuals based on percentage (0.0 to 1.0)
+   // This method updates the visuals based on percentage (0.0 to 1.0)
     public void UpdateVisuals(float progressData)
     {
+        // FIX: Clamp the value between 0 and 1 so the UI doesn't break 
+        // even if the player runs 200% of the distance.
+        float clampedProgress = Mathf.Clamp01(progressData);
+
         // 1. Update the yellow fill
         if (fillImage != null)
         {
-            fillImage.fillAmount = progressData;
+            fillImage.fillAmount = clampedProgress;
         }
 
         // 2. Move the icon along the bar
         if (playerIcon != null)
         {
-            // Calculate X position: (Width * Percentage) - (Half Width to center it)
-            // Assumes the pivot is center (0.5, 0.5)
-            float newX = (barWidth * progressData) - (barWidth / 2f);
+            // Calculate X position based on the CLAMPED value
+            float newX = (barWidth * clampedProgress) - (barWidth / 2f);
             
             Vector2 newPos = playerIcon.anchoredPosition;
             newPos.x = newX;
