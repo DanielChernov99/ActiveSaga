@@ -216,9 +216,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TileManager
   player: {fileID: 341799410}
   tilePrefabs:
-  - {fileID: 1100975392}
-  - {fileID: 1100975392}
-  - {fileID: 1100975392}
+  - {fileID: 2863175524218612859, guid: 502b0364841de7f44be2c735b644c9e5, type: 3}
+  - {fileID: 2863175524218612859, guid: 502b0364841de7f44be2c735b644c9e5, type: 3}
+  - {fileID: 2863175524218612859, guid: 502b0364841de7f44be2c735b644c9e5, type: 3}
   tilesOnScreen: 3
   tileLength: 267
 --- !u!4 &42338001
@@ -340,7 +340,7 @@ MonoBehaviour:
   squatAnalyzer: {fileID: 1270773980}
   heightCalibration: {fileID: 2025430511}
   uiManager: {fileID: 1845984359}
-  levelTargetDistance: 100
+  levelTargetDistance: 500
   goalJumps: 10
   goalSquats: 5
   scoreSpeedMultiplier: 8
@@ -726,10 +726,10 @@ MonoBehaviour:
   runAnalyzer: {fileID: 1910536954}
   squatAnalyzer: {fileID: 1270773980}
   jumpAnalyzer: {fileID: 1384799428}
-  runSpeed: 8
+  runSpeed: 15
   squatSpeed: 1.5
   acceleration: 6
-  jumpForce: 5
+  jumpForce: 8
   gravity: 20
 --- !u!114 &351468446
 MonoBehaviour:
@@ -1939,11 +1939,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1445594308}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1100975392 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5388010401461501250, guid: 818661c735108ce4fa2c41d7845bacb5, type: 3}
-  m_PrefabInstance: {fileID: 3726398111080608825}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1130428819
 PrefabInstance:
   m_ObjectHideFlags: 0
