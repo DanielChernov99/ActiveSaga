@@ -54,11 +54,19 @@ exports.loginUser = async (req, res) => {
             return res.status(401).send({ message: "Invalid password" });
         }
 
-        console.log(`🔑 User logged in: ${user.username}`);
+        const profile = await PlayerProfile.findOne({ accountId: user._id });
+
+        if (!profile) {
+            return res.status(404).send({ message: "Account exists but player profile was not found" });
+        }
+
+        console.log(`🎮 Player logged in: ${user.username}`);
+
         res.status(200).send({ 
             message: "Login successful!", 
             accountId: user._id,
-            username: user.username 
+            username: user.username,
+            playerStats: profile 
         });
 
     } catch (error) {
@@ -66,4 +74,3 @@ exports.loginUser = async (req, res) => {
         res.status(500).send({ message: "Login failed", error: error.message });
     }
 };
-
