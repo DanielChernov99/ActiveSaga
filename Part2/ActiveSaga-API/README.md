@@ -15,27 +15,23 @@
   "firstName": "Sasha",
   "lastName": "A"
 }
-
 📥 Response (Server to Unity)
+JSON
 {
   "message": "Registration successful!",
   "accountId": "65f1abcd1234..."
 }
-
-
 🔑 2. Login User (Unified)
 Endpoint: POST /api/auth/login
 
 📤 Request (Unity to Server)
-
+JSON
 {
   "identifier": "Username OR Email",
   "password": "yourPassword"
 }
-
-
 📥 Response (Server to Unity - Success 200)
-
+JSON
 {
   "message": "Login successful!",
   "accountId": "65f1abcd1234...",
