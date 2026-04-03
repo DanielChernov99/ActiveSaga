@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const Account = require('../models/Account');
 const PlayerProfile = require('../models/PlayerProfile');
 
@@ -14,7 +15,10 @@ exports.registerUser = async (req, res) => {
             return res.status(400).send({ message: "Email or Username already exists!" });
         }
 
-        const newAccount = new Account({ email, username, password });
+        const saltRounds = 10; 
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const newAccount = new Account({ email, username, password: hashedPassword });
         const savedAccount = await newAccount.save();
 
         const newPlayerProfile = new PlayerProfile({
@@ -50,7 +54,9 @@ exports.loginUser = async (req, res) => {
             return res.status(404).send({ message: "User not found" });
         }
 
-        if (user.password !== password) {
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordMatch) {
             return res.status(401).send({ message: "Invalid password" });
         }
 
