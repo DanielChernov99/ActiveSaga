@@ -1,11 +1,13 @@
-🎮 ActiveSaga API Reference
-Base URL: http://localhost:3000
-1. Register User
-Endpoint: POST /api/auth/register
+# 🎮 ActiveSaga API Reference
+**Base URL:** `http://localhost:3000`
 
-Request (Unity to Server):
+---
 
-JSON
+## 🔐 1. Register User
+**Endpoint:** `POST /api/auth/register`
+
+### 📤 Request (Unity to Server)
+```json
 {
   "email": "user@example.com",
   "username": "Player123",
@@ -13,28 +15,30 @@ JSON
   "firstName": "Sasha",
   "lastName": "A"
 }
-Response (Server to Unity):
 
-Success (201): {"message": "Registration successful!", "accountId": "65f1..."}
+📥 Response (Server to Unity)
+{
+  "message": "Registration successful!",
+  "accountId": "65f1abcd1234..."
+}
 
-Error (400): {"message": "Missing fields or User already exists"}
 
-2. Login User (Unified)
+🔑 2. Login User (Unified)
 Endpoint: POST /api/auth/login
 
-Request (Unity to Server):
+📤 Request (Unity to Server)
 
-JSON
 {
   "identifier": "Username OR Email",
   "password": "yourPassword"
 }
-Response (Server to Unity - Success 200):
 
-JSON
+
+📥 Response (Server to Unity - Success 200)
+
 {
   "message": "Login successful!",
-  "accountId": "65f1abcd...",
+  "accountId": "65f1abcd1234...",
   "username": "Player123",
   "playerStats": {
     "firstName": "Sasha",
@@ -45,3 +49,4 @@ JSON
     "inventory": []
   }
 }
+
