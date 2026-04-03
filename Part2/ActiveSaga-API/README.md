@@ -14,13 +14,14 @@
   "password": "yourPassword",
   "firstName": "Sasha",
   "lastName": "A"
-}
+}```
+
 ### Response (Server to Unity)
 ```json
 {
   "message": "Registration successful!",
   "accountId": "65f1abcd1234..."
-}
+}```
 
 ---
 
@@ -32,7 +33,8 @@
 {
   "identifier": "Username OR Email",
   "password": "yourPassword"
-}
+}```
+
 ### Response (Server to Unity - Success 200)
 ```json
 {
@@ -47,5 +49,5 @@
     "coins": 0,
     "inventory": []
   }
-}
+}```
 
