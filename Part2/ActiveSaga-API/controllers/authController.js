@@ -32,3 +32,38 @@ exports.registerUser = async (req, res) => {
         res.status(500).send({ message: "Registration failed", error: error.message });
     }
 };
+
+
+exports.loginUser = async (req, res) => {
+    try {
+        const { identifier, password } = req.body;
+
+        if (!identifier || !password) {
+            return res.status(400).send({ message: "Please provide email/username and password" });
+        }
+
+        const user = await Account.findOne({ 
+            $or: [{ email: identifier }, { username: identifier }] 
+        });
+
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        if (user.password !== password) {
+            return res.status(401).send({ message: "Invalid password" });
+        }
+
+        console.log(`🔑 User logged in: ${user.username}`);
+        res.status(200).send({ 
+            message: "Login successful!", 
+            accountId: user._id,
+            username: user.username 
+        });
+
+    } catch (error) {
+        console.error("❌ Login error:", error);
+        res.status(500).send({ message: "Login failed", error: error.message });
+    }
+};
+
