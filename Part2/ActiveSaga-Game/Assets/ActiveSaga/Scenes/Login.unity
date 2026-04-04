@@ -343,7 +343,7 @@ GameObject:
   - component: {fileID: 11715711}
   - component: {fileID: 11715710}
   m_Layer: 5
-  m_Name: PasswordInput
+  m_Name: EmailInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -521,7 +521,7 @@ GameObject:
   - component: {fileID: 22107169}
   - component: {fileID: 22107168}
   m_Layer: 5
-  m_Name: PasswordInput
+  m_Name: FirstNameInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5477,7 +5477,7 @@ GameObject:
   - component: {fileID: 1114480029}
   - component: {fileID: 1114480028}
   m_Layer: 5
-  m_Name: PasswordInput
+  m_Name: LastNameInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5810,6 +5810,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1147751294}
   - component: {fileID: 1147751295}
+  - component: {fileID: 1147751296}
   m_Layer: 0
   m_Name: LoginManager
   m_TagString: Untagged
@@ -5846,6 +5847,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LoginManager
   loginPanel: {fileID: 640952887}
   registerPanel: {fileID: 54940314}
+--- !u!114 &1147751296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1147751293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e1a178c8ecd4cf43ad50d83cd0f313b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AuthManager
+  loginIdentifierInput: {fileID: 809356180}
+  loginPasswordInput: {fileID: 546204830}
+  regEmailInput: {fileID: 11715710}
+  regUsernameInput: {fileID: 1951871967}
+  regPasswordInput: {fileID: 638895404}
+  regFirstNameInput: {fileID: 0}
+  regLastNameInput: {fileID: 0}
 --- !u!1 &1175908093
 GameObject:
   m_ObjectHideFlags: 0
