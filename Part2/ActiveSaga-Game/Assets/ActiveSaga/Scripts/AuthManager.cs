@@ -133,6 +133,12 @@ public class AuthManager : MonoBehaviour
             return;
         }
 
+        if (!IsValidEmail(email))
+        {
+            Debug.LogWarning("⚠️ Error: Please enter a valid email address (must contain '@' and '.')");
+            return;
+        }
+
         StartCoroutine(RegisterCoroutine(email, username, password, firstName, lastName));
     }
 
@@ -173,5 +179,15 @@ public class AuthManager : MonoBehaviour
                 regLastNameInput.text = "";
             }
         }
+    }
+
+    // --- Helper Functions ---
+
+    //checks if the email is in a valid format (basic check)
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrEmpty(email)) return false;
+        
+        return email.Contains("@") && email.Contains(".") && email.IndexOf("@") > 0;
     }
 }
