@@ -4,6 +4,7 @@ using TMPro;
 using System.Text;
 using System.Collections;
 
+// --- Request Classes ---
 [System.Serializable]
 public class LoginRequest
 {
@@ -20,6 +21,29 @@ public class RegisterRequest
     public string firstName;
     public string lastName;
 }
+
+// --- Response Classes ---
+[System.Serializable]
+public class PlayerStats
+{
+    public string firstName;
+    public string lastName;
+    public int level;
+    public int xp;
+    public int coins;
+    public string[] inventory;
+}
+
+[System.Serializable]
+public class LoginResponse
+{
+    public string message;
+    public string accountId;
+    public string username;
+    public PlayerStats playerStats;
+}
+
+
 
 public class AuthManager : MonoBehaviour
 {
@@ -38,7 +62,6 @@ public class AuthManager : MonoBehaviour
 
 
     // --- Login Functions ---
-
     public void OnLoginButtonClicked()
     {
         string identifier = loginIdentifierInput.text;
@@ -73,14 +96,29 @@ public class AuthManager : MonoBehaviour
             }
             else
             {
-                Debug.Log($"✅ Login Successful!\nServer Response: {request.downloadHandler.text}");
+                Debug.Log("✅ Login Successful!");
+                
+                LoginResponse responseData = JsonUtility.FromJson<LoginResponse>(request.downloadHandler.text);
+                
+                if (responseData != null && responseData.playerStats != null)
+                {
+                    Debug.Log($"\n=== Player Profile Info ===\n" +
+                              $"Name: {responseData.playerStats.firstName} {responseData.playerStats.lastName}\n" +
+                              $"Level: {responseData.playerStats.level}\n" +
+                              $"XP: {responseData.playerStats.xp}\n" +
+                              $"Coins: {responseData.playerStats.coins}\n" +
+                              $"Inventory: {string.Join(", ", responseData.playerStats.inventory)}\n" +
+                              $"===========================");
+                }
+
+                // Clear the input fields after successful login
+                loginIdentifierInput.text = "";
+                loginPasswordInput.text = "";
             }
         }
     }
 
-
     // --- Register Functions ---
-
     public void OnRegisterButtonClicked()
     {
         string email = regEmailInput.text;
@@ -125,7 +163,14 @@ public class AuthManager : MonoBehaviour
             }
             else
             {
-                Debug.Log($"✅ New player registered successfully!\nServer Response: {request.downloadHandler.text}");
+                Debug.Log($"🎮 ✅ New player registered successfully!");
+                
+                // Clear the input fields after successful registration
+                regEmailInput.text = "";
+                regUsernameInput.text = "";
+                regPasswordInput.text = "";
+                regFirstNameInput.text = "";
+                regLastNameInput.text = "";
             }
         }
     }
