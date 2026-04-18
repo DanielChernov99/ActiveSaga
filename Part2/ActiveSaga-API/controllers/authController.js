@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const Account = require('../models/Account');
 const PlayerProfile = require('../models/PlayerProfile');
 
@@ -29,7 +30,16 @@ exports.registerUser = async (req, res) => {
         await newPlayerProfile.save();
 
         console.log(`🎮 New player registered: ${username}`);
-        res.status(201).send({ message: "Registration successful!", accountId: savedAccount._id });
+
+        // Generate JWT token (optional, can be used for immediate login after registration)
+        const token = jwt.sign(
+            { accountId: savedAccount._id }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '30d' }
+        );
+
+
+        res.status(201).send({ message: "Registration successful!", accountId: savedAccount._id , token: token});
 
     } catch (error) {
         console.error("❌ Registration error:", error);
@@ -68,9 +78,17 @@ exports.loginUser = async (req, res) => {
 
         console.log(`🎮 Player logged in: ${user.username}`);
 
+        // Generate JWT token for authenticated user
+        const token = jwt.sign(
+            { accountId: user._id }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '30d' } // token valid for 30 days
+        );
+
         res.status(200).send({ 
             message: "Login successful!", 
             accountId: user._id,
+            token: token,
             username: user.username,
             playerStats: profile 
         });

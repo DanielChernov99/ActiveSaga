@@ -3,6 +3,7 @@ using UnityEngine.Networking;
 using TMPro; 
 using System.Text;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 // --- Request Classes ---
 [System.Serializable]
@@ -40,7 +41,16 @@ public class LoginResponse
     public string message;
     public string accountId;
     public string username;
+    public string token;
     public PlayerStats playerStats;
+}
+
+[System.Serializable]
+public class RegisterResponse
+{
+    public string message;
+    public string accountId;
+    public string token;
 }
 
 
@@ -114,6 +124,15 @@ public class AuthManager : MonoBehaviour
                 // Clear the input fields after successful login
                 loginIdentifierInput.text = "";
                 loginPasswordInput.text = "";
+
+                // Store the auth token for future authenticated requests
+                PlayerPrefs.SetString("AuthToken", responseData.token);
+                PlayerPrefs.Save();
+
+                // Load the main game scene after successful login
+                SceneManager.LoadScene("Main");
+
+
             }
         }
     }
@@ -177,9 +196,40 @@ public class AuthManager : MonoBehaviour
                 regPasswordInput.text = "";
                 regFirstNameInput.text = "";
                 regLastNameInput.text = "";
+
+                // Store the auth token for future authenticated requests
+                RegisterResponse responseData = JsonUtility.FromJson<RegisterResponse>(request.downloadHandler.text);
+                PlayerPrefs.SetString("AuthToken", responseData.token);
+                PlayerPrefs.Save();
+                
+                //Load the main game scene after successful registration
+                SceneManager.LoadScene("Main");
             }
         }
     }
+
+    public IEnumerator FetchPlayerStats()
+    {
+        string token = PlayerPrefs.GetString("AuthToken");
+        
+        using (UnityWebRequest request = UnityWebRequest.Get("http://localhost:3000/api/player/me"))
+        {
+            request.SetRequestHeader("Authorization", "Bearer " + token);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("❌ Error fetching stats: " + request.error);
+            }
+            else
+            {
+                PlayerStats stats = JsonUtility.FromJson<PlayerStats>(request.downloadHandler.text);
+                Debug.Log($"✅ Loaded stats for ActiveSaga UI: Level {stats.level}, XP {stats.xp}, Coins {stats.coins}");
+            }
+        }
+    }
+
 
     // --- Helper Functions ---
 
