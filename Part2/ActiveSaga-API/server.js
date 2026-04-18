@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const playerRoutes = require('./routes/playerRoutes');
 
 const app = express();
 app.use(cors());
@@ -18,6 +19,7 @@ mongoose.connect(mongoURI)
     .catch((err) => console.error('❌ Error connecting to MongoDB:', err.message));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/player', playerRoutes);
 
 app.get('/', (req, res) => {
     res.send('ActiveSaga API is running!');

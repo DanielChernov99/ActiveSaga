@@ -3,6 +3,7 @@ using UnityEngine.Networking;
 using TMPro; 
 using System.Text;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 // --- Request Classes ---
 [System.Serializable]
@@ -40,14 +41,32 @@ public class LoginResponse
     public string message;
     public string accountId;
     public string username;
+    public string token;
     public PlayerStats playerStats;
 }
 
+[System.Serializable]
+public class RegisterResponse
+{
+    public string message;
+    public string accountId;
+    public string token;
+}
+
+[System.Serializable]
+public class ErrorResponse
+{
+    public string message;
+}
 
 
 public class AuthManager : MonoBehaviour
 {
     private string baseUrl = "http://localhost:3000/api/auth";
+
+    [Header("Error Displays")]
+    public TextMeshProUGUI loginErrorText;   
+    public TextMeshProUGUI registerErrorText;
 
     [Header("Login UI Fields")]
     public TMP_InputField loginIdentifierInput; 
@@ -61,15 +80,32 @@ public class AuthManager : MonoBehaviour
     public TMP_InputField regLastNameInput;
 
 
+    private void ShowError(string errorMessage, TextMeshProUGUI displayTarget)
+    {
+        if (displayTarget != null)
+        {
+            displayTarget.text = errorMessage;
+        }
+    }
+
+    private void ClearErrors()
+    {
+        if (loginErrorText != null) loginErrorText.text = "";
+        if (registerErrorText != null) registerErrorText.text = "";
+    }
+
+
     // --- Login Functions ---
     public void OnLoginButtonClicked()
     {
+        ClearErrors();
+
         string identifier = loginIdentifierInput.text;
         string password = loginPasswordInput.text;
 
         if (string.IsNullOrEmpty(identifier) || string.IsNullOrEmpty(password))
         {
-            Debug.LogWarning("⚠️ Error: Missing username or password");
+            ShowError("Please fill in all fields.", loginErrorText);
             return;
         }
 
@@ -92,7 +128,23 @@ public class AuthManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
             {
+                string errorMsg = "An error occurred during login.";
+
+                if (!string.IsNullOrEmpty(request.downloadHandler.text))
+                {
+                    try
+                    {
+                        ErrorResponse serverError = JsonUtility.FromJson<ErrorResponse>(request.downloadHandler.text);
+                        if (serverError != null && !string.IsNullOrEmpty(serverError.message))
+                        {
+                            errorMsg = serverError.message;
+                        }
+                    }
+                    catch { }
+                }
+
                 Debug.LogError($"❌ Login Error: {request.error}\nServer Response: {request.downloadHandler.text}");
+                ShowError(errorMsg, loginErrorText);
             }
             else
             {
@@ -114,6 +166,13 @@ public class AuthManager : MonoBehaviour
                 // Clear the input fields after successful login
                 loginIdentifierInput.text = "";
                 loginPasswordInput.text = "";
+
+                // Store the auth token for future authenticated requests
+                PlayerPrefs.SetString("AuthToken", responseData.token);
+                PlayerPrefs.Save();
+
+                // Load the main game scene after successful login
+                SceneManager.LoadScene("Main");
             }
         }
     }
@@ -121,6 +180,8 @@ public class AuthManager : MonoBehaviour
     // --- Register Functions ---
     public void OnRegisterButtonClicked()
     {
+        ClearErrors();
+
         string email = regEmailInput.text;
         string username = regUsernameInput.text;
         string password = regPasswordInput.text;
@@ -129,13 +190,13 @@ public class AuthManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
         {
-            Debug.LogWarning("⚠️ Error: Please fill in all required fields");
+            ShowError("Please fill in all required fields.", registerErrorText);
             return;
         }
 
         if (!IsValidEmail(email))
         {
-            Debug.LogWarning("⚠️ Error: Please enter a valid email address (must contain '@' and '.')");
+            ShowError("Please enter a valid email address.", registerErrorText);
             return;
         }
 
@@ -165,7 +226,22 @@ public class AuthManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
             {
+                string errorMsg = "An error occurred during registration.";
+                if (!string.IsNullOrEmpty(request.downloadHandler.text))
+                {
+                    try
+                    {
+                        ErrorResponse serverError = JsonUtility.FromJson<ErrorResponse>(request.downloadHandler.text);
+                        if (serverError != null && !string.IsNullOrEmpty(serverError.message))
+                        {
+                            errorMsg = serverError.message;
+                        }
+                    }
+                    catch { }
+                }
+
                 Debug.LogError($"❌ Registration Error: {request.error}\nServer Response: {request.downloadHandler.text}");
+                ShowError(errorMsg, registerErrorText);
             }
             else
             {
@@ -177,6 +253,36 @@ public class AuthManager : MonoBehaviour
                 regPasswordInput.text = "";
                 regFirstNameInput.text = "";
                 regLastNameInput.text = "";
+
+                // Store the auth token for future authenticated requests
+                RegisterResponse responseData = JsonUtility.FromJson<RegisterResponse>(request.downloadHandler.text);
+                PlayerPrefs.SetString("AuthToken", responseData.token);
+                PlayerPrefs.Save();
+                
+                //Load the main game scene after successful registration
+                SceneManager.LoadScene("Main");
+            }
+        }
+    }
+
+    public IEnumerator FetchPlayerStats()
+    {
+        string token = PlayerPrefs.GetString("AuthToken");
+        
+        using (UnityWebRequest request = UnityWebRequest.Get("http://localhost:3000/api/player/me"))
+        {
+            request.SetRequestHeader("Authorization", "Bearer " + token);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("❌ Error fetching stats: " + request.error);
+            }
+            else
+            {
+                PlayerStats stats = JsonUtility.FromJson<PlayerStats>(request.downloadHandler.text);
+                Debug.Log($"✅ Loaded stats for ActiveSaga UI: Level {stats.level}, XP {stats.xp}, Coins {stats.coins}");
             }
         }
     }
