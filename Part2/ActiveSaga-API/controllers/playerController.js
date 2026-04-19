@@ -35,8 +35,10 @@ exports.updateStats = async (req, res) => {
             return res.status(404).json({ message: "Player profile not found" });
         }
 
-        profile.xp += xpEarned;
-        profile.coins += coinsEarned;
+        profile.xp += (xpEarned || 0);
+        profile.coins += (coinsEarned || 0);
+        profile.totalDistanceRun += (distanceToAdd || 0);
+        profile.totalTimeInGame += (timeToAdd || 0);
 
         
         // Level up logic based on XP thresholds 

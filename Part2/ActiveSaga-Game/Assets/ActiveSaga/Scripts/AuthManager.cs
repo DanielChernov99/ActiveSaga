@@ -20,6 +20,8 @@ public class RegisterRequest
     public string username;
     public string password;
     public string firstName;
+    public float totalDistanceRun;
+    public float totalTimeInGame;
     public string lastName;
 }
 
@@ -32,6 +34,8 @@ public class PlayerStats
     public int level;
     public int xp;
     public int coins;
+    public float totalDistanceRun;
+    public float totalTimeInGame;
     public string[] inventory;
 }
 
@@ -79,6 +83,25 @@ public class AuthManager : MonoBehaviour
     public TMP_InputField regFirstNameInput;
     public TMP_InputField regLastNameInput;
 
+    // --- Unity Lifecycle ---
+    void Start()
+    {
+        // Check for existing token and attempt auto-login
+        if (PlayerPrefs.HasKey("AuthToken"))
+        {
+            string token = PlayerPrefs.GetString("AuthToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                Debug.Log("🔄 Found saved token, attempting auto-login...");
+                StartCoroutine(AutoLoginCoroutine());
+            }
+        }
+    }
+
+    private IEnumerator AutoLoginCoroutine()
+    {
+        yield return StartCoroutine(FetchPlayerStats(true));
+    }
 
     private void ShowError(string errorMessage, TextMeshProUGUI displayTarget)
     {
@@ -152,27 +175,16 @@ public class AuthManager : MonoBehaviour
                 
                 LoginResponse responseData = JsonUtility.FromJson<LoginResponse>(request.downloadHandler.text);
                 
-                if (responseData != null && responseData.playerStats != null)
-                {
-                    Debug.Log($"\n=== Player Profile Info ===\n" +
-                              $"Name: {responseData.playerStats.firstName} {responseData.playerStats.lastName}\n" +
-                              $"Level: {responseData.playerStats.level}\n" +
-                              $"XP: {responseData.playerStats.xp}\n" +
-                              $"Coins: {responseData.playerStats.coins}\n" +
-                              $"Inventory: {string.Join(", ", responseData.playerStats.inventory)}\n" +
-                              $"===========================");
-                }
+                // Store the auth token for future authenticated requests
+                PlayerPrefs.SetString("AuthToken", responseData.token);
+                PlayerPrefs.Save();
 
                 // Clear the input fields after successful login
                 loginIdentifierInput.text = "";
                 loginPasswordInput.text = "";
 
-                // Store the auth token for future authenticated requests
-                PlayerPrefs.SetString("AuthToken", responseData.token);
-                PlayerPrefs.Save();
-
                 // Load the main game scene after successful login
-                SceneManager.LoadScene("Main");
+                SceneManager.LoadScene("Main New");
             }
         }
     }
@@ -247,25 +259,24 @@ public class AuthManager : MonoBehaviour
             {
                 Debug.Log($"🎮 ✅ New player registered successfully!");
                 
+                RegisterResponse responseData = JsonUtility.FromJson<RegisterResponse>(request.downloadHandler.text);
+                PlayerPrefs.SetString("AuthToken", responseData.token);
+                PlayerPrefs.Save();
+
                 // Clear the input fields after successful registration
                 regEmailInput.text = "";
                 regUsernameInput.text = "";
                 regPasswordInput.text = "";
                 regFirstNameInput.text = "";
                 regLastNameInput.text = "";
-
-                // Store the auth token for future authenticated requests
-                RegisterResponse responseData = JsonUtility.FromJson<RegisterResponse>(request.downloadHandler.text);
-                PlayerPrefs.SetString("AuthToken", responseData.token);
-                PlayerPrefs.Save();
                 
-                //Load the main game scene after successful registration
-                SceneManager.LoadScene("Main");
+                // Load the main game scene
+                SceneManager.LoadScene("Main New");
             }
         }
     }
 
-    public IEnumerator FetchPlayerStats()
+    public IEnumerator FetchPlayerStats(bool shouldNavigateOnSuccess = false)
     {
         string token = PlayerPrefs.GetString("AuthToken");
         
@@ -277,23 +288,26 @@ public class AuthManager : MonoBehaviour
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError("❌ Error fetching stats: " + request.error);
+                Debug.LogWarning("❌ Token validation failed or server unreachable. Staying on Login screen.");
+                PlayerPrefs.DeleteKey("AuthToken");
             }
             else
             {
                 PlayerStats stats = JsonUtility.FromJson<PlayerStats>(request.downloadHandler.text);
-                Debug.Log($"✅ Loaded stats for ActiveSaga UI: Level {stats.level}, XP {stats.xp}, Coins {stats.coins}");
+                Debug.Log($"✅ Auto-login verified: Level {stats.level}");
+                
+                if (shouldNavigateOnSuccess)
+                {
+                    SceneManager.LoadScene("Main New");
+                }
             }
         }
     }
 
     // --- Helper Functions ---
-
-    //checks if the email is in a valid format (basic check)
     private bool IsValidEmail(string email)
     {
         if (string.IsNullOrEmpty(email)) return false;
-        
         return email.Contains("@") && email.Contains(".") && email.IndexOf("@") > 0;
     }
 }

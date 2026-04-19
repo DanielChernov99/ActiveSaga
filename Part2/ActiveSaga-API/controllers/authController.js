@@ -25,7 +25,9 @@ exports.registerUser = async (req, res) => {
         const newPlayerProfile = new PlayerProfile({
             accountId: savedAccount._id,
             firstName: firstName,
-            lastName: lastName
+            lastName: lastName,
+            totalDistanceRun: 0,
+            totalTimeInGame: 0
         });
         await newPlayerProfile.save();
 

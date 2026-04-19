@@ -13,9 +13,11 @@ const playerProfileSchema = new mongoose.Schema({
     level: { type: Number, default: 1 },
     xp: { type: Number, default: 0 },
     coins: { type: Number, default: 0 },
+
+    totalDistanceRun: { type: Number, default: 0 }, 
+    totalTimeInGame: { type: Number, default: 0 },
     
     inventory: { type: [String], default: [] },
-    
     lastLogin: { type: Date, default: Date.now }
 });
 
