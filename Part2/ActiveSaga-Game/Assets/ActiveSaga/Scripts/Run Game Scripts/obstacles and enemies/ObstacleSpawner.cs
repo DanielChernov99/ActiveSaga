@@ -7,27 +7,36 @@ public class ObstacleSpawner : MonoBehaviour
     {
         if (tile == null) return;
 
-        //  CRITICAL: clear old content
         tile.ClearContent();
 
-        List<Transform> points = new List<Transform>(tile.availableSpawnPoints);
+        List<Transform> trackPoints = new List<Transform>(tile.trackSpawnPoints);
+        List<Transform> sidePoints = new List<Transform>(tile.sideSpawnPoints);
 
         Transform parent = tile.contentRoot != null ? tile.contentRoot : tile.transform;
 
         for (int i = 0; i < plan.Count; i++)
         {
-            if (points.Count == 0)
-                break;
+            SpawnableItem item = plan[i];
 
-            int index = Random.Range(0, points.Count);
-            Transform p = points[index];
+            List<Transform> targetPool =
+                item.type == SpawnType.Enemy ? sidePoints : trackPoints;
 
-            GameObject obj = Instantiate(plan[i].prefab, p.position, p.rotation, parent);
+            if (targetPool.Count == 0)
+                continue;
 
-            // 🔥 register for cleanup
+            int index = Random.Range(0, targetPool.Count);
+            Transform spawnPoint = targetPool[index];
+
+            GameObject obj = Instantiate(
+                item.prefab,
+                spawnPoint.position,
+                spawnPoint.rotation,
+                parent
+            );
+
             tile.RegisterSpawnedObject(obj);
 
-            points.RemoveAt(index);
+            targetPool.RemoveAt(index);
         }
     }
 }

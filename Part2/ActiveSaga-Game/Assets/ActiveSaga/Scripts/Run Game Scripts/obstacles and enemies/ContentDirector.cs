@@ -21,7 +21,6 @@ public class ContentDirector : MonoBehaviour
 
     private List<SpawnableItem> tempPool = new List<SpawnableItem>();
 
-    // 🔥 anti spam
     private SpawnType lastType = SpawnType.Collectible;
 
     private void Awake()
@@ -29,9 +28,7 @@ public class ContentDirector : MonoBehaviour
         biomeMap = new Dictionary<BiomeType, BiomeData>();
 
         for (int i = 0; i < biomeList.Count; i++)
-        {
             biomeMap[biomeList[i].biomeType] = biomeList[i];
-        }
     }
 
     private void OnEnable() => TileManager.OnTileSpawned += OnTile;
@@ -45,7 +42,7 @@ public class ContentDirector : MonoBehaviour
         UpdatePacing();
 
         int budget = GetBudget();
-        int maxItems = tile.availableSpawnPoints.Count;
+        int maxItems = tile.trackSpawnPoints.Count;
 
         List<SpawnableItem> plan = new List<SpawnableItem>();
 
@@ -58,18 +55,10 @@ public class ContentDirector : MonoBehaviour
             {
                 SpawnableItem item = biome.spawnables[i];
 
-                if (item.cost > budget)
-                    continue;
-
-                if (!IsAllowed(item))
-                    continue;
-
-                // 🔥 anti spam (no same type twice)
-                if (item.type == lastType)
-                    continue;
-
-                if (item.weight <= 0)
-                    continue;
+                if (item.cost > budget) continue;
+                if (!IsAllowed(item)) continue;
+                if (item.type == lastType) continue;
+                if (item.weight <= 0) continue;
 
                 tempPool.Add(item);
                 totalWeight += item.weight;
@@ -118,9 +107,7 @@ public class ContentDirector : MonoBehaviour
     {
         if (pacing == PacingState.Recovery &&
             (item.type == SpawnType.Enemy || item.type == SpawnType.Jump))
-        {
             return false;
-        }
 
         return true;
     }
