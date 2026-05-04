@@ -8,13 +8,14 @@ public class TileManager : MonoBehaviour
     [SerializeField] private List<GameObject> tilePrefabs;
 
     [Header("Settings")]
-    [Tooltip("Amount of tiles to keep active. 3 is recommended for smooth view.")]
-    [SerializeField] private int tilesOnScreen = 3; 
+    [Tooltip("Amount of tiles to keep active. 4 is recommended for your sequence.")]
+    [SerializeField] private int tilesOnScreen = 4; 
     
     [Tooltip("The exact length of your tile mesh (200 in your case)")]
     [SerializeField] private float tileLength = 200f;
 
     private List<GameObject> activeTiles = new List<GameObject>();
+    private int spawnIndex = 0;
 
     private void Start()
     {
@@ -43,10 +44,14 @@ public class TileManager : MonoBehaviour
 
     private void SpawnTile(float zPos)
     {
-        GameObject tile = Instantiate(tilePrefabs[Random.Range(0, tilePrefabs.Count)]);
+        // Spawn the tile based on the current sequence index
+        GameObject tile = Instantiate(tilePrefabs[spawnIndex]);
         tile.transform.SetParent(transform);
         tile.transform.position = new Vector3(0, 0, zPos);
         activeTiles.Add(tile);
+
+        // Advance the index, loop back to 0 if it reaches the end of the list
+        spawnIndex = (spawnIndex + 1) % tilePrefabs.Count;
     }
 
     private void MoveFirstTileToEnd()
