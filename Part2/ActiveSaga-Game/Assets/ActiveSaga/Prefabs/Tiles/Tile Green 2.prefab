@@ -46,6 +46,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8967374717460365238}
+  - component: {fileID: 2329343910630195739}
   m_Layer: 0
   m_Name: Tile Green 2
   m_TagString: Untagged
@@ -88,6 +89,21 @@ Transform:
   - {fileID: 4144884849075217970}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2329343910630195739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5984689513024903670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc0c73f8826d72448be46452cd444c3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileInfo
+  biomeType: 0
+  availableSpawnPoints: []
+  contentRoot: {fileID: 0}
 --- !u!1 &6241661032189417792
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,22 +8,38 @@ public class TileManager : MonoBehaviour
     [SerializeField] private List<GameObject> tilePrefabs;
 
     [Header("Settings")]
-    [Tooltip("Amount of tiles to keep active. 4 is recommended for your sequence.")]
-    [SerializeField] private int tilesOnScreen = 4; 
-    
-    [Tooltip("The exact length of your tile mesh (200 in your case)")]
+    [SerializeField] private int tilesOnScreen = 4;
     [SerializeField] private float tileLength = 200f;
 
     private List<GameObject> activeTiles = new List<GameObject>();
     private int spawnIndex = 0;
 
+    // 🔥 Event that ContentDirector listens to
+    public static event System.Action<TileInfo> OnTileSpawned;
+
     private void Start()
     {
-        // Auto-find player if not assigned
-        if (player == null) 
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+        // Find player automatically if not assigned
+        if (player == null)
+        {
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null)
+                player = p.transform;
+            else
+            {
+                Debug.LogError("Player not found (Tag = Player missing)");
+                return;
+            }
+        }
 
-        // Spawn the initial tiles
+        // Safety check
+        if (tilePrefabs == null || tilePrefabs.Count == 0)
+        {
+            Debug.LogError("TileManager: No tile prefabs assigned!");
+            return;
+        }
+
+        // Spawn initial tiles
         for (int i = 0; i < tilesOnScreen; i++)
         {
             SpawnTile(i * tileLength);
@@ -32,11 +48,16 @@ public class TileManager : MonoBehaviour
 
     private void Update()
     {
-        if (player == null || activeTiles.Count == 0) return;
+        if (player == null || activeTiles.Count == 0)
+            return;
 
-        // Check if player passed the end of the first tile
-        // Logic: If PlayerZ > FirstTileZ + Length, it means we fully walked off it
-        if (player.position.z > activeTiles[0].transform.position.z + tileLength)
+        GameObject firstTile = activeTiles[0];
+
+        if (firstTile == null)
+            return;
+
+        // If player passed the tile completely → recycle
+        if (player.position.z > firstTile.transform.position.z + tileLength)
         {
             MoveFirstTileToEnd();
         }
@@ -44,29 +65,61 @@ public class TileManager : MonoBehaviour
 
     private void SpawnTile(float zPos)
     {
-        // Spawn the tile based on the current sequence index
-        GameObject tile = Instantiate(tilePrefabs[spawnIndex]);
-        tile.transform.SetParent(transform);
-        tile.transform.position = new Vector3(0, 0, zPos);
+        GameObject prefab = tilePrefabs[spawnIndex];
+        if (prefab == null) return;
+
+        GameObject tile = Instantiate(prefab, transform);
+
+        tile.transform.position = new Vector3(0f, 0f, zPos);
+
         activeTiles.Add(tile);
 
-        // Advance the index, loop back to 0 if it reaches the end of the list
-        spawnIndex = (spawnIndex + 1) % tilePrefabs.Count;
+        // 🔥 Notify Director
+        NotifyTileSpawned(tile);
+
+        // Loop index safely
+        spawnIndex++;
+        if (spawnIndex >= tilePrefabs.Count)
+            spawnIndex = 0;
     }
 
     private void MoveFirstTileToEnd()
     {
-        // 1. Get the tile that is now behind the player
         GameObject tileToRecycle = activeTiles[0];
         activeTiles.RemoveAt(0);
 
-        // 2. Calculate the new Z position (End of the current last tile)
-        float newZ = activeTiles[activeTiles.Count - 1].transform.position.z + tileLength;
+        if (tileToRecycle == null)
+            return;
 
-        // 3. Move the tile instantly
-        tileToRecycle.transform.position = new Vector3(0, 0, newZ);
+        GameObject lastTile = activeTiles[activeTiles.Count - 1];
+        float newZ = lastTile.transform.position.z + tileLength;
 
-        // 4. Add it back to the end of the list
+        // Move tile forward
+        tileToRecycle.transform.position = new Vector3(0f, 0f, newZ);
+
         activeTiles.Add(tileToRecycle);
+
+        // 🔥 CRITICAL: Notify again (new content must be generated)
+        NotifyTileSpawned(tileToRecycle);
+    }
+
+    // ✅ Centralized event call (cleaner + safer)
+    private void NotifyTileSpawned(GameObject tile)
+    {
+        TileInfo info = tile.GetComponent<TileInfo>();
+
+        if (info != null)
+        {
+            OnTileSpawned?.Invoke(info);
+        }
+        else
+        {
+            Debug.LogWarning("Tile has no TileInfo component!");
+        }
+    }
+
+    public List<GameObject> GetActiveTiles()
+    {
+        return activeTiles;
     }
 }

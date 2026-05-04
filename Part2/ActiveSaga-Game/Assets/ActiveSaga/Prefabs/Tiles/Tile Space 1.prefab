@@ -95,6 +95,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 695758104980796535}
+  - component: {fileID: 6282663349903201536}
   m_Layer: 0
   m_Name: Tile Space 1
   m_TagString: Untagged
@@ -155,6 +156,21 @@ Transform:
   - {fileID: 2198719430566054028}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6282663349903201536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968548409253442988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc0c73f8826d72448be46452cd444c3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileInfo
+  biomeType: 2
+  availableSpawnPoints: []
+  contentRoot: {fileID: 0}
 --- !u!1 &3198656556629334761
 GameObject:
   m_ObjectHideFlags: 0
@@ -2443,6 +2459,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5754084199372789682, guid: 7c5767d9f1b07984dbb864bb018a0f71, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 6968342067257730472, guid: 0ba76b307ca3edc46839208be2a762e9, type: 3}
     - target: {fileID: 919132149155446097, guid: 7c5767d9f1b07984dbb864bb018a0f71, type: 3}
       propertyPath: m_Name
       value: terrain_low
@@ -2485,7 +2505,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 2, y: 1, z: 2}
-  m_Center: {x: 0, y: -0.49999997, z: 0}
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1001 &2450268355376376403
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5098,11 +5118,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c211136ea7db84945b83e5a1da0baad1, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.40999997
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c211136ea7db84945b83e5a1da0baad1, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.30004883
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c211136ea7db84945b83e5a1da0baad1, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5139,42 +5159,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c211136ea7db84945b83e5a1da0baad1, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8588431014228693065}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c211136ea7db84945b83e5a1da0baad1, type: 3}
 --- !u!4 &4621593776941557560 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c211136ea7db84945b83e5a1da0baad1, type: 3}
   m_PrefabInstance: {fileID: 5163810664426012883}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &5433843232401374594 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c211136ea7db84945b83e5a1da0baad1, type: 3}
-  m_PrefabInstance: {fileID: 5163810664426012883}
-  m_PrefabAsset: {fileID: 0}
---- !u!65 &8588431014228693065
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5433843232401374594}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 2, y: 2.0000002, z: 2.0000002}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &5446345451075125066
 PrefabInstance:
   m_ObjectHideFlags: 0

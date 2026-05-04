@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf98cec2a36dc0241b361307e98e9a14, type: 3}
+  m_Name: ForestBiome
+  m_EditorClassIdentifier: Assembly-CSharp::BiomeData
+  biomeType: 0
+  spawnables:
+  - itemName: log jump
+    prefab: {fileID: 1062227653614509170, guid: 223e9277b0449a74584b10f145a31bea, type: 3}
+    cost: 1
+    weight: 10
+    type: 0
