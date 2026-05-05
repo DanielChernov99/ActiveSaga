@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - Anchor
+  - Obstacle_Crash
+  - Obstacle_Graze
   layers:
   - Default
   - TransparentFX
