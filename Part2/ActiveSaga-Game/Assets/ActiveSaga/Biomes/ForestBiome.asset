@@ -15,7 +15,7 @@ MonoBehaviour:
   biomeType: 0
   spawnables:
   - itemName: log jump
-    prefab: {fileID: 1062227653614509170, guid: 223e9277b0449a74584b10f145a31bea, type: 3}
+    prefab: {fileID: 1204842564079542113, guid: f2ae9e218b10c274383bd7b7d6270300, type: 3}
     cost: 1
     weight: 10
     type: 0

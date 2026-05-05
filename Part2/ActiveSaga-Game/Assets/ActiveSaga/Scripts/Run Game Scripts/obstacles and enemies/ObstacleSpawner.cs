@@ -18,6 +18,7 @@ public class ObstacleSpawner : MonoBehaviour
         {
             SpawnableItem item = plan[i];
 
+            // בוחר אם לשים על המסלול או בצד
             List<Transform> targetPool =
                 item.type == SpawnType.Enemy ? sidePoints : trackPoints;
 
@@ -27,10 +28,13 @@ public class ObstacleSpawner : MonoBehaviour
             int index = Random.Range(0, targetPool.Count);
             Transform spawnPoint = targetPool[index];
 
+            // ✅ שימוש ב-rotation של ה-PREFAB ולא של ה-SPAWN POINT
+            Quaternion finalRotation = item.prefab.transform.rotation;
+
             GameObject obj = Instantiate(
                 item.prefab,
                 spawnPoint.position,
-                spawnPoint.rotation,
+                finalRotation,
                 parent
             );
 

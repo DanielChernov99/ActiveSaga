@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1697265439022653483}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.5, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -91,7 +91,7 @@ Transform:
   m_GameObject: {fileID: 3057326997200106779}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.5, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -215,7 +215,7 @@ Transform:
   m_GameObject: {fileID: 4763935862432786813}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.5, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -326,8 +326,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileInfo
   biomeType: 0
-  trackSpawnPoints: []
-  sideSpawnPoints: []
+  trackSpawnPoints:
+  - {fileID: 8044137712859584860}
+  - {fileID: 7278442386848929356}
+  - {fileID: 6466140359398527400}
+  - {fileID: 110314944162685458}
+  sideSpawnPoints:
+  - {fileID: 9060675949103252946}
+  - {fileID: 2475708874597563030}
+  - {fileID: 4999393780733490917}
+  - {fileID: 1162706690445021932}
+  - {fileID: 2225363347233284780}
   contentRoot: {fileID: 0}
 --- !u!1 &6241661032189417792
 GameObject:
@@ -758,7 +767,7 @@ Transform:
   m_GameObject: {fileID: 8092593542062662278}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.5, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

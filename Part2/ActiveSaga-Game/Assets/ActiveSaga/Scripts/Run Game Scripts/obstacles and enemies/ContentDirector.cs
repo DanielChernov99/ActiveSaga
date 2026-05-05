@@ -9,7 +9,6 @@ public class ContentDirector : MonoBehaviour
     [Header("State")]
     public GameDifficulty difficulty = GameDifficulty.Easy;
 
-    private PacingState pacing = PacingState.BuildUp;
     private int tileCounter = 0;
 
     [Header("Data")]
@@ -20,8 +19,6 @@ public class ContentDirector : MonoBehaviour
     public ObstacleSpawner spawner;
 
     private List<SpawnableItem> tempPool = new List<SpawnableItem>();
-
-    private SpawnType lastType = SpawnType.Collectible;
 
     private void Awake()
     {
@@ -36,16 +33,31 @@ public class ContentDirector : MonoBehaviour
 
     private void OnTile(TileInfo tile)
     {
-        if (!biomeMap.TryGetValue(tile.biomeType, out BiomeData biome))
-            return;
+        Debug.Log("OnTile CALLED for: " + tile.name);
 
-        UpdatePacing();
+        // ✅ בדיקה שיש biome
+        if (!biomeMap.TryGetValue(tile.biomeType, out BiomeData biome))
+        {
+            Debug.Log("NO BIOME FOUND for type: " + tile.biomeType);
+            return;
+        }
+
+        // ✅ בדיקה שיש spawn points
+        int maxItems = tile.trackSpawnPoints.Count;
+        Debug.Log("Spawn points count: " + maxItems);
+
+        if (maxItems == 0)
+        {
+            Debug.Log("NO SPAWN POINTS - skipping tile");
+            return;
+        }
 
         int budget = GetBudget();
-        int maxItems = tile.trackSpawnPoints.Count;
-
         List<SpawnableItem> plan = new List<SpawnableItem>();
 
+        Debug.Log("Spawnables length: " + biome.spawnables.Length);
+
+        // 🔥 לולאת יצירה פשוטה ויציבה
         while (budget > 0 && plan.Count < maxItems)
         {
             tempPool.Clear();
@@ -55,9 +67,9 @@ public class ContentDirector : MonoBehaviour
             {
                 SpawnableItem item = biome.spawnables[i];
 
+                Debug.Log($"Checking item: {item.prefab?.name}, cost={item.cost}, weight={item.weight}");
+
                 if (item.cost > budget) continue;
-                if (!IsAllowed(item)) continue;
-                if (item.type == lastType) continue;
                 if (item.weight <= 0) continue;
 
                 tempPool.Add(item);
@@ -65,51 +77,30 @@ public class ContentDirector : MonoBehaviour
             }
 
             if (tempPool.Count == 0)
+            {
+                Debug.Log("TEMP POOL EMPTY - nothing can spawn");
                 break;
+            }
 
             SpawnableItem chosen = PickWeighted(tempPool, totalWeight);
 
             plan.Add(chosen);
             budget -= chosen.cost;
-
-            lastType = chosen.type;
         }
 
+        Debug.Log("PLAN COUNT: " + plan.Count);
+
         if (plan.Count > 0)
+        {
+            Debug.Log("Calling Spawner.Execute...");
             spawner.Execute(tile, plan);
-    }
-
-    private void UpdatePacing()
-    {
-        tileCounter++;
-
-        if (tileCounter % 5 == 0)
-            pacing = PacingState.Spike;
-        else if (tileCounter % 5 < 2)
-            pacing = PacingState.Recovery;
-        else
-            pacing = PacingState.BuildUp;
+        }
     }
 
     private int GetBudget()
     {
-        int baseBudget =
-            difficulty == GameDifficulty.Easy ? 4 :
-            difficulty == GameDifficulty.Medium ? 7 : 12;
-
-        if (pacing == PacingState.Spike) return baseBudget + 3;
-        if (pacing == PacingState.Recovery) return baseBudget / 2;
-
-        return baseBudget;
-    }
-
-    private bool IsAllowed(SpawnableItem item)
-    {
-        if (pacing == PacingState.Recovery &&
-            (item.type == SpawnType.Enemy || item.type == SpawnType.Jump))
-            return false;
-
-        return true;
+        return difficulty == GameDifficulty.Easy ? 4 :
+               difficulty == GameDifficulty.Medium ? 7 : 12;
     }
 
     private SpawnableItem PickWeighted(List<SpawnableItem> items, int totalWeight)

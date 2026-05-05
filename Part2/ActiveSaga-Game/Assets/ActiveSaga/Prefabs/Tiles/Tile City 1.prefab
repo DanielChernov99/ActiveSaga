@@ -244,8 +244,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileInfo
   biomeType: 1
-  trackSpawnPoints: []
-  sideSpawnPoints: []
+  trackSpawnPoints:
+  - {fileID: 1216870471641516917}
+  - {fileID: 8387555299792655464}
+  - {fileID: 4269853994480775477}
+  - {fileID: 2358934054690177762}
+  sideSpawnPoints:
+  - {fileID: 5127793032007631766}
+  - {fileID: 420221727606861676}
+  - {fileID: 8033211386613424206}
+  - {fileID: 4212822765178917728}
+  - {fileID: 1123910480686166827}
   contentRoot: {fileID: 0}
 --- !u!1 &3464757675719615542
 GameObject:
