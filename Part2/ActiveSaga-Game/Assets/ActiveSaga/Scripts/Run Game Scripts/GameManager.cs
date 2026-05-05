@@ -12,76 +12,66 @@ public class GameManager : MonoBehaviour
     [SerializeField] private HeightCalibration heightCalibration;
     [SerializeField] private UIManager uiManager;
 
+    [Header("Monster Chase")]
+    [SerializeField] private MonsterController monsterController;
+
+    [Header("Game Settings")]
+    [SerializeField] private float scoreSpeedMultiplier = 8f;
+
     [Header("Level Goals")]
     public float levelTargetDistance = 100f;
     public int goalJumps = 10;
     public int goalSquats = 5;
 
-    [Header("Game Settings")]
-    [Tooltip("Score points per second of running at max intensity")]
-    [SerializeField] private float scoreSpeedMultiplier = 8.0f;
-
-    [Header("Runtime Stats (Read Only)")]
+    [Header("Stats")]
     public float currentDistance;
     public int totalJumps;
     public int totalSquats;
 
-    // Internal State
+    private float currentSpeed;   // 🔥 חשוב: מקור אמת למהירות
     private bool isGameActive = false;
     private float gameStartTime;
 
-    // Event: Sends (Distance, Jumps, Squats, Time)
     public event Action<float, int, int, float> OnStatsUpdated;
 
     private void Start()
     {
-        // 1. Wait for calibration if it exists
         if (heightCalibration != null)
-        {
-            Debug.Log("GameManager: Waiting for Calibration...");
             heightCalibration.OnCalibrationComplete += StartGame;
-        }
         else
-        {
-            Debug.LogWarning("GameManager: No HeightCalibration assigned! Starting immediately.");
             StartGame();
-        }
     }
 
     private void OnDestroy()
     {
-        // Unsubscribe to prevent memory leaks
-        if (heightCalibration != null) heightCalibration.OnCalibrationComplete -= StartGame;
-        
-        if (runAnalyzer != null) runAnalyzer.OnRunIntensity -= HandleRun;
-        if (jumpAnalyzer != null) jumpAnalyzer.OnJump -= HandleJump;
-        if (squatAnalyzer != null) squatAnalyzer.OnSquatCompleted -= HandleSquat;
-    }
+        if (heightCalibration != null)
+            heightCalibration.OnCalibrationComplete -= StartGame;
 
-    private void Update()
-    {
-        // Continuous UI update for the timer
-        if (isGameActive)
-        {
-            NotifyUI();
-        }
+        if (runAnalyzer != null)
+            runAnalyzer.OnRunIntensity -= HandleRun;
+
+        if (jumpAnalyzer != null)
+            jumpAnalyzer.OnJump -= HandleJump;
+
+        if (squatAnalyzer != null)
+            squatAnalyzer.OnSquatCompleted -= HandleSquat;
     }
 
     private void StartGame()
     {
-        Debug.Log("GameManager: Game Started!");
-        
         ResetStats();
+
         isGameActive = true;
         gameStartTime = Time.time;
 
-        // 2. Subscribe to movement events
-        if (runAnalyzer != null) runAnalyzer.OnRunIntensity += HandleRun;
-        if (jumpAnalyzer != null) jumpAnalyzer.OnJump += HandleJump;
-        if (squatAnalyzer != null) squatAnalyzer.OnSquatCompleted += HandleSquat;
+        if (runAnalyzer != null)
+            runAnalyzer.OnRunIntensity += HandleRun;
 
-        // 3. Initial UI Update
-        NotifyUI();
+        if (jumpAnalyzer != null)
+            jumpAnalyzer.OnJump += HandleJump;
+
+        if (squatAnalyzer != null)
+            squatAnalyzer.OnSquatCompleted += HandleSquat;
     }
 
     private void ResetStats()
@@ -89,19 +79,16 @@ public class GameManager : MonoBehaviour
         currentDistance = 0f;
         totalJumps = 0;
         totalSquats = 0;
+        currentSpeed = 0f;
     }
-
-    // --- Event Handlers ---
 
     private void HandleRun(float intensity)
     {
         if (!isGameActive) return;
 
-        // Calculate score distance (Decoupled from physical movement)
-        float distanceStep = intensity * scoreSpeedMultiplier * Time.deltaTime;
-        currentDistance += distanceStep;
-        
-        // Note: No NotifyUI() here because Update() handles it every frame anyway
+        currentSpeed = intensity * scoreSpeedMultiplier;
+
+        currentDistance += currentSpeed * Time.deltaTime;
     }
 
     private void HandleJump()
@@ -116,11 +103,17 @@ public class GameManager : MonoBehaviour
         totalSquats++;
     }
 
-    // --- UI Helper ---
-
-    private void NotifyUI()
+    // 👉 גישה נקייה למהירות עבור מערכות אחרות
+    public float GetPlayerSpeed()
     {
-        float timeElapsed = isGameActive ? (Time.time - gameStartTime) : 0f;
-        OnStatsUpdated?.Invoke(currentDistance, totalJumps, totalSquats, timeElapsed);
+        return currentSpeed;
+    }
+
+    private void Update()
+    {
+        if (!isGameActive) return;
+
+        float t = Time.time - gameStartTime;
+        OnStatsUpdated?.Invoke(currentDistance, totalJumps, totalSquats, t);
     }
 }
