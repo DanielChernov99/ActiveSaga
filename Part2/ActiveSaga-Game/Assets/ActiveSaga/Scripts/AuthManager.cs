@@ -257,7 +257,7 @@ public class AuthManager : MonoBehaviour
             }
             else
             {
-                Debug.Log($"🎮 ✅ New player registered successfully!");
+                Debug.Log($"✅ New player registered successfully!");
                 
                 RegisterResponse responseData = JsonUtility.FromJson<RegisterResponse>(request.downloadHandler.text);
                 PlayerPrefs.SetString("AuthToken", responseData.token);

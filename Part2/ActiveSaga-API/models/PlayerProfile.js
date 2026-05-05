@@ -18,7 +18,19 @@ const playerProfileSchema = new mongoose.Schema({
     totalTimeInGame: { type: Number, default: 0 },
     
     inventory: { type: [String], default: [] },
-    lastLogin: { type: Date, default: Date.now }
+    lastLogin: { type: Date, default: Date.now },
+
+    dailyQuests: [{
+        questId: { 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Quest' 
+        },
+        isCompleted: { type: Boolean, default: false },
+        currentProgress: { type: Number, default: 0 }, 
+        lastUpdated: { type: Date, default: Date.now }
+    }],
+
+    lastQuestReset: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('PlayerProfile', playerProfileSchema);
