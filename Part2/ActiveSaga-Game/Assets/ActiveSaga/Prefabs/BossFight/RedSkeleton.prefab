@@ -440,7 +440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.SkeletonEnemy
   type: 0
-  moveSpeed: 2
+  moveSpeed: 8
 --- !u!65 &5461035775256464759
 BoxCollider:
   m_ObjectHideFlags: 0
