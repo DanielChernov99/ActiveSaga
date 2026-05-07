@@ -189,4 +189,13 @@ public class MainUIManager : MonoBehaviour
             xpFillImage.fillAmount = Mathf.Clamp01(fillPercentage);
         }
     }
+
+    public void OnLogoutButtonClicked()
+    {
+        PlayerPrefs.DeleteKey("AuthToken");
+        PlayerPrefs.Save();
+        Debug.Log("Logged out. Token deleted.");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Login"); 
+    }
 }
+
