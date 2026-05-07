@@ -7,6 +7,10 @@ TagManager:
   - Anchor
   - Obstacle_Crash
   - Obstacle_Graze
+  - RightHand
+  - LeftHand
+  - SafeZone
+  - PlayerHitbox
   layers:
   - Default
   - TransparentFX
