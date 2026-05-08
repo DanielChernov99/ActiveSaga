@@ -73,32 +73,28 @@ namespace ActiveSaga.BossFight.Waves
                     continue;
                 }
 
-                WaveData currentWave = null;
+                // Always generate dynamic waves to ensure alternating pattern
+                WaveData currentWave = GenerateDynamicWave(currentWaveIndex, nextWaveType);
                 
-                if (waveConfigs != null && currentWaveIndex < waveConfigs.Count)
-                {
-                    currentWave = waveConfigs[currentWaveIndex];
-                }
-                else
-                {
-                    currentWave = GenerateDynamicWave(currentWaveIndex, nextWaveType);
-                    nextWaveType = (nextWaveType == WaveType.Combat) ? WaveType.Dodge : WaveType.Combat;
-                }
+                // Toggle next wave type for the NEXT iteration
+                nextWaveType = (nextWaveType == WaveType.Combat) ? WaveType.Dodge : WaveType.Combat;
 
                 _isWaveActive = true;
                 yield return StartCoroutine(PlayWave(currentWave));
                 _isWaveActive = false;
                 
-                if (waveConfigs == null || currentWaveIndex >= waveConfigs.Count)
-                {
-                    Destroy(currentWave);
-                }
+                // Destroy the dynamically created WaveData asset to prevent leak
+                if (currentWave != null) Destroy(currentWave);
 
                 currentWaveIndex++;
                 // Buffer between waves
                 yield return new WaitForSeconds(2.0f); 
             }
         }
+
+        [Header("Master Data (Dynamic Generator)")]
+        [SerializeField] private List<EnemyData> enemyMasterList;
+        [SerializeField] private List<ProjectileData> projectileMasterList;
 
         private WaveData GenerateDynamicWave(int index, WaveType type)
         {
@@ -109,7 +105,7 @@ namespace ActiveSaga.BossFight.Waves
 
             float countMult = difficultyConfig != null ? difficultyConfig.GetCountMultiplier(index) : 1f;
             
-            // Set exactly 1 second delay before spawning the wave
+            // Boss Attack Start
             dynamicWave.steps.Add(new WaveStep 
             { 
                 type = WaveStep.StepType.BossAnimation, 
@@ -151,11 +147,17 @@ namespace ActiveSaga.BossFight.Waves
 
         private EnemyData GetRandomEnemyData()
         {
+            if (enemyMasterList != null && enemyMasterList.Count > 0)
+            {
+                return enemyMasterList[Random.Range(0, enemyMasterList.Count)];
+            }
+            
+            // Search existing configs as fallback
             if (waveConfigs != null)
             {
                 foreach (var config in waveConfigs)
                 {
-                    if (config.steps == null) continue;
+                    if (config == null || config.steps == null) continue;
                     var step = config.steps.Find(s => s.enemyData != null);
                     if (step != null) return step.enemyData;
                 }
@@ -165,11 +167,16 @@ namespace ActiveSaga.BossFight.Waves
 
         private ProjectileData GetRandomProjectileData()
         {
+            if (projectileMasterList != null && projectileMasterList.Count > 0)
+            {
+                return projectileMasterList[Random.Range(0, projectileMasterList.Count)];
+            }
+
             if (waveConfigs != null)
             {
                 foreach (var config in waveConfigs)
                 {
-                    if (config.steps == null) continue;
+                    if (config == null || config.steps == null) continue;
                     var step = config.steps.Find(s => s.projectileData != null);
                     if (step != null) return step.projectileData;
                 }
@@ -337,41 +344,121 @@ namespace ActiveSaga.BossFight.Waves
         }
 
         private void SpawnProjectile(ProjectileData data, Vector3 offset, float speedMultiplier)
-        {
-            if (data == null || PoolManager.Instance == null || bossSpawnPoint == null) return;
-            
-            Vector3 basePos = bossSpawnPoint.position;
-            Vector3 forward = Vector3.forward;
+{
+    Debug.Log("========== SpawnProjectile START ==========");
 
-            float yOffset = offset.y;
+    // Check data
+    if (data == null)
+    {
+        Debug.LogError("SpawnProjectile FAILED: ProjectileData is NULL!");
+        return;
+    }
 
-            // Handle DodgeLog specific targeting (Head or Feet)
-            if (data.projectileName == "DodgeLog")
-            {
-                // Head: ~1.6m, Feet: ~0.2m (approximate from boss height)
-                bool targetHead = Random.value > 0.5f;
-                yOffset = targetHead ? 1.6f : 0.2f;
-            }
+    Debug.Log($"Projectile Name: {data.projectileName}");
 
-            if (BossFightGameManager.Instance != null && BossFightGameManager.Instance.PlayerTransform != null)
-            {
-                Vector3 targetPos = BossFightGameManager.Instance.PlayerTransform.position + Vector3.up * yOffset;
-                forward = (targetPos - basePos).normalized;
-            }
+    // Check PoolManager
+    if (PoolManager.Instance == null)
+    {
+        Debug.LogError("SpawnProjectile FAILED: PoolManager.Instance is NULL!");
+        return;
+    }
 
-            Vector3 right = Vector3.Cross(Vector3.up, forward);
-            Vector3 spawnPos = basePos + (forward * offset.z) + (right * offset.x) + (Vector3.up * yOffset);
-            
-            Quaternion spawnRot = Quaternion.LookRotation(forward);
-            
-            GameObject projectile = PoolManager.Instance.SpawnFromPool(data.projectileName, spawnPos, spawnRot, false);
-            if (projectile != null)
-            {
-                _totalSpawnedThisWave++;
-                var controller = projectile.GetComponent<ProjectileController>();
-                if (controller != null) controller.Initialize(data, speedMultiplier);
-            }
-        }
+    // Check boss spawn
+    if (bossSpawnPoint == null)
+    {
+        Debug.LogError("SpawnProjectile FAILED: bossSpawnPoint is NULL!");
+        return;
+    }
+
+    Vector3 basePos = bossSpawnPoint.position;
+    Vector3 forward = Vector3.forward;
+
+    float yOffset = offset.y;
+
+    // DodgeLog special handling
+    if (data.projectileName == "DodgeLog")
+    {
+        bool targetHead = Random.value > 0.5f;
+        yOffset = targetHead ? 1.7f : 0.7f;
+
+        Debug.Log($"DodgeLog targeting: {(targetHead ? "HEAD" : "FEET")}");
+    }
+
+    // Calculate direction toward player
+    if (BossFightGameManager.Instance != null &&
+        BossFightGameManager.Instance.PlayerTransform != null)
+    {
+        Vector3 targetPos =
+            BossFightGameManager.Instance.PlayerTransform.position +
+            Vector3.up * yOffset;
+
+        forward = (targetPos - basePos).normalized;
+
+        Debug.Log($"Target Position: {targetPos}");
+        Debug.Log($"Forward Direction: {forward}");
+    }
+    else
+    {
+        Debug.LogWarning("PlayerTransform missing. Using default forward.");
+    }
+
+    Vector3 right = Vector3.Cross(Vector3.up, forward);
+
+    Vector3 spawnPos =
+        basePos +
+        (forward * offset.z) +
+        (right * offset.x) +
+        (Vector3.up * yOffset);
+
+    Quaternion spawnRot = Quaternion.LookRotation(forward);
+
+    Debug.Log($"Spawn Position: {spawnPos}");
+
+    // Spawn from pool
+    GameObject projectile =
+        PoolManager.Instance.SpawnFromPool(
+            data.projectileName,
+            spawnPos,
+            spawnRot,
+            false
+        );
+
+    // Check spawn success
+    if (projectile == null)
+    {
+        Debug.LogError(
+            $"SpawnProjectile FAILED: Pool returned NULL for '{data.projectileName}'"
+        );
+
+        Debug.LogError(
+            "Most likely causes:\n" +
+            "1. PoolConfig name does not exactly match projectileName\n" +
+            "2. Pool not configured in Inspector\n" +
+            "3. Prefab missing in PoolConfig"
+        );
+
+        return;
+    }
+
+    Debug.Log($"Projectile spawned successfully: {projectile.name}");
+
+    _totalSpawnedThisWave++;
+
+    var controller = projectile.GetComponent<ProjectileController>();
+
+    if (controller == null)
+    {
+        Debug.LogError(
+            $"Projectile '{projectile.name}' has NO ProjectileController!"
+        );
+
+        return;
+    }
+
+    controller.Initialize(data, speedMultiplier);
+
+    Debug.Log("========== SpawnProjectile END ==========");
+}
 
         private void OnEntitySpawned(EnemySpawnedEvent e) 
         { 

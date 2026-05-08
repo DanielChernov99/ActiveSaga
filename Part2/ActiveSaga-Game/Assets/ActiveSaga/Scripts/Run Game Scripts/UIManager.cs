@@ -1,4 +1,6 @@
 using UnityEngine;
+using TMPro;
+using ActiveSaga.BossFight.Core;
 
 public class UIManager : MonoBehaviour
 {
@@ -10,7 +12,28 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RunningProgressBar progressBar;
     
     [Tooltip("The Left Side Panel Stats")]
-    [SerializeField] private StatsDisplay statsDisplay; // Uncommented and active!
+    [SerializeField] private StatsDisplay statsDisplay; 
+
+    [Header("Wave UI")]
+    [SerializeField] private TextMeshProUGUI waveText;
+
+    private void OnEnable()
+    {
+        EventManager.Subscribe<WaveStartedEvent>(OnWaveStarted);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Unsubscribe<WaveStartedEvent>(OnWaveStarted);
+    }
+
+    private void OnWaveStarted(WaveStartedEvent e)
+    {
+        if (waveText != null)
+        {
+            waveText.text = $"Wave: {e.waveIndex}";
+        }
+    }
 
     private void Start()
     {

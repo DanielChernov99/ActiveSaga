@@ -16,6 +16,7 @@ namespace ActiveSaga.BossFight.Entities
         private Rigidbody rb;
         private bool isInitialized;
         private float currentSpeed;
+        private Vector3 targetOffset;
 
         private Transform targetCamera;
         private Transform targetRoot;
@@ -36,8 +37,18 @@ namespace ActiveSaga.BossFight.Entities
 
         public void Initialize(EnemyData enemyData, float speedMultiplier = 1f)
         {
+            if (enemyData == null)
+            {
+                Debug.LogError("EnemyController: Initialized with null EnemyData!");
+                return;
+            }
+
             data = enemyData;
             currentSpeed = data.moveSpeed * speedMultiplier;
+
+            // Add random horizontal offset (1.0 to 1.5m)
+            float side = Random.value > 0.5f ? 1f : -1f;
+            targetOffset = new Vector3(Random.Range(1.0f, 1.5f) * side, 0, 0);
 
             isInitialized = true;
             currentState = EnemyState.Moving;
@@ -73,11 +84,18 @@ namespace ActiveSaga.BossFight.Entities
                 hasTarget = true;
             }
 
-            // If a player target exists, calculate precise direction towards it
+            // If a player target exists, calculate precise direction towards it with offset
             if (hasTarget)
             {
                 targetPos.y = transform.position.y; // Keep movement purely horizontal
-                direction = (targetPos - rb.position).normalized;
+                
+                // Convert horizontal offset from player local space to world space if needed, 
+                // or just apply it relative to the player's position.
+                // Simple world-space horizontal offset based on current view direction:
+                Vector3 playerRight = Vector3.Cross(Vector3.up, (targetPos - transform.position).normalized);
+                Vector3 offsetPos = targetPos + (playerRight * targetOffset.x);
+
+                direction = (offsetPos - rb.position).normalized;
             }
 
             // Move the Rigidbody forward regardless of target tracking status

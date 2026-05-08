@@ -52,7 +52,7 @@ namespace ActiveSaga.BossFight.Core
         {
             if (waveText != null)
             {
-                waveText.text = $"Wave: {e.waveIndex} - {e.name}";
+                waveText.text = $"Wave: {e.waveIndex}";
             }
         }
 

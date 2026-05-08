@@ -26,6 +26,8 @@ namespace ActiveSaga.BossFight.Entities
 
         public string GetPoolName() => data != null ? data.projectileName : string.Empty;
 
+        private Vector3 targetVelocity;
+
         public void Initialize(ProjectileData projectileData, float speedMultiplier = 1f)
         {
             if (projectileData == null) return;
@@ -37,21 +39,30 @@ namespace ActiveSaga.BossFight.Entities
             initialForward = transform.forward;
             spawnTime = Time.time;
 
-            // Reset Rigidbody state
+            // Ensure Rigidbody is ready and active
+            if (rb == null) rb = GetComponent<Rigidbody>();
+            
+            // Force physics to be active
+            rb.isKinematic = false; 
+            rb.useGravity = false;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.WakeUp(); // Ensure the Rigidbody is awake
+            
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
 
-            // Base velocity for linear movement. 
-            // If pattern is Sine, we zero this out in FixedUpdate or don't set it here.
-            // Setting it here is safe as long as Sine doesn't fight it.
-            // But to be absolutely safe and avoid jitter:
+            // Apply velocity for linear movement
             if (data.pattern == ProjectilePattern.Linear)
             {
-                rb.linearVelocity = initialForward * data.speed * speedMultiplier;
-            }
-            else
-            {
-                rb.linearVelocity = Vector3.zero;
+                targetVelocity = initialForward * data.speed * speedMultiplier;
+                
+                // If speed is 0 or forward is zero, provide a default
+                if (targetVelocity.sqrMagnitude < 0.01f)
+                {
+                    targetVelocity = transform.forward * 10f;
+                }
+                
+                rb.linearVelocity = targetVelocity;
             }
 
             EventManager.Trigger(new ProjectileSpawnedEvent { projectile = gameObject });
@@ -63,18 +74,33 @@ namespace ActiveSaga.BossFight.Entities
 
         private void FixedUpdate()
         {
-            if (!isInitialized || data == null || data.pattern != ProjectilePattern.Sine) return;
+            if (!isInitialized || data == null) return;
 
-            // Add Sine movement offset
-            float timeActive = Time.time - spawnTime;
-            float sineOffset = Mathf.Sin(timeActive * data.frequency) * data.amplitude;
-            
-            // Calculate side vector (perpendicular to forward and up)
-            Vector3 side = Vector3.Cross(initialForward, Vector3.up).normalized;
-            
-            // Target position based on linear progress + sine offset
-            Vector3 targetPos = startPosition + (initialForward * data.speed * timeActive) + (side * sineOffset);
-            rb.MovePosition(targetPos);
+            if (data.pattern == ProjectilePattern.Sine)
+            {
+                // Add Sine movement offset
+                float timeActive = Time.time - spawnTime;
+                float sineOffset = Mathf.Sin(timeActive * data.frequency) * data.amplitude;
+                
+                // Calculate side vector (perpendicular to forward and up)
+                Vector3 side = Vector3.Cross(initialForward, Vector3.up).normalized;
+                
+                // Target position based on linear progress + sine offset
+                Vector3 targetPos = startPosition + (initialForward * (data.speed * (data.speed != 0 ? 1f : 0f)) * timeActive) + (side * sineOffset);
+                rb.MovePosition(targetPos);
+            }
+            else if (data.pattern == ProjectilePattern.Linear)
+            {
+                // Safety check: ensure velocity is maintained
+                // Using rb.velocity as fallback for linearVelocity if needed, but linearVelocity is correct for Unity 6
+                if (rb.linearVelocity.sqrMagnitude < 0.1f && targetVelocity != Vector3.zero)
+                {
+                    rb.linearVelocity = targetVelocity;
+                }
+                
+                // Manual backup movement if physics fails to update position
+                // rb.MovePosition(rb.position + targetVelocity * Time.fixedDeltaTime);
+            }
         }
 
         private void DespawnDueToLifetime()
