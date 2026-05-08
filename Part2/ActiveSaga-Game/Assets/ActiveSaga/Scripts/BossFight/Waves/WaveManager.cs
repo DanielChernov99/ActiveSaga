@@ -129,9 +129,9 @@ namespace ActiveSaga.BossFight.Waves
             }
             else
             {
-                // Dynamic range for projectile count (6-10) scaled by difficulty
-                int baseCount = Random.Range(6, 11);
-                int projectileCount = Mathf.RoundToInt(baseCount * countMult);
+                // Cap the dodge wave projectiles
+                int baseCount = Random.Range(3, 6); 
+                int projectileCount = Mathf.Clamp(Mathf.RoundToInt(baseCount * countMult), 3, 7);
                 
                 for (int i = 0; i < projectileCount; i++)
                 {
@@ -140,7 +140,7 @@ namespace ActiveSaga.BossFight.Waves
                         type = WaveStep.StepType.SpawnProjectile, 
                         projectileData = GetRandomProjectileData(),
                         spawnOffset = new Vector3(Random.Range(-3f, 3f), 1f, Random.Range(3f, 6f)),
-                        delayAfterStep = Random.Range(0.5f, 1.2f)
+                        delayAfterStep = Random.Range(0.8f, 1.5f)
                     });
                 }
             }
@@ -353,90 +353,86 @@ namespace ActiveSaga.BossFight.Waves
         }
 
         private void SpawnProjectile(ProjectileData data, Vector3 offset, float speedMultiplier)
-{
-    Debug.Log("========== SpawnProjectile START ==========");
+        {
+            if (data == null)
+            {
+                Debug.LogError("SpawnProjectile FAILED: ProjectileData is NULL!");
+                return;
+            }
 
-    if (data == null)
-    {
-        Debug.LogError("SpawnProjectile FAILED: ProjectileData is NULL!");
-        return;
-    }
+            if (PoolManager.Instance == null || bossSpawnPoint == null)
+                return;
 
-    if (PoolManager.Instance == null || bossSpawnPoint == null)
-        return;
+            Vector3 basePos = bossSpawnPoint.position;
 
-    Vector3 basePos = bossSpawnPoint.position;
+            bool hasPlayer = BossFightGameManager.Instance?.PlayerTransform != null;
 
-    bool hasPlayer = BossFightGameManager.Instance?.PlayerTransform != null;
+            Vector3 playerPos = hasPlayer
+                ? BossFightGameManager.Instance.PlayerTransform.position
+                : basePos + Vector3.forward * 5f;
 
-    Vector3 playerPos = hasPlayer
-        ? BossFightGameManager.Instance.PlayerTransform.position
-        : basePos + Vector3.forward * 5f;
+            float yOffset = offset.y;
 
-    float yOffset = offset.y;
+            // ---------------------------
+            // 3-Zone Targeting System (Legs, Body, Head)
+            // ---------------------------
+            float targetHeight;
+            float roll = Random.value;
 
-    // ---------------------------
-    // 🔥 FIX: proper head/feet targeting system
-    // ---------------------------
-    bool targetHead = false;
+            if (roll < 0.6f)
+            {
+                targetHeight = 0.5f; // Legs
+            }
+            else if (roll < 0.9f)
+            {
+                targetHeight = 1.1f; // Body
+            }
+            else
+            {
+                targetHeight = 1.7f; // Head
+            }
 
-    if (data.projectileName == "DodgeLog")
-    {
-        targetHead = Random.value > 0.5f;
-    }
-    else
-    {
-        // חשוב מאוד: נותן חלק מהפרויקטים לראש גם אם לא מוגדר
-        targetHead = Random.value > 0.6f;
-    }
+            Vector3 targetPos = playerPos + Vector3.up * targetHeight;
 
-    float targetHeight = targetHead ? 1.7f : 0.7f;
+            Vector3 direction = (targetPos - basePos).normalized;
+            if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
 
-    Vector3 targetPos = playerPos + Vector3.up * targetHeight;
+            Vector3 right = Vector3.Cross(Vector3.up, direction).normalized;
+            if (right.sqrMagnitude < 0.001f) right = Vector3.right;
 
-    Vector3 direction = (targetPos - basePos).normalized;
-    if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
+            Vector3 spawnPos =
+                basePos +
+                direction * offset.z +
+                right * offset.x +
+                Vector3.up * yOffset;
 
-    Vector3 right = Vector3.Cross(Vector3.up, direction).normalized;
-    if (right.sqrMagnitude < 0.001f) right = Vector3.right;
+            Quaternion spawnRot = Quaternion.LookRotation(direction);
 
-    Vector3 spawnPos =
-        basePos +
-        direction * offset.z +
-        right * offset.x +
-        Vector3.up * yOffset;
+            GameObject projectile = PoolManager.Instance.SpawnFromPool(
+                data.projectileName,
+                spawnPos,
+                spawnRot,
+                false
+            );
 
-    Quaternion spawnRot = Quaternion.LookRotation(direction);
+            if (projectile == null)
+            {
+                Debug.LogError($"Pool returned NULL for {data.projectileName}");
+                return;
+            }
 
-    GameObject projectile =
-        PoolManager.Instance.SpawnFromPool(
-            data.projectileName,
-            spawnPos,
-            spawnRot,
-            false
-        );
+            _totalSpawnedThisWave++;
 
-    if (projectile == null)
-    {
-        Debug.LogError($"Pool returned NULL for {data.projectileName}");
-        return;
-    }
+            var controller = projectile.GetComponent<ProjectileController>();
 
-    _totalSpawnedThisWave++;
+            if (controller == null)
+            {
+                Debug.LogError($"Missing ProjectileController on {projectile.name}");
+                return;
+            }
 
-    var controller = projectile.GetComponent<ProjectileController>();
-
-    if (controller == null)
-    {
-        Debug.LogError($"Missing ProjectileController on {projectile.name}");
-        return;
-    }
-
-    controller.Initialize(data, speedMultiplier);
-
-    Debug.Log($"Spawned {data.projectileName} -> TargetHead: {targetHead}");
-    Debug.Log("========== SpawnProjectile END ==========");
-}
+            controller.Initialize(data, speedMultiplier);
+        }
 
         private void OnEntitySpawned(EnemySpawnedEvent e) 
         { 

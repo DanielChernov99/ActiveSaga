@@ -145,8 +145,13 @@ namespace ActiveSaga.BossFight.Entities
                 return;
             }
 
-            if (other.CompareTag("Sword") ||
-                other.CompareTag("DodgeShield"))
+            // Sword does not destroy dodge objects anymore
+            if (other.CompareTag("Sword"))
+            {
+                return;
+            }
+
+            if (other.CompareTag("DodgeShield"))
             {
                 DespawnInternal(true, false);
             }
