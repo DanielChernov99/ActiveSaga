@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2823921433092028349
+--- !u!1 &2514698018464458005
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,48 +8,46 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5245318290686902985}
-  - component: {fileID: 7637878608007496381}
-  - component: {fileID: 7198224878720101148}
-  - component: {fileID: 4396606844274892246}
-  - component: {fileID: 4069651900622907279}
+  - component: {fileID: 1450246495942994490}
+  - component: {fileID: 657309908934376602}
+  - component: {fileID: 4299427949711503749}
   m_Layer: 0
-  m_Name: DodgeLog
+  m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5245318290686902985
+--- !u!4 &1450246495942994490
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2823921433092028349}
+  m_GameObject: {fileID: 2514698018464458005}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.00000008146034, y: 0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 5245318290686902985}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &7637878608007496381
+--- !u!33 &657309908934376602
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2823921433092028349}
+  m_GameObject: {fileID: 2514698018464458005}
   m_Mesh: {fileID: 5101702725964522417, guid: d11b452b00d1ca64495853ce6b977e3c, type: 3}
---- !u!23 &7198224878720101148
+--- !u!23 &4299427949711503749
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2823921433092028349}
+  m_GameObject: {fileID: 2514698018464458005}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -92,6 +90,41 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &2823921433092028349
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5245318290686902985}
+  - component: {fileID: 4396606844274892246}
+  - component: {fileID: 8459166144048152341}
+  - component: {fileID: 7307086709430841111}
+  m_Layer: 0
+  m_Name: DodgeLog
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5245318290686902985
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2823921433092028349}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.00000008146034, y: 0, z: -0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1450246495942994490}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &4396606844274892246
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -113,7 +146,34 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.72136885, y: 0.73335594, z: 1.35}
   m_Center: {x: -0.004414141, y: 0.09079701, z: 0.000036597252}
---- !u!114 &4069651900622907279
+--- !u!54 &8459166144048152341
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2823921433092028349}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &7307086709430841111
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,7 +182,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 2823921433092028349}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 193964881784e044cbb14a8a1c267e9c, type: 3}
+  m_Script: {fileID: 11500000, guid: e124ec941a1a9d34b98d81dac29cd495, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.ObstacleProjectile
-  speed: 5
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Entities.ProjectileController

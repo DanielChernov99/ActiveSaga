@@ -11,6 +11,11 @@ namespace ActiveSaga.BossFight.Entities
         private Rigidbody rb;
         private bool isInitialized = false;
 
+        private bool wasHitPlayer = false;
+        private Vector3 startPosition;
+        private Vector3 initialForward;
+        private float spawnTime;
+
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
@@ -19,31 +24,69 @@ namespace ActiveSaga.BossFight.Entities
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
 
-        public void Initialize(ProjectileData projectileData)
+        public string GetPoolName() => data != null ? data.projectileName : string.Empty;
+
+        public void Initialize(ProjectileData projectileData, float speedMultiplier = 1f)
         {
+            if (projectileData == null) return;
+
             this.data = projectileData;
             isInitialized = true;
+            wasHitPlayer = false;
+            startPosition = transform.position;
+            initialForward = transform.forward;
+            spawnTime = Time.time;
 
-            // Target the headset (Camera) specifically
-            Transform target = BossFightGameManager.Instance.PlayerCamera != null ? 
-                BossFightGameManager.Instance.PlayerCamera.transform : 
-                BossFightGameManager.Instance.PlayerTransform;
+            // Reset Rigidbody state
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
 
-            if (target != null)
+            // Base velocity for linear movement. 
+            // If pattern is Sine, we zero this out in FixedUpdate or don't set it here.
+            // Setting it here is safe as long as Sine doesn't fight it.
+            // But to be absolutely safe and avoid jitter:
+            if (data.pattern == ProjectilePattern.Linear)
             {
-                transform.LookAt(target.position);
-                rb.linearVelocity = transform.forward * data.speed;
-}
+                rb.linearVelocity = initialForward * data.speed * speedMultiplier;
+            }
             else
             {
-                Debug.LogError("ProjectileController: No target found for initialization!");
+                rb.linearVelocity = Vector3.zero;
             }
 
             EventManager.Trigger(new ProjectileSpawnedEvent { projectile = gameObject });
             
             // Return to pool after lifetime
-            CancelInvoke(nameof(Despawn));
-            Invoke(nameof(Despawn), data.lifetime);
+            CancelInvoke(nameof(DespawnDueToLifetime));
+            Invoke(nameof(DespawnDueToLifetime), data.lifetime);
+        }
+
+        private void FixedUpdate()
+        {
+            if (!isInitialized || data == null || data.pattern != ProjectilePattern.Sine) return;
+
+            // Add Sine movement offset
+            float timeActive = Time.time - spawnTime;
+            float sineOffset = Mathf.Sin(timeActive * data.frequency) * data.amplitude;
+            
+            // Calculate side vector (perpendicular to forward and up)
+            Vector3 side = Vector3.Cross(initialForward, Vector3.up).normalized;
+            
+            // Target position based on linear progress + sine offset
+            Vector3 targetPos = startPosition + (initialForward * data.speed * timeActive) + (side * sineOffset);
+            rb.MovePosition(targetPos);
+        }
+
+        private void DespawnDueToLifetime()
+        {
+            // If it lived its full lifetime without hitting player, it's a successful dodge
+            DespawnInternal(true, false);
+        }
+
+        private void OnDisable()
+        {
+            CancelInvoke(nameof(DespawnDueToLifetime));
+            isInitialized = false;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -54,25 +97,45 @@ namespace ActiveSaga.BossFight.Entities
             if (other.CompareTag("PlayerHitbox") || other.CompareTag("MainCamera") || other.CompareTag("Player"))
             {
                 Debug.Log($"<color=orange>Projectile Hit Player: {data.projectileName}</color>");
-                BossFightGameManager.Instance.TakeDamage(data.damage);
-                Despawn();
+                if (BossFightGameManager.Instance != null)
+                {
+                    BossFightGameManager.Instance.TakeDamage(data.damage);
+                }
+                wasHitPlayer = true;
+                DespawnInternal(false, true);
             }
-            // Check if deflected
+            // Check if deflected (Combat wave or specific mechanic)
             else if (other.CompareTag("Sword") || other.CompareTag("DodgeShield"))
             {
                 Debug.Log($"Projectile {data.projectileName} deflected.");
-                Despawn();
+                DespawnInternal(true, false);
             }
         }
 
-        private void Despawn()
+        public void Despawn()
+        {
+            // Called by boundary or external force
+            DespawnInternal(true, false);
+        }
+
+        private void DespawnInternal(bool wasDodged, bool wasHitPlayer)
         {
             if (!isInitialized) return;
             isInitialized = false;
+            
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-            EventManager.Trigger(new ProjectileDespawnedEvent { projectile = gameObject });
-            PoolManager.Instance.ReturnToPool(gameObject, data.projectileName);
+            
+            EventManager.Trigger(new ProjectileDespawnedEvent { 
+                projectile = gameObject, 
+                wasDodged = wasDodged && !wasHitPlayer, 
+                wasHitPlayer = wasHitPlayer 
+            });
+            
+            if (PoolManager.Instance != null)
+                PoolManager.Instance.ReturnToPool(gameObject, data.projectileName);
+            else
+                Destroy(gameObject);
         }
     }
 }

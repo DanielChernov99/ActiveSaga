@@ -19,6 +19,7 @@ namespace ActiveSaga.BossFight.Core
         
         private Dictionary<string, Queue<GameObject>> _poolDictionary = new Dictionary<string, Queue<GameObject>>();
         private Dictionary<string, GameObject> _prefabLookup = new Dictionary<string, GameObject>();
+        private HashSet<GameObject> _currentlyPooled = new HashSet<GameObject>();
         
         private Transform _activeEnemiesParent;
         private Transform _activeProjectilesParent;
@@ -39,16 +40,19 @@ namespace ActiveSaga.BossFight.Core
             _inactiveParent.SetParent(transform);
             
             _activeEnemiesParent = new GameObject("ActiveEnemies").transform;
+            _activeEnemiesParent.SetParent(transform);
+
             _activeProjectilesParent = new GameObject("ActiveProjectiles").transform;
-            
-            // Link these to GameManager or keep them at root for visibility
+            _activeProjectilesParent.SetParent(transform);
         }
 
         private void InitializePools()
         {
+            if (poolConfigs == null) return;
+
             foreach (var config in poolConfigs)
             {
-                if (config.prefab == null) continue;
+                if (config.prefab == null || string.IsNullOrEmpty(config.name)) continue;
                 
                 _prefabLookup[config.name] = config.prefab;
                 Queue<GameObject> queue = new Queue<GameObject>();
@@ -57,6 +61,7 @@ namespace ActiveSaga.BossFight.Core
                 {
                     GameObject obj = CreateNewObject(config.prefab);
                     queue.Enqueue(obj);
+                    _currentlyPooled.Add(obj);
                 }
 
                 _poolDictionary[config.name] = queue;
@@ -73,7 +78,7 @@ namespace ActiveSaga.BossFight.Core
 
         public GameObject SpawnFromPool(string poolName, Vector3 position, Quaternion rotation, bool isEnemy = true)
         {
-            if (!_poolDictionary.ContainsKey(poolName))
+            if (string.IsNullOrEmpty(poolName) || !_poolDictionary.ContainsKey(poolName))
             {
                 Debug.LogError($"PoolManager: Pool '{poolName}' not found!");
                 return null;
@@ -83,9 +88,11 @@ namespace ActiveSaga.BossFight.Core
             if (_poolDictionary[poolName].Count > 0)
             {
                 obj = _poolDictionary[poolName].Dequeue();
+                _currentlyPooled.Remove(obj);
             }
             else
             {
+                if (!_prefabLookup.ContainsKey(poolName)) return null;
                 obj = CreateNewObject(_prefabLookup[poolName]);
                 Debug.Log($"PoolManager: Expanding pool '{poolName}'");
             }
@@ -94,7 +101,9 @@ namespace ActiveSaga.BossFight.Core
             obj.transform.SetParent(isEnemy ? _activeEnemiesParent : _activeProjectilesParent);
             obj.transform.position = position;
             obj.transform.rotation = rotation;
-            obj.transform.localScale = _prefabLookup[poolName].transform.localScale;
+            
+            if (_prefabLookup.ContainsKey(poolName))
+                obj.transform.localScale = _prefabLookup[poolName].transform.localScale;
 
             Rigidbody rb = obj.GetComponent<Rigidbody>();
             if (rb != null)
@@ -109,16 +118,25 @@ namespace ActiveSaga.BossFight.Core
 
         public void ReturnToPool(GameObject obj, string poolName)
         {
-            if (!_poolDictionary.ContainsKey(poolName))
+            if (obj == null) return;
+
+            if (string.IsNullOrEmpty(poolName) || !_poolDictionary.ContainsKey(poolName))
             {
                 Debug.LogWarning($"Trying to return object to non-existent pool: {poolName}. Destroying instead.");
                 Destroy(obj);
                 return;
             }
 
+            if (_currentlyPooled.Contains(obj))
+            {
+                Debug.LogWarning($"Object {obj.name} is already in the pool!");
+                return;
+            }
+
             obj.SetActive(false);
             obj.transform.SetParent(_inactiveParent);
             _poolDictionary[poolName].Enqueue(obj);
+            _currentlyPooled.Add(obj);
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace ActiveSaga.BossFight.Data
 {
+    public enum WaveType { Combat, Dodge }
+
     [System.Serializable]
     public class WaveStep
     {
@@ -21,6 +23,7 @@ namespace ActiveSaga.BossFight.Data
     public class WaveData : ScriptableObject
     {
         public string waveName;
+        public WaveType waveType;
         public List<WaveStep> steps;
         public float difficultyMultiplier = 1.0f;
     }

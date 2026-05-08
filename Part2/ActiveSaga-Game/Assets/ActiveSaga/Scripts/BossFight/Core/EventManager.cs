@@ -49,9 +49,9 @@ namespace ActiveSaga.BossFight.Core
     public struct WaveStartedEvent { public int waveIndex; public string name; }
     public struct WaveCompletedEvent { public bool success; }
     public struct EnemySpawnedEvent { public GameObject enemy; }
-    public struct EnemyDespawnedEvent { public GameObject enemy; }
+    public struct EnemyDespawnedEvent { public GameObject enemy; public bool wasKilledByPlayer; }
     public struct ProjectileSpawnedEvent { public GameObject projectile; }
-    public struct ProjectileDespawnedEvent { public GameObject projectile; }
+    public struct ProjectileDespawnedEvent { public GameObject projectile; public bool wasDodged; public bool wasHitPlayer; }
     public struct FeedbackEvent { public string message; public float duration; }
 }
 

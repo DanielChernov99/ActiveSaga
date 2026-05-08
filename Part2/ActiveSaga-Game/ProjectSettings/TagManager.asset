@@ -12,6 +12,7 @@ TagManager:
   - SafeZone
   - PlayerHitbox
   - Sword
+  - DodgeShield
   layers:
   - Default
   - TransparentFX

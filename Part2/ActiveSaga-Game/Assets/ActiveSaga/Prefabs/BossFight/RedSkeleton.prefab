@@ -400,10 +400,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3852176659262874800}
-  - component: {fileID: 5027030913789641861}
   - component: {fileID: 5461035775256464759}
   - component: {fileID: 5226940797300921742}
   - component: {fileID: 7817682358755858149}
+  - component: {fileID: 1449733243452698686}
   m_Layer: 0
   m_Name: RedSkeleton
   m_TagString: Untagged
@@ -427,20 +427,6 @@ Transform:
   - {fileID: 6842444437316477571}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5027030913789641861
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3133576792547481104}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63cd8eff9b6a31c489e0ae14f04c7e0f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.SkeletonEnemy
-  type: 0
-  moveSpeed: 8
 --- !u!65 &5461035775256464759
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -484,10 +470,10 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!95 &7817682358755858149
 Animator:
@@ -511,6 +497,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1449733243452698686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3133576792547481104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52d9112040f7e1245b57efacc5451309, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Entities.EnemyController
+  currentState: 0
 --- !u!1 &3292077008492517743
 GameObject:
   m_ObjectHideFlags: 0
