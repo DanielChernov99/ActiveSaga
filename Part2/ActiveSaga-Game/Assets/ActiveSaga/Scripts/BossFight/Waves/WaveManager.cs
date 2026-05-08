@@ -364,47 +364,44 @@ namespace ActiveSaga.BossFight.Waves
                 return;
 
             Vector3 basePos = bossSpawnPoint.position;
-
             bool hasPlayer = BossFightGameManager.Instance?.PlayerTransform != null;
 
             Vector3 playerPos = hasPlayer
                 ? BossFightGameManager.Instance.PlayerTransform.position
                 : basePos + Vector3.forward * 5f;
 
-            float yOffset = offset.y;
-
             // ---------------------------
-            // 3-Zone Targeting System (Legs, Body, Head)
+            // 2-Zone Targeting System (Legs & Head)
             // ---------------------------
-            float targetHeight;
-            float roll = Random.value;
+            bool isHeadTarget = Random.value > 0.5f;
+            
+            // Adjust these values to fine-tune the physical heights in VR.
+            // 0.9f for legs, 1.6f is average head height.
+            float targetHeight = isHeadTarget ? 3.0f : 0.9f;
 
-            if (roll < 0.6f)
-            {
-                targetHeight = 0.5f; // Legs
-            }
-            else if (roll < 0.9f)
-            {
-                targetHeight = 1.1f; // Body
-            }
-            else
-            {
-                targetHeight = 1.7f; // Head
-            }
+            // Base the height on the player's floor level for accuracy
+            float floorY = hasPlayer ? BossFightGameManager.Instance.PlayerTransform.position.y : basePos.y;
 
-            Vector3 targetPos = playerPos + Vector3.up * targetHeight;
+            Vector3 targetPos = playerPos;
+            targetPos.y = floorY + targetHeight;
 
-            Vector3 direction = (targetPos - basePos).normalized;
+            // Force the spawn position to start at the exact same height 
+            // so the projectile flies perfectly straight, not diagonally downwards.
+            Vector3 spawnStartPos = basePos;
+            spawnStartPos.y = floorY + targetHeight;
+
+            Vector3 direction = (targetPos - spawnStartPos).normalized;
             if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
 
             Vector3 right = Vector3.Cross(Vector3.up, direction).normalized;
             if (right.sqrMagnitude < 0.001f) right = Vector3.right;
 
+            // Apply the X and Z offsets for spread, but ignore the wave's Y offset 
+            // to maintain strict horizontal flight at the target height.
             Vector3 spawnPos =
-                basePos +
+                spawnStartPos +
                 direction * offset.z +
-                right * offset.x +
-                Vector3.up * yOffset;
+                right * offset.x;
 
             Quaternion spawnRot = Quaternion.LookRotation(direction);
 
