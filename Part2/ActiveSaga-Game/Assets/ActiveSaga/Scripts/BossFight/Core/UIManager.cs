@@ -11,24 +11,22 @@ namespace ActiveSaga.BossFight.Core
         
         [Header("Text UI")]
         [SerializeField] private TextMeshProUGUI waveText;
-        [SerializeField] private TextMeshProUGUI feedbackText;
 
         private void OnEnable()
         {
             EventManager.Subscribe<HealthChangedEvent>(OnHealthChanged);
             EventManager.Subscribe<WaveStartedEvent>(OnWaveStarted);
-            EventManager.Subscribe<FeedbackEvent>(OnFeedback);
         }
 
         private void OnDisable()
         {
             EventManager.Unsubscribe<HealthChangedEvent>(OnHealthChanged);
             EventManager.Unsubscribe<WaveStartedEvent>(OnWaveStarted);
-            EventManager.Unsubscribe<FeedbackEvent>(OnFeedback);
         }
 
         private void OnHealthChanged(HealthChangedEvent e)
         {
+            // Update UI only if the health change belongs to the player
             if (e.isPlayer)
             {
                 if (playerHPBar != null)
@@ -41,25 +39,11 @@ namespace ActiveSaga.BossFight.Core
 
         private void OnWaveStarted(WaveStartedEvent e)
         {
+            // Update the text component to display the current wave number
             if (waveText != null)
             {
                 waveText.text = $"Wave: {e.waveIndex}";
             }
-        }
-
-        private void OnFeedback(FeedbackEvent e)
-        {
-            if (feedbackText != null)
-            {
-                feedbackText.text = e.message;
-                CancelInvoke(nameof(ClearFeedback));
-                Invoke(nameof(ClearFeedback), e.duration);
-            }
-        }
-
-        private void ClearFeedback()
-        {
-            if (feedbackText != null) feedbackText.text = "";
         }
     }
 }
