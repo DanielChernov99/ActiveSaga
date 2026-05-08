@@ -4878,13 +4878,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1415042328}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c8d49ed6cdefb04a8f99ee9d934993d, type: 3}
+  m_Script: {fileID: 11500000, guid: 3ea7a58ee3d64014a95fead126f4738c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  gameManager: {fileID: 0}
-  progressBar: {fileID: 0}
-  statsDisplay: {fileID: 0}
-  waveText: {fileID: 413833266}
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.UI.BossUI
+  bossHealthBar: {fileID: 958953447}
 --- !u!1001 &1455638911
 PrefabInstance:
   m_ObjectHideFlags: 0

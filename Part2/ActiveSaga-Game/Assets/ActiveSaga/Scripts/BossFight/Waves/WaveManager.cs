@@ -129,7 +129,10 @@ namespace ActiveSaga.BossFight.Waves
             }
             else
             {
-                int projectileCount = Mathf.RoundToInt(5 * countMult);
+                // Dynamic range for projectile count (6-10) scaled by difficulty
+                int baseCount = Random.Range(6, 11);
+                int projectileCount = Mathf.RoundToInt(baseCount * countMult);
+                
                 for (int i = 0; i < projectileCount; i++)
                 {
                     dynamicWave.steps.Add(new WaveStep 
@@ -249,10 +252,12 @@ namespace ActiveSaga.BossFight.Waves
 
         private void EvaluateWave(WaveData data)
         {
+            Debug.Log($"EvaluateWave called for {data.waveName}. Total Spawned: {_totalSpawnedThisWave}, Successfully Handled: {_successfullyHandledThisWave}");
+
             if (_totalSpawnedThisWave == 0) return;
 
             float successRate = (float)_successfullyHandledThisWave / _totalSpawnedThisWave;
-            bool success = successRate >= 0.7f; // Slightly more lenient
+            bool success = successRate >= 0.7f; 
 
             Debug.Log($"Wave {data.waveType} Result: Handled {_successfullyHandledThisWave}/{_totalSpawnedThisWave} ({successRate:P0}). Hit: {_playerHitCountThisWave}");
 
@@ -262,6 +267,10 @@ namespace ActiveSaga.BossFight.Waves
                 if (BossController.Instance != null)
                 {
                     BossController.Instance.TakeDamage(100f); 
+                }
+                else
+                {
+                    Debug.LogError("[WaveManager] CANNOT DAMAGE BOSS: BossController.Instance is NULL!");
                 }
             }
             else
@@ -347,74 +356,58 @@ namespace ActiveSaga.BossFight.Waves
 {
     Debug.Log("========== SpawnProjectile START ==========");
 
-    // Check data
     if (data == null)
     {
         Debug.LogError("SpawnProjectile FAILED: ProjectileData is NULL!");
         return;
     }
 
-    Debug.Log($"Projectile Name: {data.projectileName}");
-
-    // Check PoolManager
-    if (PoolManager.Instance == null)
-    {
-        Debug.LogError("SpawnProjectile FAILED: PoolManager.Instance is NULL!");
+    if (PoolManager.Instance == null || bossSpawnPoint == null)
         return;
-    }
-
-    // Check boss spawn
-    if (bossSpawnPoint == null)
-    {
-        Debug.LogError("SpawnProjectile FAILED: bossSpawnPoint is NULL!");
-        return;
-    }
 
     Vector3 basePos = bossSpawnPoint.position;
-    Vector3 forward = Vector3.forward;
+
+    bool hasPlayer = BossFightGameManager.Instance?.PlayerTransform != null;
+
+    Vector3 playerPos = hasPlayer
+        ? BossFightGameManager.Instance.PlayerTransform.position
+        : basePos + Vector3.forward * 5f;
 
     float yOffset = offset.y;
 
-    // DodgeLog special handling
+    // ---------------------------
+    // 🔥 FIX: proper head/feet targeting system
+    // ---------------------------
+    bool targetHead = false;
+
     if (data.projectileName == "DodgeLog")
     {
-        bool targetHead = Random.value > 0.5f;
-        yOffset = targetHead ? 1.7f : 0.7f;
-
-        Debug.Log($"DodgeLog targeting: {(targetHead ? "HEAD" : "FEET")}");
-    }
-
-    // Calculate direction toward player
-    if (BossFightGameManager.Instance != null &&
-        BossFightGameManager.Instance.PlayerTransform != null)
-    {
-        Vector3 targetPos =
-            BossFightGameManager.Instance.PlayerTransform.position +
-            Vector3.up * yOffset;
-
-        forward = (targetPos - basePos).normalized;
-
-        Debug.Log($"Target Position: {targetPos}");
-        Debug.Log($"Forward Direction: {forward}");
+        targetHead = Random.value > 0.5f;
     }
     else
     {
-        Debug.LogWarning("PlayerTransform missing. Using default forward.");
+        // חשוב מאוד: נותן חלק מהפרויקטים לראש גם אם לא מוגדר
+        targetHead = Random.value > 0.6f;
     }
 
-    Vector3 right = Vector3.Cross(Vector3.up, forward);
+    float targetHeight = targetHead ? 1.7f : 0.7f;
+
+    Vector3 targetPos = playerPos + Vector3.up * targetHeight;
+
+    Vector3 direction = (targetPos - basePos).normalized;
+    if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
+
+    Vector3 right = Vector3.Cross(Vector3.up, direction).normalized;
+    if (right.sqrMagnitude < 0.001f) right = Vector3.right;
 
     Vector3 spawnPos =
         basePos +
-        (forward * offset.z) +
-        (right * offset.x) +
-        (Vector3.up * yOffset);
+        direction * offset.z +
+        right * offset.x +
+        Vector3.up * yOffset;
 
-    Quaternion spawnRot = Quaternion.LookRotation(forward);
+    Quaternion spawnRot = Quaternion.LookRotation(direction);
 
-    Debug.Log($"Spawn Position: {spawnPos}");
-
-    // Spawn from pool
     GameObject projectile =
         PoolManager.Instance.SpawnFromPool(
             data.projectileName,
@@ -423,24 +416,11 @@ namespace ActiveSaga.BossFight.Waves
             false
         );
 
-    // Check spawn success
     if (projectile == null)
     {
-        Debug.LogError(
-            $"SpawnProjectile FAILED: Pool returned NULL for '{data.projectileName}'"
-        );
-
-        Debug.LogError(
-            "Most likely causes:\n" +
-            "1. PoolConfig name does not exactly match projectileName\n" +
-            "2. Pool not configured in Inspector\n" +
-            "3. Prefab missing in PoolConfig"
-        );
-
+        Debug.LogError($"Pool returned NULL for {data.projectileName}");
         return;
     }
-
-    Debug.Log($"Projectile spawned successfully: {projectile.name}");
 
     _totalSpawnedThisWave++;
 
@@ -448,15 +428,13 @@ namespace ActiveSaga.BossFight.Waves
 
     if (controller == null)
     {
-        Debug.LogError(
-            $"Projectile '{projectile.name}' has NO ProjectileController!"
-        );
-
+        Debug.LogError($"Missing ProjectileController on {projectile.name}");
         return;
     }
 
     controller.Initialize(data, speedMultiplier);
 
+    Debug.Log($"Spawned {data.projectileName} -> TargetHead: {targetHead}");
     Debug.Log("========== SpawnProjectile END ==========");
 }
 

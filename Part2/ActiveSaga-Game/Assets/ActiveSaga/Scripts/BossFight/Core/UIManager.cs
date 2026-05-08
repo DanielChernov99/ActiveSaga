@@ -7,7 +7,6 @@ namespace ActiveSaga.BossFight.Core
     public class UIManager : MonoBehaviour
     {
         [Header("HP UI")]
-        [SerializeField] private Slider bossHPBar;
         [SerializeField] private Slider playerHPBar;
         
         [Header("Text UI")]
@@ -36,14 +35,6 @@ namespace ActiveSaga.BossFight.Core
                 {
                     playerHPBar.maxValue = e.max;
                     playerHPBar.value = e.current;
-                }
-            }
-            else
-            {
-                if (bossHPBar != null)
-                {
-                    bossHPBar.maxValue = e.max;
-                    bossHPBar.value = e.current;
                 }
             }
         }

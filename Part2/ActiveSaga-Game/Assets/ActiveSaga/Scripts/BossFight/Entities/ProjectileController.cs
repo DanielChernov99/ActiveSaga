@@ -9,65 +9,84 @@ namespace ActiveSaga.BossFight.Entities
     {
         private ProjectileData data;
         private Rigidbody rb;
-        private bool isInitialized = false;
 
-        private bool wasHitPlayer = false;
+        private bool isInitialized;
+
+        private bool wasHitPlayer;
+
         private Vector3 startPosition;
-        private Vector3 initialForward;
+        private Vector3 forward;
+        private Vector3 right;
+
         private float spawnTime;
+
+        private Vector3 linearVelocity;
 
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
-            rb.isKinematic = false; 
-            rb.useGravity = false;
-            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            ConfigureRigidbody();
         }
 
-        public string GetPoolName() => data != null ? data.projectileName : string.Empty;
+        private void ConfigureRigidbody()
+        {
+            rb.isKinematic = false;
+            rb.useGravity = false;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+        }
 
-        private Vector3 targetVelocity;
+        public string GetPoolName() =>
+            data != null ? data.projectileName : string.Empty;
 
         public void Initialize(ProjectileData projectileData, float speedMultiplier = 1f)
         {
             if (projectileData == null) return;
 
-            this.data = projectileData;
+            data = projectileData;
             isInitialized = true;
             wasHitPlayer = false;
-            startPosition = transform.position;
-            initialForward = transform.forward;
+
             spawnTime = Time.time;
 
-            // Ensure Rigidbody is ready and active
-            if (rb == null) rb = GetComponent<Rigidbody>();
-            
-            // Force physics to be active
-            rb.isKinematic = false; 
-            rb.useGravity = false;
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
-            rb.WakeUp(); // Ensure the Rigidbody is awake
-            
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            startPosition = transform.position;
 
-            // Apply velocity for linear movement
-            if (data.pattern == ProjectilePattern.Linear)
+            // Ensure we have a valid forward direction
+            forward = transform.forward.normalized;
+            if (forward.sqrMagnitude < 0.001f)
             {
-                targetVelocity = initialForward * data.speed * speedMultiplier;
-                
-                // If speed is 0 or forward is zero, provide a default
-                if (targetVelocity.sqrMagnitude < 0.01f)
-                {
-                    targetVelocity = transform.forward * 10f;
-                }
-                
-                rb.linearVelocity = targetVelocity;
+                forward = Vector3.forward;
+            }
+            
+            right = Vector3.Cross(Vector3.up, forward).normalized;
+            if (right.sqrMagnitude < 0.001f)
+            {
+                right = Vector3.right;
             }
 
-            EventManager.Trigger(new ProjectileSpawnedEvent { projectile = gameObject });
-            
-            // Return to pool after lifetime
+            // --- CRITICAL RESET SEQUENCE ---
+            // Force wake up and clear all physics states for pooling consistency
+            rb.isKinematic = false;
+            rb.WakeUp();
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            // --------------------------------
+
+            if (data.pattern == ProjectilePattern.Linear)
+            {
+                float targetSpeed = data.speed * speedMultiplier;
+                if (targetSpeed <= 0) targetSpeed = 10f; // Safety fallback
+                
+                linearVelocity = forward * targetSpeed;
+                rb.linearVelocity = linearVelocity;
+            }
+
+            EventManager.Trigger(new ProjectileSpawnedEvent
+            {
+                projectile = gameObject
+            });
+
             CancelInvoke(nameof(DespawnDueToLifetime));
             Invoke(nameof(DespawnDueToLifetime), data.lifetime);
         }
@@ -76,36 +95,31 @@ namespace ActiveSaga.BossFight.Entities
         {
             if (!isInitialized || data == null) return;
 
-            if (data.pattern == ProjectilePattern.Sine)
+            float t = Time.time - spawnTime;
+
+            switch (data.pattern)
             {
-                // Add Sine movement offset
-                float timeActive = Time.time - spawnTime;
-                float sineOffset = Mathf.Sin(timeActive * data.frequency) * data.amplitude;
-                
-                // Calculate side vector (perpendicular to forward and up)
-                Vector3 side = Vector3.Cross(initialForward, Vector3.up).normalized;
-                
-                // Target position based on linear progress + sine offset
-                Vector3 targetPos = startPosition + (initialForward * (data.speed * (data.speed != 0 ? 1f : 0f)) * timeActive) + (side * sineOffset);
-                rb.MovePosition(targetPos);
-            }
-            else if (data.pattern == ProjectilePattern.Linear)
-            {
-                // Safety check: ensure velocity is maintained
-                // Using rb.velocity as fallback for linearVelocity if needed, but linearVelocity is correct for Unity 6
-                if (rb.linearVelocity.sqrMagnitude < 0.1f && targetVelocity != Vector3.zero)
-                {
-                    rb.linearVelocity = targetVelocity;
-                }
-                
-                // Manual backup movement if physics fails to update position
-                // rb.MovePosition(rb.position + targetVelocity * Time.fixedDeltaTime);
+                case ProjectilePattern.Linear:
+                    // Keep constant velocity
+                    rb.linearVelocity = linearVelocity;
+                    break;
+
+                case ProjectilePattern.Sine:
+                    float sineOffset =
+                        Mathf.Sin(t * data.frequency) * data.amplitude;
+
+                    Vector3 targetPos =
+                        startPosition +
+                        forward * (data.speed * t) +
+                        right * sineOffset;
+
+                    rb.MovePosition(targetPos);
+                    break;
             }
         }
 
         private void DespawnDueToLifetime()
         {
-            // If it lived its full lifetime without hitting player, it's a successful dodge
             DespawnInternal(true, false);
         }
 
@@ -119,45 +133,46 @@ namespace ActiveSaga.BossFight.Entities
         {
             if (!isInitialized) return;
 
-            // Check if hit player (XR Headset or Body Collider)
-            if (other.CompareTag("PlayerHitbox") || other.CompareTag("MainCamera") || other.CompareTag("Player"))
+            if (other.CompareTag("PlayerHitbox") ||
+                other.CompareTag("MainCamera") ||
+                other.CompareTag("Player"))
             {
-                Debug.Log($"<color=orange>Projectile Hit Player: {data.projectileName}</color>");
                 if (BossFightGameManager.Instance != null)
-                {
                     BossFightGameManager.Instance.TakeDamage(data.damage);
-                }
+
                 wasHitPlayer = true;
                 DespawnInternal(false, true);
+                return;
             }
-            // Check if deflected (Combat wave or specific mechanic)
-            else if (other.CompareTag("Sword") || other.CompareTag("DodgeShield"))
+
+            if (other.CompareTag("Sword") ||
+                other.CompareTag("DodgeShield"))
             {
-                Debug.Log($"Projectile {data.projectileName} deflected.");
                 DespawnInternal(true, false);
             }
         }
 
         public void Despawn()
         {
-            // Called by boundary or external force
             DespawnInternal(true, false);
         }
 
-        private void DespawnInternal(bool wasDodged, bool wasHitPlayer)
+        private void DespawnInternal(bool wasDodged, bool hitPlayer)
         {
             if (!isInitialized) return;
+
             isInitialized = false;
-            
+
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-            
-            EventManager.Trigger(new ProjectileDespawnedEvent { 
-                projectile = gameObject, 
-                wasDodged = wasDodged && !wasHitPlayer, 
-                wasHitPlayer = wasHitPlayer 
+
+            EventManager.Trigger(new ProjectileDespawnedEvent
+            {
+                projectile = gameObject,
+                wasDodged = wasDodged && !hitPlayer,
+                wasHitPlayer = hitPlayer
             });
-            
+
             if (PoolManager.Instance != null)
                 PoolManager.Instance.ReturnToPool(gameObject, data.projectileName);
             else
@@ -165,5 +180,3 @@ namespace ActiveSaga.BossFight.Entities
         }
     }
 }
-
-
