@@ -4026,7 +4026,10 @@ MonoBehaviour:
     prefab: {fileID: 748439340640669337, guid: 71736da07ef3043429500b7217583317, type: 3}
     initialSize: 5
   - name: RockProjectile
-    prefab: {fileID: 6616318332622595014, guid: 6dd78f58432c4dc469911446e483565a, type: 3}
+    prefab: {fileID: 7468498409537363837, guid: 312d12ce3d0867644ba3bd4a5d8f39ec, type: 3}
+    initialSize: 5
+  - name: DodgeLog
+    prefab: {fileID: 2823921433092028349, guid: 7d59b1c3396aabd429beff6fbf400088, type: 3}
     initialSize: 5
 --- !u!1 &1141451815
 GameObject:
