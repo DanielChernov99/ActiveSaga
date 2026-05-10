@@ -7,19 +7,19 @@ namespace ActiveSaga.BossFight.Entities
     [RequireComponent(typeof(Rigidbody))]
     public class EnemyController : MonoBehaviour
     {
-        public enum EnemyState { Idle, Spawning, Moving, Hit, Dead }
+        public enum EnemyState { Idle, Moving, Dead }
 
         [Header("State")]
         [SerializeField] private EnemyState currentState = EnemyState.Idle;
 
         private EnemyData data;
         private Rigidbody rb;
-        private bool isInitialized;
-        private float currentSpeed;
-        private Vector3 targetOffset;
 
-        private Transform targetCamera;
-        private Transform targetRoot;
+        private bool isInitialized;
+        private bool wasKilledByPlayer;
+
+        private float currentSpeed;
+        private Vector3 moveDirection;
 
         private void Awake()
         {
@@ -27,101 +27,116 @@ namespace ActiveSaga.BossFight.Entities
 
             rb.useGravity = false;
             rb.constraints = RigidbodyConstraints.FreezeRotation;
-
-            // Must not be kinematic for physics movement
             rb.isKinematic = false;
-
-            // Smooth movement
             rb.interpolation = RigidbodyInterpolation.Interpolate;
         }
 
         public void Initialize(EnemyData enemyData, float speedMultiplier = 1f)
         {
             if (enemyData == null)
-            {
-                Debug.LogError("EnemyController: Initialized with null EnemyData!");
                 return;
-            }
 
             data = enemyData;
-            currentSpeed = data.moveSpeed * speedMultiplier;
-
-            // Add random horizontal offset (1.0 to 1.5m)
-            float side = Random.value > 0.5f ? 1f : -1f;
-            targetOffset = new Vector3(Random.Range(1.0f, 1.5f) * side, 0, 0);
-
             isInitialized = true;
+            wasKilledByPlayer = false;
+
             currentState = EnemyState.Moving;
 
-            if (BossFightGameManager.Instance != null)
+            float finalSpeed = data.moveSpeed * speedMultiplier;
+            if (finalSpeed <= 0f)
+                finalSpeed = 5f;
+
+            currentSpeed = finalSpeed;
+
+            // Calculate direction ONCE only
+            Vector3 targetPosition = transform.position + transform.forward * 20f;
+
+            if (BossFightGameManager.Instance != null &&
+                BossFightGameManager.Instance.PlayerTransform != null)
             {
-                // We track both to follow the physical player position (camera XZ) but keep Y grounded
-                targetCamera = BossFightGameManager.Instance.PlayerCamera != null ? BossFightGameManager.Instance.PlayerCamera.transform : null;
-                targetRoot = BossFightGameManager.Instance.PlayerTransform;
+                targetPosition =
+                    BossFightGameManager.Instance.PlayerTransform.position;
+                targetPosition.y = transform.position.y;
             }
 
-            EventManager.Trigger(new EnemySpawnedEvent { enemy = gameObject });
+            moveDirection =
+                (targetPosition - transform.position).normalized;
+
+            if (moveDirection.sqrMagnitude < 0.001f)
+                moveDirection = transform.forward;
+
+            transform.rotation = Quaternion.LookRotation(moveDirection);
+
+            // Reset physics
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.WakeUp();
+
+            EventManager.Trigger(new EnemySpawnedEvent
+            {
+                enemy = gameObject
+            });
+
+            CancelInvoke(nameof(DespawnDueToLifetime));
+           
         }
 
         private void FixedUpdate()
         {
-            if (!isInitialized || currentState != EnemyState.Moving) return;
-            
-            // Default movement direction if target is lost
-            Vector3 direction = transform.forward;
-            Vector3 targetPos = transform.position;
+            if (!isInitialized)
+                return;
 
-            bool hasTarget = false;
+            if (currentState != EnemyState.Moving)
+                return;
 
-            if (targetCamera != null)
-            {
-                targetPos = targetCamera.position;
-                hasTarget = true;
-            }
-            else if (targetRoot != null)
-            {
-                targetPos = targetRoot.position;
-                hasTarget = true;
-            }
+            // Move ONLY in the original direction
+            Vector3 newPosition =
+                rb.position +
+                moveDirection * currentSpeed * Time.fixedDeltaTime;
 
-            // If a player target exists, calculate precise direction towards it with offset
-            if (hasTarget)
-            {
-                targetPos.y = transform.position.y; // Keep movement purely horizontal
-                
-                // Convert horizontal offset from player local space to world space if needed, 
-                // or just apply it relative to the player's position.
-                // Simple world-space horizontal offset based on current view direction:
-                Vector3 playerRight = Vector3.Cross(Vector3.up, (targetPos - transform.position).normalized);
-                Vector3 offsetPos = targetPos + (playerRight * targetOffset.x);
-
-                direction = (offsetPos - rb.position).normalized;
-            }
-
-            // Move the Rigidbody forward regardless of target tracking status
-            Vector3 newPos = rb.position + direction * currentSpeed * Time.fixedDeltaTime;
-            rb.MovePosition(newPos);
-
-            // Rotate smoothly to face the movement direction
-            if (direction != Vector3.zero)
-            {
-                rb.MoveRotation(Quaternion.LookRotation(direction));
-            }
+            rb.MovePosition(newPosition);
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.CompareTag("Sword") || other.CompareTag("Weapon"))
+            if (!isInitialized)
+                return;
+
+            // Sword kills enemy
+            if (other.CompareTag("Sword") ||
+                other.CompareTag("Weapon"))
             {
                 Despawn(true);
+                return;
             }
+        }
+
+        private void DespawnDueToLifetime()
+        {
+            Despawn(false);
+        }
+
+        private void OnDisable()
+        {
+            CancelInvoke(nameof(DespawnDueToLifetime));
+            isInitialized = false;
+            currentState = EnemyState.Idle;
         }
 
         public void Despawn(bool killedByPlayer)
         {
-            if (currentState == EnemyState.Dead) return;
+            if (!isInitialized)
+                return;
 
+            if (currentState == EnemyState.Dead)
+                return;
+
+            isInitialized = false;
             currentState = EnemyState.Dead;
+            wasKilledByPlayer = killedByPlayer;
+
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
 
             EventManager.Trigger(new EnemyDespawnedEvent
             {
@@ -131,7 +146,14 @@ namespace ActiveSaga.BossFight.Entities
 
             if (PoolManager.Instance != null)
             {
-                PoolManager.Instance.ReturnToPool(gameObject, data.enemyName);
+                PoolManager.Instance.ReturnToPool(
+                    gameObject,
+                    data.enemyName
+                );
+            }
+            else
+            {
+                Destroy(gameObject);
             }
         }
     }

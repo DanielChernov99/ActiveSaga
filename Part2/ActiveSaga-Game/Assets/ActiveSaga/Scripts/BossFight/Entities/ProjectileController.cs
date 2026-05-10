@@ -12,8 +12,6 @@ namespace ActiveSaga.BossFight.Entities
 
         private bool isInitialized;
 
-        private bool wasHitPlayer;
-
         private Vector3 startPosition;
         private Vector3 forward;
         private Vector3 right;
@@ -45,7 +43,6 @@ namespace ActiveSaga.BossFight.Entities
 
             data = projectileData;
             isInitialized = true;
-            wasHitPlayer = false;
 
             spawnTime = Time.time;
 
@@ -140,7 +137,6 @@ namespace ActiveSaga.BossFight.Entities
                 if (BossFightGameManager.Instance != null)
                     BossFightGameManager.Instance.TakeDamage(data.damage);
 
-                wasHitPlayer = true;
                 DespawnInternal(false, true);
                 return;
             }
@@ -164,7 +160,8 @@ namespace ActiveSaga.BossFight.Entities
 
         private void DespawnInternal(bool wasDodged, bool hitPlayer)
         {
-            if (!isInitialized) return;
+            if (!isInitialized)
+                return;
 
             isInitialized = false;
 
