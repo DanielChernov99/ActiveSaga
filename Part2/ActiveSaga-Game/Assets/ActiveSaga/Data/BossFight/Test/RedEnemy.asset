@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d757e74082e140c4a804a42476a5deb6, type: 3}
+  m_Name: RedEnemy
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Data.EnemyData
+  enemyName: RedSkeleton
+  prefab: {fileID: 3133576792547481104, guid: 27d43c05de8490d43a2f0850d925a2e4, type: 3}
+  enemyColor: {r: 1, g: 0, b: 0, a: 1}
+  health: 1
+  moveSpeed: 4
+  scoreValue: 100
+  requiredHand: 2
+  requiredDirection: 0
+  velocityThreshold: 1
+  deathVFX: {fileID: 0}
+  deathSFX: {fileID: 0}
+  spawnSFX: {fileID: 0}

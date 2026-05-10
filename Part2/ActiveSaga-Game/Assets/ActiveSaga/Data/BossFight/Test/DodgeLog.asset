@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f843404627283743967d3654f720848, type: 3}
+  m_Name: DodgeLog
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Data.ProjectileData
+  projectileName: DodgeLog
+  prefab: {fileID: 2823921433092028349, guid: 7d59b1c3396aabd429beff6fbf400088, type: 3}
+  speed: 8
+  damage: 15
+  lifetime: 10
+  pattern: 0
+  amplitude: 1
+  frequency: 2
+  impactVFX: {fileID: 0}
+  launchSFX: {fileID: 0}

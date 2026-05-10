@@ -7,6 +7,13 @@ TagManager:
   - Anchor
   - Obstacle_Crash
   - Obstacle_Graze
+  - RightHand
+  - LeftHand
+  - SafeZone
+  - PlayerHitbox
+  - Sword
+  - DodgeShield
+  - Weapon
   layers:
   - Default
   - TransparentFX
