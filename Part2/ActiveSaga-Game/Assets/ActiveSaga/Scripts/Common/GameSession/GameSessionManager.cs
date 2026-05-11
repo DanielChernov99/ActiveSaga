@@ -20,6 +20,7 @@ namespace ActiveSaga.Common.GameSession
         [SerializeField] private MonoBehaviour submitterBehaviour;
 
         [Header("UI")]
+        [SerializeField] private GameObject gameplayHUD;
         [SerializeField] private EndGameResultsUI resultsUI;
 
         private IGameResultSubmitter gameResultSubmitter;
@@ -46,12 +47,7 @@ namespace ActiveSaga.Common.GameSession
 
             Instance = this;
 
-            gameResultSubmitter = submitterBehaviour as IGameResultSubmitter;
-
-            if (submitterBehaviour != null && gameResultSubmitter == null)
-            {
-                Debug.LogError("Submitter Behaviour does not implement IGameResultSubmitter.");
-            }
+            ResolveSubmitter();
         }
 
         private void Start()
@@ -60,6 +56,46 @@ namespace ActiveSaga.Common.GameSession
             {
                 StartSession();
             }
+        }
+
+        private void ResolveSubmitter()
+        {
+            gameResultSubmitter = null;
+
+            if (submitterBehaviour != null)
+            {
+                if (submitterBehaviour is IGameResultSubmitter submitter)
+                {
+                    gameResultSubmitter = submitter;
+                    Debug.Log("GameSessionManager using connected submitter: " + submitterBehaviour.GetType().Name);
+                    return;
+                }
+
+                Debug.LogWarning(
+                    "Submitter Behaviour is connected, but it does not implement IGameResultSubmitter. Connected component: "
+                    + submitterBehaviour.GetType().Name +
+                    ". Trying to find a valid submitter automatically."
+                );
+            }
+
+            MonoBehaviour[] behaviours = GetComponents<MonoBehaviour>();
+
+            foreach (MonoBehaviour behaviour in behaviours)
+            {
+                if (behaviour is IGameResultSubmitter foundSubmitter)
+                {
+                    submitterBehaviour = behaviour;
+                    gameResultSubmitter = foundSubmitter;
+
+                    Debug.Log("GameSessionManager found submitter automatically: " + behaviour.GetType().Name);
+                    return;
+                }
+            }
+
+            Debug.LogError(
+                "No component implementing IGameResultSubmitter found. " +
+                "Add MockGameResultSubmitter or ApiGameResultSubmitter to the same object as GameSessionManager."
+            );
         }
 
         public void StartSession()
@@ -81,6 +117,22 @@ namespace ActiveSaga.Common.GameSession
             if (statsTracker != null)
             {
                 statsTracker.ResetStats();
+            }
+            else
+            {
+                Debug.LogWarning("GameSessionManager: Stats Tracker is missing.");
+            }
+
+            ResolveSubmitter();
+
+            if (gameplayHUD != null)
+            {
+                gameplayHUD.SetActive(true);
+            }
+
+            if (resultsUI != null)
+            {
+                resultsUI.HideAll();
             }
 
             state = GameSessionState.Running;
@@ -126,9 +178,15 @@ namespace ActiveSaga.Common.GameSession
                 return;
             }
 
+            if (state == GameSessionState.NotStarted)
+            {
+                Debug.LogWarning("GameSessionManager: EndGame was called before StartSession.");
+            }
+
             if (state == GameSessionState.Paused)
             {
                 totalPausedSeconds += Time.realtimeSinceStartup - pausedStartedRealtime;
+                pausedStartedRealtime = 0f;
             }
 
             Time.timeScale = 1f;
@@ -140,6 +198,10 @@ namespace ActiveSaga.Common.GameSession
             if (statsTracker != null)
             {
                 statsSnapshot = statsTracker.BuildSnapshot();
+            }
+            else
+            {
+                Debug.LogWarning("GameSessionManager: Cannot build stats snapshot because Stats Tracker is missing.");
             }
 
             string endedUtc = DateTime.UtcNow.ToString("o");
@@ -159,9 +221,19 @@ namespace ActiveSaga.Common.GameSession
 
             state = GameSessionState.WaitingForServer;
 
+            if (gameplayHUD != null)
+            {
+                gameplayHUD.SetActive(false);
+            }
+
             if (resultsUI != null)
             {
                 resultsUI.ShowLoading();
+            }
+
+            if (gameResultSubmitter == null)
+            {
+                ResolveSubmitter();
             }
 
             if (gameResultSubmitter == null)
@@ -210,7 +282,12 @@ namespace ActiveSaga.Common.GameSession
                 }
 
                 Debug.LogError(errorMessage);
-                Debug.LogError(response.rawJson);
+
+                if (!string.IsNullOrWhiteSpace(response.rawJson))
+                {
+                    Debug.LogError(response.rawJson);
+                }
+
                 return;
             }
 
@@ -220,7 +297,15 @@ namespace ActiveSaga.Common.GameSession
             }
 
             Debug.Log("Server response:");
-            Debug.Log(response.rawJson);
+
+            if (!string.IsNullOrWhiteSpace(response.rawJson))
+            {
+                Debug.Log(response.rawJson);
+            }
+            else
+            {
+                Debug.Log(response.message);
+            }
         }
 
         public void EndGameAsGameOver()
@@ -236,6 +321,22 @@ namespace ActiveSaga.Common.GameSession
         public void EndGameAsPlayerQuit()
         {
             EndGame(GameEndReason.PlayerQuit);
+        }
+
+        public float GetActiveDurationSeconds()
+        {
+            if (state == GameSessionState.NotStarted)
+            {
+                return 0f;
+            }
+
+            if (state == GameSessionState.Paused)
+            {
+                float pausedDuration = pausedStartedRealtime - startedRealtime - totalPausedSeconds;
+                return Mathf.Max(0f, pausedDuration);
+            }
+
+            return CalculateActiveDurationSeconds();
         }
 
         private float CalculateActiveDurationSeconds()

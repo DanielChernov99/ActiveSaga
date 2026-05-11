@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class MonsterController : MonoBehaviour
 {
@@ -10,12 +11,61 @@ public class MonsterController : MonoBehaviour
     public float monsterSpeed = 5f;
 
     [Header("Catch Up Settings")]
-    public float maxCatchUpSpeed = 12f;     // מהירות מקסימלית כשהוא רחוק
-    public float catchUpStrength = 0.15f;   // כמה מהר הוא מגיב לפער
+    public float maxCatchUpSpeed = 12f;
+    public float catchUpStrength = 0.15f;
 
     private bool gameOver = false;
+    private bool isChasing = false;
+
+    public event Action OnMonsterCaughtPlayer;
 
     private void Start()
+    {
+        ResetMonsterPosition();
+    }
+
+    private void Update()
+    {
+        if (!isChasing || gameOver || playerTransform == null)
+        {
+            return;
+        }
+
+        float distance = playerTransform.position.z - transform.position.z;
+
+        float speed = monsterSpeed;
+
+        if (distance > startDistance)
+        {
+            float extraDistance = distance - startDistance;
+            float catchUpSpeed = extraDistance * catchUpStrength;
+
+            speed += catchUpSpeed;
+        }
+
+        speed = Mathf.Clamp(speed, 0f, maxCatchUpSpeed);
+
+        transform.position += Vector3.forward * speed * Time.deltaTime;
+
+        if (distance <= 0f)
+        {
+            CatchPlayer();
+        }
+    }
+
+    public void BeginChase()
+    {
+        gameOver = false;
+        isChasing = true;
+        ResetMonsterPosition();
+    }
+
+    public void StopChase()
+    {
+        isChasing = false;
+    }
+
+    public void ResetMonsterPosition()
     {
         if (playerTransform == null)
         {
@@ -27,44 +77,18 @@ public class MonsterController : MonoBehaviour
         transform.position = startPos;
     }
 
-    private void Update()
+    private void CatchPlayer()
     {
-        if (gameOver || playerTransform == null) return;
-
-        float distance = playerTransform.position.z - transform.position.z;
-
-        // 🔥 בסיס: מהירות קבועה
-        float speed = monsterSpeed;
-
-        // 🔥 אם הוא מאחור ביותר מ-50 → מתחיל לרדוף חזק יותר
-        if (distance > startDistance)
+        if (gameOver)
         {
-            float extraDistance = distance - startDistance;
-
-            // בוסט פרופורציונלי לפער
-            float catchUpSpeed = extraDistance * catchUpStrength;
-
-            speed += catchUpSpeed;
+            return;
         }
-
-        // 🔥 מגבלת מהירות כדי שלא ישתגע
-        speed = Mathf.Clamp(speed, 0f, maxCatchUpSpeed);
-
-        // תנועה קדימה
-        transform.position += Vector3.forward * speed * Time.deltaTime;
-
-        // בדיקת Game Over
-        if (distance <= 0f)
-        {
-            GameOver();
-        }
-    }
-
-    private void GameOver()
-    {
-        if (gameOver) return;
 
         gameOver = true;
+        isChasing = false;
+
         Debug.Log("GAME OVER - Monster caught you!");
+
+        OnMonsterCaughtPlayer?.Invoke();
     }
 }

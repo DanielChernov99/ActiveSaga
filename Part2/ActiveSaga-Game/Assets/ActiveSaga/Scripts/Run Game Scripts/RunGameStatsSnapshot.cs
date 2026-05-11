@@ -8,6 +8,12 @@ namespace ActiveSaga.RunGame
         public float distanceMeters;
         public int enemiesKilled;
 
+        public int totalJumps;
+        public int totalSquats;
+
+        public int obstacleCrashes;
+        public int obstacleGrazes;
+
         public override GameType GameType => GameType.RunGame;
 
         public override string ToJson()
@@ -16,7 +22,11 @@ namespace ActiveSaga.RunGame
 
             return "{"
                    + "\"distanceMeters\":" + distance + ","
-                   + "\"enemiesKilled\":" + enemiesKilled
+                   + "\"enemiesKilled\":" + enemiesKilled + ","
+                   + "\"totalJumps\":" + totalJumps + ","
+                   + "\"totalSquats\":" + totalSquats + ","
+                   + "\"obstacleCrashes\":" + obstacleCrashes + ","
+                   + "\"obstacleGrazes\":" + obstacleGrazes
                    + "}";
         }
     }
