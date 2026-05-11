@@ -1427,6 +1427,7 @@ GameObject:
   - component: {fileID: 997664004}
   - component: {fileID: 997664003}
   - component: {fileID: 997664006}
+  - component: {fileID: 997664007}
   m_Layer: 0
   m_Name: RunHUDCanvas
   m_TagString: Untagged
@@ -1534,6 +1535,21 @@ MonoBehaviour:
   localOffset: {x: -0.35, y: -0.08, z: 0.85}
   followSpeed: 8
   followRotation: 1
+--- !u!114 &997664007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 997664001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c8d49ed6cdefb04a8f99ee9d934993d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIManager
+  gameManager: {fileID: 1976218460}
+  timerText: {fileID: 1362031072}
+  distanceText: {fileID: 2117652627}
 --- !u!1 &1021546580
 GameObject:
   m_ObjectHideFlags: 0
@@ -2383,8 +2399,8 @@ MonoBehaviour:
   gameType: 1
   startSessionOnStart: 0
   statsTracker: {fileID: 1112345725}
-  submitterBehaviour: {fileID: 1112345726}
-  gameplayHUD: {fileID: 0}
+  submitterBehaviour: {fileID: 0}
+  gameplayHUD: {fileID: 997664001}
   resultsUI: {fileID: 396887656}
 --- !u!1 &1140893187
 GameObject:
@@ -3806,8 +3822,8 @@ MonoBehaviour:
   jumpAnalyzer: {fileID: 2036115307}
   squatAnalyzer: {fileID: 321152836}
   heightCalibration: {fileID: 53213600}
-  uiManager: {fileID: 0}
-  playerCollisionHandler: {fileID: 0}
+  uiManager: {fileID: 997664007}
+  playerCollisionHandler: {fileID: 1159350406}
   monsterController: {fileID: 108434430}
   gameSessionManager: {fileID: 1112345726}
   runGameStatsTracker: {fileID: 1112345725}
