@@ -5,22 +5,26 @@ namespace ActiveSaga.RunGame
 {
     public class RunGameResultsUI : EndGameResultsViewBase
     {
-        protected override string BuildGameSpecificStatsText(GameStatsSnapshot statsSnapshot)
+        protected override void BuildGameSpecificStats(
+            GameStatsSnapshot statsSnapshot,
+            out ResultStat stat1,
+            out ResultStat stat2,
+            out ResultStat stat3
+        )
         {
             RunGameStatsSnapshot runStats = statsSnapshot as RunGameStatsSnapshot;
 
             if (runStats == null)
             {
-                return "Run game stats missing.";
+                stat1 = new ResultStat("DISTANCE", "-");
+                stat2 = new ResultStat("ENEMIES KILLED", "-");
+                stat3 = new ResultStat("JUMPS", "-");
+                return;
             }
 
-            return
-                "Distance: " + runStats.distanceMeters.ToString("0") + " m" +
-                "\nEnemies Killed: " + runStats.enemiesKilled +
-                "\nJumps: " + runStats.totalJumps +
-                "\nSquats: " + runStats.totalSquats +
-                "\nObstacle Crashes: " + runStats.obstacleCrashes;
-
+            stat1 = new ResultStat("DISTANCE", runStats.distanceMeters.ToString("0") + " m");
+            stat2 = new ResultStat("ENEMIES KILLED", runStats.enemiesKilled.ToString());
+            stat3 = new ResultStat("JUMPS", runStats.totalJumps.ToString());
         }
     }
 }

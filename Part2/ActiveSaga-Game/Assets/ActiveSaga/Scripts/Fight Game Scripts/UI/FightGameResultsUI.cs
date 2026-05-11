@@ -5,19 +5,26 @@ namespace ActiveSaga.FightGame
 {
     public class FightGameResultsUI : EndGameResultsViewBase
     {
-        protected override string BuildGameSpecificStatsText(GameStatsSnapshot statsSnapshot)
+        protected override void BuildGameSpecificStats(
+            GameStatsSnapshot statsSnapshot,
+            out ResultStat stat1,
+            out ResultStat stat2,
+            out ResultStat stat3
+        )
         {
             FightGameStatsSnapshot fightStats = statsSnapshot as FightGameStatsSnapshot;
 
             if (fightStats == null)
             {
-                return "Fight game stats missing.";
+                stat1 = new ResultStat("WAVES COMPLETED", "-");
+                stat2 = new ResultStat("ENEMIES KILLED", "-");
+                stat3 = new ResultStat("SUCCESSFUL DODGES", "-");
+                return;
             }
 
-            return
-                "Waves Completed: " + fightStats.wavesCompleted +
-                "\nEnemies Killed: " + fightStats.enemiesKilled +
-                "\nSuccessful Dodges: " + fightStats.successfulDodges;
+            stat1 = new ResultStat("WAVES COMPLETED", fightStats.wavesCompleted.ToString());
+            stat2 = new ResultStat("ENEMIES KILLED", fightStats.enemiesKilled.ToString());
+            stat3 = new ResultStat("SUCCESSFUL DODGES", fightStats.successfulDodges.ToString());
         }
     }
 }

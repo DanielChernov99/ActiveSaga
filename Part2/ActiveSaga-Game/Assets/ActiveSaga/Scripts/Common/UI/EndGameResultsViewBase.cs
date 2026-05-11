@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using ActiveSaga.Common.GameSession;
 using ActiveSaga.Common.Networking;
 
@@ -13,16 +14,46 @@ namespace ActiveSaga.Common.UI
         [SerializeField] private GameObject resultsPanel;
         [SerializeField] private GameObject errorPanel;
 
-        [Header("Result Texts")]
+        [Header("Title")]
         [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI durationText;
-        [SerializeField] private TextMeshProUGUI xpText;
-        [SerializeField] private TextMeshProUGUI moneyText;
-        [SerializeField] private TextMeshProUGUI levelText;
-        [SerializeField] private TextMeshProUGUI gameStatsText;
+
+        [Header("Top Summary Values")]
+        [SerializeField] private TextMeshProUGUI timeValueText;
+        [SerializeField] private TextMeshProUGUI xpEarnedValueText;
+        [SerializeField] private TextMeshProUGUI moneyEarnedValueText;
+
+        [Header("Level Section")]
+        [SerializeField] private TextMeshProUGUI levelUpText;
+        [SerializeField] private TextMeshProUGUI currentLevelText;
+        [SerializeField] private TextMeshProUGUI xpProgressText;
+        [SerializeField] private Image xpBarFill;
+
+        [Header("Game Stat 1")]
+        [SerializeField] private TextMeshProUGUI stat1LabelText;
+        [SerializeField] private TextMeshProUGUI stat1ValueText;
+
+        [Header("Game Stat 2")]
+        [SerializeField] private TextMeshProUGUI stat2LabelText;
+        [SerializeField] private TextMeshProUGUI stat2ValueText;
+
+        [Header("Game Stat 3")]
+        [SerializeField] private TextMeshProUGUI stat3LabelText;
+        [SerializeField] private TextMeshProUGUI stat3ValueText;
 
         [Header("Error Text")]
         [SerializeField] private TextMeshProUGUI errorText;
+
+        protected struct ResultStat
+        {
+            public string label;
+            public string value;
+
+            public ResultStat(string label, string value)
+            {
+                this.label = label;
+                this.value = value;
+            }
+        }
 
         private void Start()
         {
@@ -55,11 +86,13 @@ namespace ActiveSaga.Common.UI
             SetActive(errorPanel, false);
 
             SetText(titleText, BuildTitle(endReason));
-            SetText(durationText, "Time Played: " + FormatDuration(durationSeconds));
-            SetText(xpText, BuildXpText(response));
-            SetText(moneyText, BuildMoneyText(response));
-            SetText(levelText, BuildLevelText(response));
-            SetText(gameStatsText, BuildGameSpecificStatsText(statsSnapshot));
+
+            SetText(timeValueText, FormatDuration(durationSeconds));
+            SetText(xpEarnedValueText, GetTotalXp(response).ToString());
+            SetText(moneyEarnedValueText, GetTotalMoney(response).ToString());
+
+            UpdateLevelSection(response);
+            UpdateGameSpecificStats(statsSnapshot);
         }
 
         public void ShowError(string message)
@@ -80,68 +113,106 @@ namespace ActiveSaga.Common.UI
             SetActive(errorPanel, false);
         }
 
-        protected abstract string BuildGameSpecificStatsText(GameStatsSnapshot statsSnapshot);
+        protected abstract void BuildGameSpecificStats(
+            GameStatsSnapshot statsSnapshot,
+            out ResultStat stat1,
+            out ResultStat stat2,
+            out ResultStat stat3
+        );
+
+        private void UpdateLevelSection(ServerGameResultResponse response)
+        {
+            if (response.player == null)
+            {
+                SetText(levelUpText, "PROGRESSION MISSING");
+                SetText(currentLevelText, "CURRENT LEVEL: -");
+                SetText(xpProgressText, "XP: - / -");
+
+                if (xpBarFill != null)
+                {
+                    xpBarFill.fillAmount = 0f;
+                }
+
+                return;
+            }
+
+            if (response.leveledUp)
+            {
+                SetText(levelUpText, "LEVEL UP! " + response.previousLevel + " -> " + response.player.level);
+            }
+            else
+            {
+                SetText(levelUpText, "NO LEVEL UP");
+            }
+
+            SetText(currentLevelText, "CURRENT LEVEL: " + response.player.level);
+            SetText(xpProgressText, "XP: " + response.player.currentXp + " / " + response.player.xpNeededForNextLevel);
+
+            if (xpBarFill != null)
+            {
+                float fillAmount = 0f;
+
+                if (response.player.xpNeededForNextLevel > 0)
+                {
+                    fillAmount = Mathf.Clamp01(
+                        (float)response.player.currentXp / response.player.xpNeededForNextLevel
+                    );
+                }
+
+                xpBarFill.fillAmount = fillAmount;
+            }
+        }
+
+        private void UpdateGameSpecificStats(GameStatsSnapshot statsSnapshot)
+        {
+            BuildGameSpecificStats(statsSnapshot, out ResultStat stat1, out ResultStat stat2, out ResultStat stat3);
+
+            SetText(stat1LabelText, stat1.label);
+            SetText(stat1ValueText, stat1.value);
+
+            SetText(stat2LabelText, stat2.label);
+            SetText(stat2ValueText, stat2.value);
+
+            SetText(stat3LabelText, stat3.label);
+            SetText(stat3ValueText, stat3.value);
+        }
 
         private string BuildTitle(GameEndReason endReason)
         {
             switch (endReason)
             {
                 case GameEndReason.GameWon:
-                    return "Game Won";
+                    return "GAME WON";
 
                 case GameEndReason.PlayerQuit:
-                    return "Game Ended";
+                    return "GAME ENDED";
 
                 case GameEndReason.GameOver:
-                    return "Game Over";
+                    return "GAME OVER";
 
                 default:
-                    return "Game Results";
+                    return "GAME RESULTS";
             }
         }
 
-        private string BuildXpText(ServerGameResultResponse response)
+        private int GetTotalXp(ServerGameResultResponse response)
         {
             if (response.rewards == null)
             {
-                return "XP Earned: 0";
+                return 0;
             }
 
-            return "XP Earned: " + response.rewards.totalXp;
+            return response.rewards.totalXp;
         }
 
-        private string BuildMoneyText(ServerGameResultResponse response)
+        private int GetTotalMoney(ServerGameResultResponse response)
         {
             if (response.rewards == null)
             {
-                return "Money Earned: 0";
+                return 0;
             }
 
-            return "Money Earned: " + response.rewards.totalMoney;
-        }
-
-        private string BuildLevelText(ServerGameResultResponse response)
-        {
-            if (response.player == null)
-            {
-                return "Player progression missing.";
-            }
-
-            string levelLine;
-
-            if (response.leveledUp)
-            {
-                levelLine = "Level Up! " + response.previousLevel + " -> " + response.player.level;
-            }
-            else
-            {
-                levelLine = "No Level Up";
-            }
-
-            return
-                levelLine +
-                "\nCurrent Level: " + response.player.level +
-                "\nXP: " + response.player.currentXp + " / " + response.player.xpNeededForNextLevel;
+            return response.rewards.totalMoney;
         }
 
         private string FormatDuration(float totalSeconds)
