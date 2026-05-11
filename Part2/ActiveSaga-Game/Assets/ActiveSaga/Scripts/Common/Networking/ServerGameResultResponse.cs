@@ -8,9 +8,11 @@ namespace ActiveSaga.Common.Networking
         public bool success;
         public string message;
 
+        public bool leveledUp;
+        public int previousLevel;
+
         public ServerPlayerProgression player;
         public ServerRewardResult rewards;
-        public ServerMissionReportItem[] missionReport;
 
         [NonSerialized] public string rawJson;
         [NonSerialized] public string errorMessage;
@@ -36,22 +38,5 @@ namespace ActiveSaga.Common.Networking
         public int gameplayMoney;
         public int missionBonusMoney;
         public int totalMoney;
-    }
-
-    [Serializable]
-    public class ServerMissionReportItem
-    {
-        public string title;
-        public bool completed;
-
-        public int currentValue;
-        public int targetValue;
-
-        public int rewardXp;
-        public int rewardMoney;
-
-        public string type;
-        public int streak;
-        public bool bigStreakBonus;
     }
 }

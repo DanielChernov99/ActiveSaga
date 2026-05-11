@@ -21,8 +21,7 @@ namespace ActiveSaga.Common.GameSession
 
         [Header("UI")]
         [SerializeField] private GameObject gameplayHUD;
-        [SerializeField] private EndGameResultsUI resultsUI;
-
+        [SerializeField] private EndGameResultsViewBase resultsUI;
         private IGameResultSubmitter gameResultSubmitter;
 
         private string sessionId;
@@ -293,7 +292,7 @@ namespace ActiveSaga.Common.GameSession
 
             if (resultsUI != null)
             {
-                resultsUI.ShowResults(response);
+                resultsUI.ShowResults(response, endReason, durationSeconds, statsSnapshot);
             }
 
             Debug.Log("Server response:");

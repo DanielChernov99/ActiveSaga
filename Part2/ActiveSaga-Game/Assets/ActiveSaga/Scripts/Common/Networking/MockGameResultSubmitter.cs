@@ -14,6 +14,10 @@ namespace ActiveSaga.Common.Networking
         [SerializeField] private int mockGameplayMoney = 25;
         [SerializeField] private int mockMissionBonusMoney = 10;
 
+        [Header("Mock Level Up")]
+        [SerializeField] private bool mockLeveledUp = false;
+        [SerializeField] private int mockPreviousLevel = 1;
+
         [Header("Mock Player State After Server")]
         [SerializeField] private int mockLevel = 2;
         [SerializeField] private int mockCurrentXp = 70;
@@ -29,6 +33,10 @@ namespace ActiveSaga.Common.Networking
             {
                 success = true,
                 message = "Mock server response",
+
+                leveledUp = mockLeveledUp,
+                previousLevel = mockPreviousLevel,
+
                 player = new ServerPlayerProgression
                 {
                     level = mockLevel,
@@ -37,6 +45,7 @@ namespace ActiveSaga.Common.Networking
                     money = mockMoney,
                     totalEarnedXp = mockTotalEarnedXp
                 },
+
                 rewards = new ServerRewardResult
                 {
                     gameplayXp = mockGameplayXp,
@@ -47,16 +56,9 @@ namespace ActiveSaga.Common.Networking
                     missionBonusMoney = mockMissionBonusMoney,
                     totalMoney = mockGameplayMoney + mockMissionBonusMoney
                 },
-                missionReport = new ServerMissionReportItem[]
-                {
-                    new ServerMissionReportItem
-                    {
-                        title = "Play 10 minutes today",
-                        completed = true,
-                        rewardXp = mockMissionBonusXp,
-                        rewardMoney = mockMissionBonusMoney
-                    }
-                }
+
+                rawJson = jsonPayload,
+                errorMessage = null
             };
         }
     }
