@@ -6,6 +6,11 @@ public class MonsterController : MonoBehaviour
     [Header("References")]
     public Transform playerTransform;
 
+    [Header("Visuals")]
+    [SerializeField] private GameObject visualRoot;
+    [SerializeField] private bool hideVisualsOnCatch = true;
+    [SerializeField] private bool disableCollidersOnCatch = true;
+
     [Header("Settings")]
     public float startDistance = 50f;
     public float monsterSpeed = 5f;
@@ -17,10 +22,19 @@ public class MonsterController : MonoBehaviour
     private bool gameOver = false;
     private bool isChasing = false;
 
+    private Renderer[] monsterRenderers;
+    private Collider[] monsterColliders;
+
     public event Action OnMonsterCaughtPlayer;
+
+    private void Awake()
+    {
+        CacheVisualParts();
+    }
 
     private void Start()
     {
+        SetMonsterVisible(true);
         ResetMonsterPosition();
     }
 
@@ -57,6 +71,8 @@ public class MonsterController : MonoBehaviour
     {
         gameOver = false;
         isChasing = true;
+
+        SetMonsterVisible(true);
         ResetMonsterPosition();
     }
 
@@ -89,6 +105,44 @@ public class MonsterController : MonoBehaviour
 
         Debug.Log("GAME OVER - Monster caught you!");
 
+        if (hideVisualsOnCatch)
+        {
+            SetMonsterVisible(false);
+        }
+
         OnMonsterCaughtPlayer?.Invoke();
+    }
+
+    private void CacheVisualParts()
+    {
+        Transform targetRoot = visualRoot != null ? visualRoot.transform : transform;
+
+        monsterRenderers = targetRoot.GetComponentsInChildren<Renderer>(true);
+        monsterColliders = targetRoot.GetComponentsInChildren<Collider>(true);
+    }
+
+    private void SetMonsterVisible(bool visible)
+    {
+        if (monsterRenderers != null)
+        {
+            for (int i = 0; i < monsterRenderers.Length; i++)
+            {
+                if (monsterRenderers[i] != null)
+                {
+                    monsterRenderers[i].enabled = visible;
+                }
+            }
+        }
+
+        if (disableCollidersOnCatch && monsterColliders != null)
+        {
+            for (int i = 0; i < monsterColliders.Length; i++)
+            {
+                if (monsterColliders[i] != null)
+                {
+                    monsterColliders[i].enabled = visible;
+                }
+            }
+        }
     }
 }
