@@ -1,54 +1,31 @@
 using UnityEngine;
 using TMPro;
-using ActiveSaga.BossFight.Core;
-using ActiveSaga.BossFight.Entities;
 
 public class UIManager : MonoBehaviour
 {
     [Header("Game Manager Connection")]
     [SerializeField] private GameManager gameManager;
 
-    [Header("Modules")]
-    [Tooltip("The Progress Bar Logic")]
-    [SerializeField] private RunningProgressBar progressBar;
-    
-    [Tooltip("The Left Side Panel Stats")]
-    [SerializeField] private StatsDisplay statsDisplay; 
-
-    [Header("Wave UI")]
-    [SerializeField] private TextMeshProUGUI waveText;
-
-    private void OnEnable()
-    {
-        EventManager.Subscribe<WaveStartedEvent>(OnWaveStarted);
-    }
-
-    private void OnDisable()
-    {
-        EventManager.Unsubscribe<WaveStartedEvent>(OnWaveStarted);
-    }
+    [Header("Run HUD Texts")]
+    [SerializeField] private TextMeshProUGUI timerText;
+    [SerializeField] private TextMeshProUGUI distanceText;
 
     private void Start()
     {
-        if (gameManager != null)
+        if (gameManager == null)
         {
-            gameManager.OnStatsUpdated += HandleGameUpdate;
-
-            if (statsDisplay != null)
-            {
-                statsDisplay.SetGoals(
-                    gameManager.levelTargetDistance, 
-                    gameManager.goalJumps, 
-                    gameManager.goalSquats
-                );
-            }
-
-            HandleGameUpdate(0, 0, 0, 0f);
+            gameManager = FindObjectOfType<GameManager>();
         }
-        else
+
+        if (gameManager == null)
         {
-            Debug.LogError("UIManager: Game Manager is missing!");
+            Debug.LogError("UIManager: GameManager is missing.");
+            return;
         }
+
+        gameManager.OnStatsUpdated += HandleGameUpdate;
+
+        HandleGameUpdate(0f, 0, 0, 0f);
     }
 
     private void OnDestroy()
@@ -59,30 +36,24 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // ---------------- WAVES ----------------
-
-    private void OnWaveStarted(WaveStartedEvent e)
+    private void HandleGameUpdate(float distance, int jumps, int squats, float elapsedTime)
     {
-        if (waveText != null)
+        if (timerText != null)
         {
-            waveText.text = $"Wave: {e.waveIndex}";
+            timerText.text = "Time: " + FormatTime(elapsedTime);
+        }
+
+        if (distanceText != null)
+        {
+            distanceText.text = "Distance: " + distance.ToString("0") + " m";
         }
     }
 
-    // ---------------- RUN STATS ----------------
-
-    private void HandleGameUpdate(float currentDist, int jumps, int squats, float timeElapsed)
+    private string FormatTime(float seconds)
     {
-        if (progressBar != null)
-        {
-            float maxDist = gameManager.levelTargetDistance;
-            float progress = (maxDist > 0) ? (currentDist / maxDist) : 0;
-            progressBar.UpdateVisuals(progress);
-        }
+        int minutes = Mathf.FloorToInt(seconds / 60f);
+        int remainingSeconds = Mathf.FloorToInt(seconds % 60f);
 
-        if (statsDisplay != null)
-        {
-            statsDisplay.UpdateStats(currentDist, jumps, squats, timeElapsed);
-        }
+        return minutes.ToString("00") + ":" + remainingSeconds.ToString("00");
     }
 }

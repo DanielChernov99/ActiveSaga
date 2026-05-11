@@ -51,6 +51,10 @@ public class JumpAnalyzer : MonoBehaviour
     private void Update()
     {
         if (bodyTracker == null) return;
+        if (Time.deltaTime <= 0f)
+        {
+            return;
+        }
 
         // 1. Handle Cooldown
         if (currentCooldownTimer > 0)

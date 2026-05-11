@@ -31,6 +31,11 @@ public class SquatAnalyzer : MonoBehaviour
         if (bodyTracker == null || heightCalibration == null || !heightCalibration.IsCalibrated) 
             return;
 
+        if (Time.deltaTime <= 0f)
+        {
+            return;
+        }
+
         // 2. Get Data
         float currentHeadY = bodyTracker.HeadPosition.y;
         float baseHeight = heightCalibration.BaseHeight;

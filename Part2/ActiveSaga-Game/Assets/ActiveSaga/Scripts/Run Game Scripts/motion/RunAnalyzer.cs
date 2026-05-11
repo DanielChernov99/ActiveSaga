@@ -40,6 +40,10 @@ public class RunAnalyzer : MonoBehaviour
     private void Update()
     {
         if (bodyTracker == null) return;
+        if (Time.deltaTime <= 0f)
+        {
+            return;
+        }
 
         // 1. Calculate Vertical Velocity (Meters per Second)
         float currentHeadY = bodyTracker.HeadPosition.y;
