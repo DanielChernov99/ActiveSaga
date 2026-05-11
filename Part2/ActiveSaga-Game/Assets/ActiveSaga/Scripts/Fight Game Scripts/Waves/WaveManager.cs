@@ -20,87 +20,164 @@ namespace ActiveSaga.BossFight.Waves
         [Header("Runtime State")]
         [SerializeField] private int currentWaveIndex = 0;
         [SerializeField] private WaveType nextWaveType = WaveType.Combat;
-        private HashSet<GameObject> _activeEntities = new HashSet<GameObject>();
 
-        private int _totalSpawnedThisWave = 0;
-        private int _successfullyHandledThisWave = 0;
-        private int _playerHitCountThisWave = 0;
+        [Header("Master Data (Dynamic Generator)")]
+        [SerializeField] private List<EnemyData> enemyMasterList;
+        [SerializeField] private List<ProjectileData> projectileMasterList;
 
-        public int ActiveEntitiesCount => _activeEntities.Count;
+        private Coroutine waveLoopRoutine;
+        private bool isWaveActive;
+        private WaveData currentDynamicWave;
 
-        private Coroutine _waveLoopRoutine;
-        private bool _isWaveActive = false;
-        private WaveData _currentDynamicWave;
+        private DynamicWaveGenerator dynamicWaveGenerator;
+        private WaveEntitySpawner entitySpawner;
+        private WaveEntityTracker entityTracker;
+        private WaveEvaluator waveEvaluator;
+
+        public int ActiveEntitiesCount
+        {
+            get
+            {
+                return entityTracker != null ? entityTracker.ActiveEntitiesCount : 0;
+            }
+        }
+
+        private void Awake()
+        {
+            InitializeHelpers();
+        }
 
         private void OnEnable()
         {
-            EventManager.Subscribe<EnemySpawnedEvent>(OnEntitySpawned);
-            EventManager.Subscribe<EnemyDespawnedEvent>(OnEnemyDespawned);
-            EventManager.Subscribe<ProjectileSpawnedEvent>(OnEntitySpawned);
-            EventManager.Subscribe<ProjectileDespawnedEvent>(OnProjectileDespawned);
+            InitializeHelpers();
+
+            if (entityTracker != null)
+            {
+                entityTracker.Subscribe();
+            }
         }
 
         private void OnDisable()
         {
-            EventManager.Unsubscribe<EnemySpawnedEvent>(OnEntitySpawned);
-            EventManager.Unsubscribe<EnemyDespawnedEvent>(OnEnemyDespawned);
-            EventManager.Unsubscribe<ProjectileSpawnedEvent>(OnEntitySpawned);
-            EventManager.Unsubscribe<ProjectileDespawnedEvent>(OnProjectileDespawned);
+            if (entityTracker != null)
+            {
+                entityTracker.Unsubscribe();
+            }
 
             StopAllCoroutines();
+            waveLoopRoutine = null;
         }
 
         private void Start()
         {
-            if (bossSpawnPoint == null)
+            ResolveBossSpawnPoint();
+
+            InitializeHelpers();
+
+            if (entitySpawner != null)
             {
-                var boss = BossController.Instance;
-                if (boss != null) bossSpawnPoint = boss.transform;
+                entitySpawner.SetBossSpawnPoint(bossSpawnPoint);
             }
 
-            if (_waveLoopRoutine != null) StopCoroutine(_waveLoopRoutine);
-            _waveLoopRoutine = StartCoroutine(WaveLoopRoutine());
+            if (waveLoopRoutine != null)
+            {
+                StopCoroutine(waveLoopRoutine);
+            }
+
+            waveLoopRoutine = StartCoroutine(WaveLoopRoutine());
+        }
+
+        private void InitializeHelpers()
+        {
+            if (dynamicWaveGenerator == null)
+            {
+                dynamicWaveGenerator = new DynamicWaveGenerator(
+                    waveConfigs,
+                    difficultyConfig,
+                    enemyMasterList,
+                    projectileMasterList
+                );
+            }
+
+            if (entitySpawner == null)
+            {
+                entitySpawner = new WaveEntitySpawner(
+                    bossSpawnPoint,
+                    CanContinueWaves
+                );
+            }
+
+            if (entityTracker == null)
+            {
+                entityTracker = new WaveEntityTracker(
+                    CanCountWaveStats
+                );
+            }
+
+            if (waveEvaluator == null)
+            {
+                waveEvaluator = new WaveEvaluator();
+            }
+        }
+
+        private void ResolveBossSpawnPoint()
+        {
+            if (bossSpawnPoint != null)
+            {
+                return;
+            }
+
+            BossController boss = BossController.Instance;
+
+            if (boss != null)
+            {
+                bossSpawnPoint = boss.transform;
+            }
         }
 
         private IEnumerator WaveLoopRoutine()
         {
-            // Initial delay before the first wave
             yield return new WaitForSeconds(4f);
 
             if (!CanContinueWaves())
             {
-                _waveLoopRoutine = null;
+                waveLoopRoutine = null;
                 yield break;
             }
 
             while (CanContinueWaves())
             {
-                if (_isWaveActive)
+                if (isWaveActive)
                 {
                     yield return null;
                     continue;
                 }
 
-                // Always generate dynamic waves to ensure alternating pattern
-                WaveData currentWave = GenerateDynamicWave(currentWaveIndex, nextWaveType);
-                _currentDynamicWave = currentWave;
+                WaveData currentWave = dynamicWaveGenerator.Generate(
+                    currentWaveIndex,
+                    nextWaveType
+                );
 
-                // Toggle next wave type for the NEXT iteration
-                nextWaveType = (nextWaveType == WaveType.Combat) ? WaveType.Dodge : WaveType.Combat;
+                currentDynamicWave = currentWave;
 
-                _isWaveActive = true;
+                nextWaveType = nextWaveType == WaveType.Combat
+                    ? WaveType.Dodge
+                    : WaveType.Combat;
+
+                isWaveActive = true;
+
                 yield return StartCoroutine(PlayWave(currentWave));
-                _isWaveActive = false;
 
-                // Destroy the dynamically created WaveData asset to prevent leak
+                isWaveActive = false;
+
                 if (currentWave != null)
                 {
                     Destroy(currentWave);
                 }
 
-                if (_currentDynamicWave == currentWave)
+                if (currentDynamicWave == currentWave)
                 {
-                    _currentDynamicWave = null;
+                    currentDynamicWave = null;
                 }
 
                 if (!CanContinueWaves())
@@ -110,7 +187,6 @@ namespace ActiveSaga.BossFight.Waves
 
                 currentWaveIndex++;
 
-                // Buffer between waves
                 yield return new WaitForSeconds(2.0f);
 
                 if (!CanContinueWaves())
@@ -119,130 +195,50 @@ namespace ActiveSaga.BossFight.Waves
                 }
             }
 
-            _waveLoopRoutine = null;
-        }
-
-        [Header("Master Data (Dynamic Generator)")]
-        [SerializeField] private List<EnemyData> enemyMasterList;
-        [SerializeField] private List<ProjectileData> projectileMasterList;
-
-        private WaveData GenerateDynamicWave(int index, WaveType type)
-        {
-            WaveData dynamicWave = ScriptableObject.CreateInstance<WaveData>();
-            dynamicWave.waveName = $"Dynamic {type} Wave {index + 1}";
-            dynamicWave.waveType = type;
-            dynamicWave.steps = new List<WaveStep>();
-
-            float countMult = difficultyConfig != null ? difficultyConfig.GetCountMultiplier(index) : 1f;
-
-            // Boss Attack Start
-            dynamicWave.steps.Add(new WaveStep
-            {
-                type = WaveStep.StepType.BossAnimation,
-                animationTrigger = "Attack",
-                delayAfterStep = 1f
-            });
-
-            if (type == WaveType.Combat)
-            {
-                int enemyCount = Mathf.RoundToInt(3 * countMult);
-                for (int i = 0; i < enemyCount; i++)
-                {
-                    dynamicWave.steps.Add(new WaveStep
-                    {
-                        type = WaveStep.StepType.SpawnEnemy,
-                        enemyData = GetRandomEnemyData(),
-                        spawnOffset = new Vector3(Random.Range(-3f, 3f), 0, Random.Range(4f, 8f)),
-                        delayAfterStep = Random.Range(0.5f, 1.5f)
-                    });
-                }
-            }
-            else
-            {
-                // Cap the dodge wave projectiles
-                int baseCount = Random.Range(3, 6);
-                int projectileCount = Mathf.Clamp(Mathf.RoundToInt(baseCount * countMult), 3, 7);
-
-                for (int i = 0; i < projectileCount; i++)
-                {
-                    dynamicWave.steps.Add(new WaveStep
-                    {
-                        type = WaveStep.StepType.SpawnProjectile,
-                        projectileData = GetRandomProjectileData(),
-                        spawnOffset = new Vector3(Random.Range(-3f, 3f), 1f, Random.Range(3f, 6f)),
-                        delayAfterStep = Random.Range(0.8f, 1.5f)
-                    });
-                }
-            }
-
-            return dynamicWave;
-        }
-
-        private EnemyData GetRandomEnemyData()
-        {
-            if (enemyMasterList != null && enemyMasterList.Count > 0)
-            {
-                return enemyMasterList[Random.Range(0, enemyMasterList.Count)];
-            }
-
-            // Search existing configs as fallback
-            if (waveConfigs != null)
-            {
-                foreach (var config in waveConfigs)
-                {
-                    if (config == null || config.steps == null) continue;
-                    var step = config.steps.Find(s => s.enemyData != null);
-                    if (step != null) return step.enemyData;
-                }
-            }
-
-            return null;
-        }
-
-        private ProjectileData GetRandomProjectileData()
-        {
-            if (projectileMasterList != null && projectileMasterList.Count > 0)
-            {
-                return projectileMasterList[Random.Range(0, projectileMasterList.Count)];
-            }
-
-            if (waveConfigs != null)
-            {
-                foreach (var config in waveConfigs)
-                {
-                    if (config == null || config.steps == null) continue;
-                    var step = config.steps.Find(s => s.projectileData != null);
-                    if (step != null) return step.projectileData;
-                }
-            }
-
-            return null;
+            waveLoopRoutine = null;
         }
 
         private IEnumerator PlayWave(WaveData data)
         {
-            if (data == null) yield break;
+            if (data == null)
+            {
+                yield break;
+            }
 
             if (!CanContinueWaves())
             {
                 yield break;
             }
 
-            _totalSpawnedThisWave = 0;
-            _successfullyHandledThisWave = 0;
-            _playerHitCountThisWave = 0;
+            entityTracker.ResetWaveCounters();
 
             Debug.Log($"<color=cyan>Starting {data.waveType} Wave {currentWaveIndex + 1}: {data.waveName}</color>");
-            EventManager.Trigger(new WaveStartedEvent { waveIndex = currentWaveIndex + 1, name = data.waveName });
 
-            float speedMult = difficultyConfig != null ? difficultyConfig.GetSpeedMultiplier(currentWaveIndex) : 1f;
+            EventManager.Trigger(new WaveStartedEvent
+            {
+                waveIndex = currentWaveIndex + 1,
+                name = data.waveName
+            });
 
-            // Step A & B: Trigger Boss Animation and Wait for completion
-            var animationStep = data.steps.Find(s => s.type == WaveStep.StepType.BossAnimation);
+            float speedMult = difficultyConfig != null
+                ? difficultyConfig.GetSpeedMultiplier(currentWaveIndex)
+                : 1f;
+
+            if (speedMult <= 0f)
+            {
+                speedMult = 1f;
+            }
+
+            WaveStep animationStep = data.steps.Find(s => s.type == WaveStep.StepType.BossAnimation);
+
             if (animationStep != null)
             {
-                if (BossController.Instance != null) BossController.Instance.PlayAnimation(animationStep.animationTrigger);
-                yield return new WaitForSeconds(2.0f); // Giant@UnarmedAttack01 length
+                if (BossController.Instance != null)
+                {
+                    BossController.Instance.PlayAnimation(animationStep.animationTrigger);
+                }
+
+                yield return new WaitForSeconds(2.0f);
 
                 if (!CanContinueWaves())
                 {
@@ -250,17 +246,19 @@ namespace ActiveSaga.BossFight.Waves
                 }
             }
 
-            // Step C: Spawn the wave entities
-            foreach (var step in data.steps)
+            foreach (WaveStep step in data.steps)
             {
                 if (!CanContinueWaves())
                 {
                     yield break;
                 }
 
-                if (step.type == WaveStep.StepType.BossAnimation) continue;
+                if (step.type == WaveStep.StepType.BossAnimation)
+                {
+                    continue;
+                }
 
-                ExecuteStep(step, speedMult);
+                entitySpawner.ExecuteStep(step, speedMult);
 
                 yield return new WaitForSeconds(step.delayAfterStep / speedMult);
 
@@ -270,7 +268,6 @@ namespace ActiveSaga.BossFight.Waves
                 }
             }
 
-            // Step D: WAIT COMPLETELY until ALL spawned entities are destroyed, deflected, or despawned
             float timeout = 45f;
             float timer = 0f;
 
@@ -281,14 +278,13 @@ namespace ActiveSaga.BossFight.Waves
                     yield break;
                 }
 
-                // If we've spawned things and the arena is now clear
-                if (_totalSpawnedThisWave > 0 && _activeEntities.Count == 0)
+                if (entityTracker.TotalSpawnedThisWave > 0 &&
+                    entityTracker.ActiveEntitiesCount == 0)
                 {
                     break;
                 }
 
-                // If nothing was spawned (unlikely but safe)
-                if (_totalSpawnedThisWave == 0 && timer > 2f)
+                if (entityTracker.TotalSpawnedThisWave == 0 && timer > 2f)
                 {
                     break;
                 }
@@ -302,9 +298,9 @@ namespace ActiveSaga.BossFight.Waves
                 yield break;
             }
 
-            if (_activeEntities.Count > 0)
+            if (entityTracker.ActiveEntitiesCount > 0)
             {
-                ForceClearActiveEntities();
+                entityTracker.ForceClearActiveEntities();
             }
 
             if (!CanContinueWaves())
@@ -312,61 +308,42 @@ namespace ActiveSaga.BossFight.Waves
                 yield break;
             }
 
-            bool waveSuccess = EvaluateWave(data);
+            bool waveSuccess = waveEvaluator.EvaluateWave(
+                data,
+                entityTracker.TotalSpawnedThisWave,
+                entityTracker.SuccessfullyHandledThisWave,
+                entityTracker.PlayerHitCountThisWave
+            );
 
             Debug.Log($"Wave {currentWaveIndex + 1} Cleared.");
-            EventManager.Trigger(new WaveCompletedEvent { success = waveSuccess });
-        }
 
-        private bool EvaluateWave(WaveData data)
-        {
-            Debug.Log($"EvaluateWave called for {data.waveName}. Total Spawned: {_totalSpawnedThisWave}, Successfully Handled: {_successfullyHandledThisWave}");
-
-            if (_totalSpawnedThisWave == 0) return false;
-
-            float successRate = (float)_successfullyHandledThisWave / _totalSpawnedThisWave;
-            bool success = successRate >= 0.7f;
-
-            Debug.Log($"Wave {data.waveType} Result: Handled {_successfullyHandledThisWave}/{_totalSpawnedThisWave} ({successRate:P0}). Hit: {_playerHitCountThisWave}");
-
-            if (success)
+            EventManager.Trigger(new WaveCompletedEvent
             {
-                Debug.Log("<color=green>Wave Success! Damaging Boss.</color>");
-                if (BossController.Instance != null)
-                {
-                    BossController.Instance.TakeDamage(100f);
-                }
-                else
-                {
-                    Debug.LogError("[WaveManager] CANNOT DAMAGE BOSS: BossController.Instance is NULL!");
-                }
-            }
-            else
-            {
-                Debug.Log("<color=red>Wave Failed. No Boss damage.</color>");
-            }
-
-            return success;
+                success = waveSuccess
+            });
         }
 
         public void StopWavesAfterGameEnded()
         {
             Debug.Log("<color=orange>[WaveManager] Stopping waves because game ended.</color>");
 
-            if (_waveLoopRoutine != null)
+            if (waveLoopRoutine != null)
             {
-                StopCoroutine(_waveLoopRoutine);
-                _waveLoopRoutine = null;
+                StopCoroutine(waveLoopRoutine);
+                waveLoopRoutine = null;
             }
 
-            _isWaveActive = false;
+            isWaveActive = false;
 
-            ForceClearActiveEntitiesWithoutStats();
-
-            if (_currentDynamicWave != null)
+            if (entityTracker != null)
             {
-                Destroy(_currentDynamicWave);
-                _currentDynamicWave = null;
+                entityTracker.ForceClearActiveEntitiesWithoutStats();
+            }
+
+            if (currentDynamicWave != null)
+            {
+                Destroy(currentDynamicWave);
+                currentDynamicWave = null;
             }
         }
 
@@ -377,265 +354,22 @@ namespace ActiveSaga.BossFight.Waves
                 return true;
             }
 
-            return GameSessionManager.Instance.State == GameSessionState.Running;
+            GameSessionState state = GameSessionManager.Instance.State;
+
+            return state != GameSessionState.WaitingForServer &&
+                   state != GameSessionState.Ended;
         }
 
-        private void ForceClearActiveEntitiesWithoutStats()
+        private bool CanCountWaveStats()
         {
-            if (_activeEntities.Count == 0)
-            {
-                return;
-            }
-
-            Debug.Log($"<color=orange>[WaveManager] Force clearing {_activeEntities.Count} entities without adding stats.</color>");
-
-            List<GameObject> toClear = new List<GameObject>(_activeEntities);
-
-            foreach (GameObject obj in toClear)
-            {
-                if (obj == null)
-                {
-                    continue;
-                }
-
-                obj.SetActive(false);
-            }
-
-            _activeEntities.Clear();
-        }
-
-        private void ForceClearActiveEntities()
-        {
-            Debug.Log($"<color=orange>Force clearing {_activeEntities.Count} entities.</color>");
-            List<GameObject> toClear = new List<GameObject>(_activeEntities);
-            foreach (var obj in toClear)
-            {
-                if (obj == null) continue;
-
-                var enemy = obj.GetComponent<EnemyController>();
-                if (enemy != null)
-                {
-                    enemy.Despawn(false);
-                    continue;
-                }
-
-                var proj = obj.GetComponent<ProjectileController>();
-                if (proj != null)
-                {
-                    proj.Despawn();
-                    continue;
-                }
-
-                obj.SetActive(false);
-            }
-
-            _activeEntities.Clear();
-        }
-
-        private void ExecuteStep(WaveStep step, float speedMultiplier)
-        {
-            if (step == null) return;
-
-            if (!CanContinueWaves())
-            {
-                return;
-            }
-
-            switch (step.type)
-            {
-                case WaveStep.StepType.SpawnEnemy:
-                    SpawnEnemy(step.enemyData, step.spawnOffset, speedMultiplier);
-                    break;
-                case WaveStep.StepType.SpawnProjectile:
-                    SpawnProjectile(step.projectileData, step.spawnOffset, speedMultiplier);
-                    break;
-                case WaveStep.StepType.BossAnimation:
-                    if (BossController.Instance != null) BossController.Instance.PlayAnimation(step.animationTrigger);
-                    break;
-            }
-        }
-
-        private void SpawnEnemy(EnemyData data, Vector3 offset, float speedMultiplier)
-        {
-            if (!CanContinueWaves())
-            {
-                return;
-            }
-
-            if (data == null || PoolManager.Instance == null || bossSpawnPoint == null) return;
-
-            Vector3 basePos = bossSpawnPoint.position;
-            Vector3 forward = Vector3.forward;
-
-            if (BossFightGameManager.Instance != null && BossFightGameManager.Instance.PlayerTransform != null)
-            {
-                forward = (BossFightGameManager.Instance.PlayerTransform.position - basePos).normalized;
-                forward.y = 0;
-            }
-
-            Vector3 right = Vector3.Cross(Vector3.up, forward);
-
-            // Calculate spawn position in front of the boss, based on the player's direction
-            Vector3 spawnPos = basePos + (forward * offset.z) + (right * offset.x) + (Vector3.up * offset.y);
-            Quaternion spawnRot = Quaternion.LookRotation(forward);
-
-            GameObject enemy = PoolManager.Instance.SpawnFromPool(data.enemyName, spawnPos, spawnRot, true);
-            if (enemy != null)
-            {
-                _totalSpawnedThisWave++;
-                var controller = enemy.GetComponent<EnemyController>();
-                if (controller != null) controller.Initialize(data, speedMultiplier);
-            }
-        }
-
-        private void SpawnProjectile(ProjectileData data, Vector3 offset, float speedMultiplier)
-        {
-            if (!CanContinueWaves())
-            {
-                return;
-            }
-
-            if (data == null)
-            {
-                Debug.LogError("SpawnProjectile FAILED: ProjectileData is NULL!");
-                return;
-            }
-
-            if (PoolManager.Instance == null || bossSpawnPoint == null)
-                return;
-
-            Vector3 basePos = bossSpawnPoint.position;
-            bool hasPlayer = BossFightGameManager.Instance?.PlayerTransform != null;
-
-            Vector3 playerPos = hasPlayer
-                ? BossFightGameManager.Instance.PlayerTransform.position
-                : basePos + Vector3.forward * 5f;
-
-            // ---------------------------
-            // 2-Zone Targeting System (Legs & Head)
-            // ---------------------------
-            bool isHeadTarget = Random.value > 0.5f;
-
-            // Adjust these values to fine-tune the physical heights in VR.
-            // 0.9f for legs, 1.6f is average head height.
-            float targetHeight = isHeadTarget ? 3.0f : 0.9f;
-
-            // Base the height on the player's floor level for accuracy
-            float floorY = hasPlayer ? BossFightGameManager.Instance.PlayerTransform.position.y : basePos.y;
-
-            Vector3 targetPos = playerPos;
-            targetPos.y = floorY + targetHeight;
-
-            // Force the spawn position to start at the exact same height
-            // so the projectile flies perfectly straight, not diagonally downwards.
-            Vector3 spawnStartPos = basePos;
-            spawnStartPos.y = floorY + targetHeight;
-
-            Vector3 direction = (targetPos - spawnStartPos).normalized;
-            if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
-
-            Vector3 right = Vector3.Cross(Vector3.up, direction).normalized;
-            if (right.sqrMagnitude < 0.001f) right = Vector3.right;
-
-            // Apply the X and Z offsets for spread, but ignore the wave's Y offset
-            // to maintain strict horizontal flight at the target height.
-            Vector3 spawnPos =
-                spawnStartPos +
-                direction * offset.z +
-                right * offset.x;
-
-            Quaternion spawnRot = Quaternion.LookRotation(direction);
-
-            GameObject projectile = PoolManager.Instance.SpawnFromPool(
-                data.projectileName,
-                spawnPos,
-                spawnRot,
-                false
-            );
-
-            if (projectile == null)
-            {
-                Debug.LogError($"Pool returned NULL for {data.projectileName}");
-                return;
-            }
-
-            _totalSpawnedThisWave++;
-
-            var controller = projectile.GetComponent<ProjectileController>();
-
-            if (controller == null)
-            {
-                Debug.LogError($"Missing ProjectileController on {projectile.name}");
-                return;
-            }
-
-            controller.Initialize(data, speedMultiplier);
-        }
-
-        private void OnEntitySpawned(EnemySpawnedEvent e)
-        {
-            if (!CanContinueWaves())
-            {
-                return;
-            }
-
-            if (e.enemy != null && !_activeEntities.Contains(e.enemy))
-            {
-                _activeEntities.Add(e.enemy);
-            }
-        }
-
-        private void OnEntitySpawned(ProjectileSpawnedEvent e)
-        {
-            if (!CanContinueWaves())
-            {
-                return;
-            }
-
-            if (e.projectile != null && !_activeEntities.Contains(e.projectile))
-            {
-                _activeEntities.Add(e.projectile);
-            }
-        }
-
-        private void OnEnemyDespawned(EnemyDespawnedEvent e)
-        {
-            if (e.enemy != null)
-            {
-                _activeEntities.Remove(e.enemy);
-
-                if (!CanContinueWaves())
-                {
-                    return;
-                }
-
-                if (e.wasKilledByPlayer) _successfullyHandledThisWave++;
-                else _playerHitCountThisWave++;
-            }
-        }
-
-        private void OnProjectileDespawned(ProjectileDespawnedEvent e)
-        {
-            if (e.projectile != null)
-            {
-                _activeEntities.Remove(e.projectile);
-
-                if (!CanContinueWaves())
-                {
-                    return;
-                }
-
-                if (e.wasDodged) _successfullyHandledThisWave++;
-                else if (e.wasHitPlayer) _playerHitCountThisWave++;
-            }
+            return CanContinueWaves();
         }
 
         private void Update()
         {
-            if (Time.frameCount % 30 == 0 && _activeEntities.Count > 0)
+            if (Time.frameCount % 30 == 0 && entityTracker != null)
             {
-                // Safety cleanup for destroyed or inactive objects
-                _activeEntities.RemoveWhere(item => item == null || !item.activeInHierarchy);
+                entityTracker.CleanupInactiveEntities();
             }
         }
 
