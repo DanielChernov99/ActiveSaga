@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using ActiveSaga.Common.GameSession;
 using ActiveSaga.BossFight.Core;
 
 namespace ActiveSaga.BossFight.Entities
@@ -9,8 +11,10 @@ namespace ActiveSaga.BossFight.Entities
 
         [SerializeField] private Animator animator;
         [SerializeField] private float maxHP = 1000f;
-        
+        [SerializeField] private float gameWonDelaySeconds = 2f;
+
         private float currentHP;
+        private bool gameWonTriggered;
 
         private void Awake()
         {
@@ -26,14 +30,23 @@ namespace ActiveSaga.BossFight.Entities
                 return;
             }
 
-            if (animator == null) animator = GetComponent<Animator>();
+            if (animator == null)
+            {
+                animator = GetComponent<Animator>();
+            }
+
             currentHP = maxHP;
+            gameWonTriggered = false;
         }
 
         private void Start()
         {
-            // Initial UI sync
-            EventManager.Trigger(new HealthChangedEvent { current = currentHP, max = maxHP, isPlayer = false });
+            EventManager.Trigger(new HealthChangedEvent
+            {
+                current = currentHP,
+                max = maxHP,
+                isPlayer = false
+            });
         }
 
         private void OnDestroy()
@@ -47,22 +60,35 @@ namespace ActiveSaga.BossFight.Entities
 
         public void TakeDamage(float amount)
         {
-            if (currentHP <= 0) return;
+            if (gameWonTriggered)
+            {
+                return;
+            }
+
+            if (currentHP <= 0f)
+            {
+                return;
+            }
 
             float oldHP = currentHP;
+
             currentHP -= amount;
-            if (currentHP < 0) currentHP = 0;
+
+            if (currentHP < 0f)
+            {
+                currentHP = 0f;
+            }
 
             Debug.Log($"[BossController] Damage Received: {amount}. HP: {oldHP} -> {currentHP} / {maxHP}");
 
-            EventManager.Trigger(new HealthChangedEvent 
-            { 
-                current = currentHP, 
-                max = maxHP, 
-                isPlayer = false 
+            EventManager.Trigger(new HealthChangedEvent
+            {
+                current = currentHP,
+                max = maxHP,
+                isPlayer = false
             });
-            
-            if (currentHP <= 0)
+
+            if (currentHP <= 0f)
             {
                 OnBossDefeated();
             }
@@ -70,8 +96,32 @@ namespace ActiveSaga.BossFight.Entities
 
         private void OnBossDefeated()
         {
+            if (gameWonTriggered)
+            {
+                return;
+            }
+
+            gameWonTriggered = true;
+
             Debug.Log("<color=red>[BossController] Boss Defeated!</color>");
+
             PlayAnimation("Die");
+
+            StartCoroutine(EndGameAsWonAfterDelay());
+        }
+
+        private IEnumerator EndGameAsWonAfterDelay()
+        {
+            yield return new WaitForSecondsRealtime(gameWonDelaySeconds);
+
+            if (GameSessionManager.Instance != null)
+            {
+                GameSessionManager.Instance.EndGameAsGameWon();
+            }
+            else
+            {
+                Debug.LogError("[BossController] Cannot end game as won because GameSessionManager.Instance is null.");
+            }
         }
 
         public void PlayAnimation(string trigger)
