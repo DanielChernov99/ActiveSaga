@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeightCalibration
   bodyTracker: {fileID: 53213601}
-  calibrationDelay: 3
+  calibrationDelay: 2
 --- !u!114 &53213601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3488,7 +3488,7 @@ MonoBehaviour:
   - {fileID: 1968548409253442988, guid: 7f8a43676f520aa4ab3c0523622b6696, type: 3}
   - {fileID: 3436237458793784669, guid: 6603668f625acf548a3f0b3a1ec5bf9b, type: 3}
   - {fileID: 3436237458793784669, guid: 6603668f625acf548a3f0b3a1ec5bf9b, type: 3}
-  tilesOnScreen: 4
+  tilesOnScreen: 3
   tileLength: 400
 --- !u!1001 &1886457467
 PrefabInstance:
