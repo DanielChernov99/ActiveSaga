@@ -2544,6 +2544,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4675105466496168, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
   m_PrefabInstance: {fileID: 512608914}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &523013874 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1680501587, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+  m_PrefabInstance: {fileID: 1629309576}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &530941857
 GameObject:
   m_ObjectHideFlags: 0
@@ -5648,17 +5653,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Core.PoolManager
   poolConfigs:
-  - name: RedSkeleton
-    prefab: {fileID: 3133576792547481104, guid: 27d43c05de8490d43a2f0850d925a2e4, type: 3}
-    initialSize: 5
-  - name: BlueSkeleton
-    prefab: {fileID: 748439340640669337, guid: 71736da07ef3043429500b7217583317, type: 3}
-    initialSize: 5
   - name: RockProjectile
     prefab: {fileID: 7468498409537363837, guid: 312d12ce3d0867644ba3bd4a5d8f39ec, type: 3}
     initialSize: 5
   - name: DodgeLog
     prefab: {fileID: 2823921433092028349, guid: 7d59b1c3396aabd429beff6fbf400088, type: 3}
+    initialSize: 5
+  - name: Enemy_SkeletonMage
+    prefab: {fileID: 5716363623977720288, guid: 5ff14458dfbb75a48848e53c4879c33a, type: 3}
+    initialSize: 5
+  - name: Enemy_SkeletonMinion
+    prefab: {fileID: 2704903964718341995, guid: 693af0c8af3d1104f8fa41bef7abde34, type: 3}
+    initialSize: 5
+  - name: Enemy_SkeletonRouge
+    prefab: {fileID: 5321068525605618586, guid: c64770e5afa3bb7468c658306621b2db, type: 3}
+    initialSize: 5
+  - name: Enemy_SkeletonWarrior
+    prefab: {fileID: 2589283267966640905, guid: 88da55af9aea9154db0060d7e4e93a1a, type: 3}
     initialSize: 5
 --- !u!1 &1141451815
 GameObject:
@@ -5764,8 +5775,10 @@ MonoBehaviour:
   currentWaveIndex: 0
   nextWaveType: 0
   enemyMasterList:
-  - {fileID: 11400000, guid: 375e69f26be4cf34ca021edbbcff1aeb, type: 2}
-  - {fileID: 11400000, guid: 1e8140f8302969c488a45b2476a60e10, type: 2}
+  - {fileID: 11400000, guid: fcd7ed511fcedc0479f5d3807c338cc3, type: 2}
+  - {fileID: 11400000, guid: ba6321d3d1fe09f4998cd0cbfdb6ef01, type: 2}
+  - {fileID: 11400000, guid: e01b7b62377655e4b8d2d2b8a666612d, type: 2}
+  - {fileID: 11400000, guid: d19189a12b3602245ad5897a205d4505, type: 2}
   projectileMasterList:
   - {fileID: 11400000, guid: 20c5aa0e5c4664c4f8a755049df0e269, type: 2}
   - {fileID: 11400000, guid: 649a124ef771c0f41bbddbf69e8d628f, type: 2}
@@ -7921,8 +7934,8 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1270092956}
-    - targetCorrespondingSourceObject: {fileID: 1767192434, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
-      insertIndex: -1
+    - targetCorrespondingSourceObject: {fileID: 1680501587, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      insertIndex: 0
       addedObject: {fileID: 1719168098}
     - targetCorrespondingSourceObject: {fileID: 202364688, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       insertIndex: -1
@@ -8103,15 +8116,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1719168097}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1629309580}
+  m_Father: {fileID: 523013874}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &1719168099
-SphereCollider:
+--- !u!136 &1719168099
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -8125,12 +8138,14 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.26365754
-  m_Center: {x: -0.06365752, y: 0, z: 0}
+  serializedVersion: 2
+  m_Radius: 0.35
+  m_Height: 1.6
+  m_Direction: 1
+  m_Center: {x: 0, y: -0.5668776, z: 0}
 --- !u!1 &1816184005
 GameObject:
   m_ObjectHideFlags: 0
