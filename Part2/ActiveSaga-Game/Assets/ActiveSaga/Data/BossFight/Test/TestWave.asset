@@ -22,19 +22,19 @@ MonoBehaviour:
     delayAfterStep: 1
     spawnOffset: {x: 0, y: 0, z: 0}
   - type: 0
-    enemyData: {fileID: 11400000, guid: 1e8140f8302969c488a45b2476a60e10, type: 2}
+    enemyData: {fileID: 11400000, guid: ba6321d3d1fe09f4998cd0cbfdb6ef01, type: 2}
     projectileData: {fileID: 0}
     animationTrigger: 
     delayAfterStep: 1
     spawnOffset: {x: -2, y: 0, z: 15}
   - type: 0
-    enemyData: {fileID: 11400000, guid: 375e69f26be4cf34ca021edbbcff1aeb, type: 2}
+    enemyData: {fileID: 11400000, guid: e01b7b62377655e4b8d2d2b8a666612d, type: 2}
     projectileData: {fileID: 0}
     animationTrigger: 
     delayAfterStep: 1
     spawnOffset: {x: 0, y: 0, z: 15}
   - type: 0
-    enemyData: {fileID: 11400000, guid: 1e8140f8302969c488a45b2476a60e10, type: 2}
+    enemyData: {fileID: 11400000, guid: d19189a12b3602245ad5897a205d4505, type: 2}
     projectileData: {fileID: 0}
     animationTrigger: 
     delayAfterStep: 2

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d757e74082e140c4a804a42476a5deb6, type: 3}
+  m_Name: Enemy_SkeletonMageData
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Data.EnemyData
+  enemyName: Enemy_SkeletonMage
+  prefab: {fileID: 5716363623977720288, guid: 5ff14458dfbb75a48848e53c4879c33a, type: 3}
+  enemyColor: {r: 1, g: 1, b: 1, a: 1}
+  health: 1
+  moveSpeed: 5
+  scoreValue: 100
+  requiredHand: 0
+  requiredDirection: 0
+  velocityThreshold: 1
+  deathVFX: {fileID: 0}
+  deathSFX: {fileID: 0}
+  spawnSFX: {fileID: 0}

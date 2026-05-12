@@ -12,8 +12,12 @@ namespace ActiveSaga.BossFight.Entities
         [Header("State")]
         [SerializeField] private EnemyState currentState = EnemyState.Idle;
 
+        [Header("Animation")]
+        [SerializeField] private string walkStateName = "Walk";
+
         private EnemyData data;
         private Rigidbody rb;
+        private Animator animator;
 
         private bool isInitialized;
         private bool wasKilledByPlayer;
@@ -24,53 +28,51 @@ namespace ActiveSaga.BossFight.Entities
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
+            animator = GetComponentInChildren<Animator>();
+
+            ConfigureRigidbody();
+        }
+
+        private void ConfigureRigidbody()
+        {
+            if (rb == null)
+                return;
 
             rb.useGravity = false;
-            rb.constraints = RigidbodyConstraints.FreezeRotation;
             rb.isKinematic = false;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+
+            rb.constraints =
+                RigidbodyConstraints.FreezePositionY |
+                RigidbodyConstraints.FreezeRotationX |
+                RigidbodyConstraints.FreezeRotationY |
+                RigidbodyConstraints.FreezeRotationZ;
         }
 
         public void Initialize(EnemyData enemyData, float speedMultiplier = 1f)
         {
             if (enemyData == null)
+            {
+                Debug.LogError($"EnemyController on {gameObject.name}: EnemyData is null.");
                 return;
+            }
 
             data = enemyData;
             isInitialized = true;
             wasKilledByPlayer = false;
-
             currentState = EnemyState.Moving;
 
             float finalSpeed = data.moveSpeed * speedMultiplier;
+
             if (finalSpeed <= 0f)
                 finalSpeed = 5f;
 
             currentSpeed = finalSpeed;
 
-            // Calculate direction ONCE only
-            Vector3 targetPosition = transform.position + transform.forward * 20f;
-
-            if (BossFightGameManager.Instance != null &&
-                BossFightGameManager.Instance.PlayerTransform != null)
-            {
-                targetPosition =
-                    BossFightGameManager.Instance.PlayerTransform.position;
-                targetPosition.y = transform.position.y;
-            }
-
-            moveDirection =
-                (targetPosition - transform.position).normalized;
-
-            if (moveDirection.sqrMagnitude < 0.001f)
-                moveDirection = transform.forward;
-
-            transform.rotation = Quaternion.LookRotation(moveDirection);
-
-            // Reset physics
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            rb.WakeUp();
+            CalculateMoveDirection();
+            ResetPhysics();
+            PlayWalkAnimation();
 
             EventManager.Trigger(new EnemySpawnedEvent
             {
@@ -78,7 +80,65 @@ namespace ActiveSaga.BossFight.Entities
             });
 
             CancelInvoke(nameof(DespawnDueToLifetime));
-           
+        }
+
+        private void CalculateMoveDirection()
+        {
+            Vector3 targetPosition = transform.position + transform.forward * 20f;
+
+            if (BossFightGameManager.Instance != null &&
+                BossFightGameManager.Instance.PlayerTransform != null)
+            {
+                targetPosition = BossFightGameManager.Instance.PlayerTransform.position;
+                targetPosition.y = transform.position.y;
+            }
+
+            moveDirection = targetPosition - transform.position;
+            moveDirection.y = 0f;
+
+            if (moveDirection.sqrMagnitude < 0.001f)
+            {
+                moveDirection = transform.forward;
+                moveDirection.y = 0f;
+            }
+
+            moveDirection.Normalize();
+
+            if (moveDirection.sqrMagnitude > 0.001f)
+            {
+                transform.rotation = Quaternion.LookRotation(moveDirection);
+            }
+        }
+
+        private void ResetPhysics()
+        {
+            if (rb == null)
+                return;
+
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            ConfigureRigidbody();
+
+            rb.WakeUp();
+        }
+
+        private void PlayWalkAnimation()
+        {
+            if (animator == null)
+            {
+                Debug.LogWarning($"EnemyController on {gameObject.name}: No Animator found in children.");
+                return;
+            }
+
+            animator.enabled = true;
+            animator.Rebind();
+            animator.Update(0f);
+
+            if (!string.IsNullOrEmpty(walkStateName))
+            {
+                animator.Play(walkStateName, 0, 0f);
+            }
         }
 
         private void FixedUpdate()
@@ -89,10 +149,11 @@ namespace ActiveSaga.BossFight.Entities
             if (currentState != EnemyState.Moving)
                 return;
 
-            // Move ONLY in the original direction
             Vector3 newPosition =
                 rb.position +
                 moveDirection * currentSpeed * Time.fixedDeltaTime;
+
+            newPosition.y = rb.position.y;
 
             rb.MovePosition(newPosition);
         }
@@ -102,7 +163,6 @@ namespace ActiveSaga.BossFight.Entities
             if (!isInitialized)
                 return;
 
-            // Sword kills enemy
             if (other.CompareTag("Sword") ||
                 other.CompareTag("Weapon"))
             {
@@ -119,8 +179,15 @@ namespace ActiveSaga.BossFight.Entities
         private void OnDisable()
         {
             CancelInvoke(nameof(DespawnDueToLifetime));
+
             isInitialized = false;
             currentState = EnemyState.Idle;
+
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
         }
 
         public void Despawn(bool killedByPlayer)
@@ -135,8 +202,11 @@ namespace ActiveSaga.BossFight.Entities
             currentState = EnemyState.Dead;
             wasKilledByPlayer = killedByPlayer;
 
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
 
             EventManager.Trigger(new EnemyDespawnedEvent
             {
@@ -144,7 +214,7 @@ namespace ActiveSaga.BossFight.Entities
                 wasKilledByPlayer = killedByPlayer
             });
 
-            if (PoolManager.Instance != null)
+            if (PoolManager.Instance != null && data != null)
             {
                 PoolManager.Instance.ReturnToPool(
                     gameObject,
