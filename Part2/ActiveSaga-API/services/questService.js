@@ -129,36 +129,40 @@ function updateDailyQuestProgress(profile, gameResult, gameRewards) {
             continue;
         }
 
-        const increment = getQuestProgressIncrement(
+        const sessionValue = getQuestProgressIncrement(
             quest,
             gameResult,
             gameRewards
         );
 
-        if (increment <= 0) {
+        if (sessionValue <= 0) {
             continue;
         }
 
-        questEntry.currentProgress += increment;
         questEntry.lastUpdated = new Date();
 
-        if (questEntry.currentProgress >= quest.goalValue) {
-            questEntry.currentProgress = quest.goalValue;
-            questEntry.isCompleted = true;
+        const completedInThisSession = sessionValue >= quest.goalValue;
 
-            profile.xp += quest.xpReward;
-            profile.coins += quest.coinsReward;
-
-            questXpEarned += quest.xpReward;
-            questCoinsEarned += quest.coinsReward;
-
-            completedQuests.push({
-                questId: quest._id,
-                title: quest.title,
-                xpReward: quest.xpReward,
-                coinsReward: quest.coinsReward
-            });
+        if (!completedInThisSession) {
+            questEntry.currentProgress = 0;
+            continue;
         }
+
+        questEntry.currentProgress = quest.goalValue;
+        questEntry.isCompleted = true;
+
+        profile.xp += quest.xpReward;
+        profile.coins += quest.coinsReward;
+
+        questXpEarned += quest.xpReward;
+        questCoinsEarned += quest.coinsReward;
+
+        completedQuests.push({
+            questId: quest._id,
+            title: quest.title,
+            xpReward: quest.xpReward,
+            coinsReward: quest.coinsReward
+        });
     }
 
     return {
