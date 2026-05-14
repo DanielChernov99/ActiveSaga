@@ -21,7 +21,10 @@ namespace ActiveSaga.Common.GameSession
 
         [Header("UI")]
         [SerializeField] private GameObject gameplayHUD;
+        [SerializeField] private GameObject pausePanel;
+        [SerializeField] private bool hideGameplayHUDWhilePaused = false;
         [SerializeField] private EndGameResultsViewBase resultsUI;
+
         private IGameResultSubmitter gameResultSubmitter;
 
         private string sessionId;
@@ -30,11 +33,15 @@ namespace ActiveSaga.Common.GameSession
         private float startedRealtime;
         private float pausedStartedRealtime;
         private float totalPausedSeconds;
+        private bool gameplayTimerStarted;
 
         private GameSessionState state = GameSessionState.NotStarted;
 
         public GameSessionState State => state;
         public GameType GameType => gameType;
+
+        public bool IsRunning => state == GameSessionState.Running;
+        public bool IsPaused => state == GameSessionState.Paused;
 
         private void Awake()
         {
@@ -51,9 +58,20 @@ namespace ActiveSaga.Common.GameSession
 
         private void Start()
         {
+            SetActive(pausePanel, false);
+
             if (startSessionOnStart)
             {
                 StartSession();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+                Time.timeScale = 1f;
             }
         }
 
@@ -112,6 +130,7 @@ namespace ActiveSaga.Common.GameSession
             startedRealtime = Time.realtimeSinceStartup;
             pausedStartedRealtime = 0f;
             totalPausedSeconds = 0f;
+            gameplayTimerStarted = false;
 
             if (statsTracker != null)
             {
@@ -124,10 +143,8 @@ namespace ActiveSaga.Common.GameSession
 
             ResolveSubmitter();
 
-            if (gameplayHUD != null)
-            {
-                gameplayHUD.SetActive(true);
-            }
+            SetActive(gameplayHUD, true);
+            SetActive(pausePanel, false);
 
             if (resultsUI != null)
             {
@@ -137,6 +154,38 @@ namespace ActiveSaga.Common.GameSession
             state = GameSessionState.Running;
 
             Debug.Log("Game Session Started: " + gameType + ", Session ID: " + sessionId);
+        }
+
+        public void StartGameplayTimerIfNeeded()
+        {
+            if (gameplayTimerStarted)
+            {
+                return;
+            }
+
+            gameplayTimerStarted = true;
+
+            startedRealtime = Time.realtimeSinceStartup;
+            startedUtc = DateTime.UtcNow.ToString("o");
+
+            pausedStartedRealtime = 0f;
+            totalPausedSeconds = 0f;
+
+            Debug.Log("Gameplay timer started.");
+        }
+
+        public void TogglePauseGame()
+        {
+            if (state == GameSessionState.Running)
+            {
+                PauseGame();
+                return;
+            }
+
+            if (state == GameSessionState.Paused)
+            {
+                ResumeGame();
+            }
         }
 
         public void PauseGame()
@@ -150,6 +199,13 @@ namespace ActiveSaga.Common.GameSession
             state = GameSessionState.Paused;
 
             Time.timeScale = 0f;
+
+            if (hideGameplayHUDWhilePaused)
+            {
+                SetActive(gameplayHUD, false);
+            }
+
+            SetActive(pausePanel, true);
 
             Debug.Log("Game Paused");
         }
@@ -166,6 +222,9 @@ namespace ActiveSaga.Common.GameSession
 
             Time.timeScale = 1f;
             state = GameSessionState.Running;
+
+            SetActive(gameplayHUD, true);
+            SetActive(pausePanel, false);
 
             Debug.Log("Game Resumed");
         }
@@ -189,6 +248,8 @@ namespace ActiveSaga.Common.GameSession
             }
 
             Time.timeScale = 1f;
+
+            SetActive(pausePanel, false);
 
             float durationSeconds = CalculateActiveDurationSeconds();
 
@@ -220,10 +281,7 @@ namespace ActiveSaga.Common.GameSession
 
             state = GameSessionState.WaitingForServer;
 
-            if (gameplayHUD != null)
-            {
-                gameplayHUD.SetActive(false);
-            }
+            SetActive(gameplayHUD, false);
 
             if (resultsUI != null)
             {
@@ -324,15 +382,17 @@ namespace ActiveSaga.Common.GameSession
 
         public float GetActiveDurationSeconds()
         {
-            if (state == GameSessionState.NotStarted)
+            if (state == GameSessionState.NotStarted || !gameplayTimerStarted)
             {
                 return 0f;
             }
 
             if (state == GameSessionState.Paused)
             {
-                float pausedDuration = pausedStartedRealtime - startedRealtime - totalPausedSeconds;
-                return Mathf.Max(0f, pausedDuration);
+                float activeDurationUntilPause =
+                    pausedStartedRealtime - startedRealtime - totalPausedSeconds;
+
+                return Mathf.Max(0f, activeDurationUntilPause);
             }
 
             return CalculateActiveDurationSeconds();
@@ -340,9 +400,22 @@ namespace ActiveSaga.Common.GameSession
 
         private float CalculateActiveDurationSeconds()
         {
+            if (!gameplayTimerStarted)
+            {
+                return 0f;
+            }
+
             float now = Time.realtimeSinceStartup;
             float activeDuration = now - startedRealtime - totalPausedSeconds;
             return Mathf.Max(0f, activeDuration);
+        }
+
+        private void SetActive(GameObject target, bool active)
+        {
+            if (target != null)
+            {
+                target.SetActive(active);
+            }
         }
     }
 }

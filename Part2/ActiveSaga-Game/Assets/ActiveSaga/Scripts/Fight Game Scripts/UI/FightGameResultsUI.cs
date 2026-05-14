@@ -1,3 +1,5 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using ActiveSaga.Common.GameSession;
 using ActiveSaga.Common.UI;
 
@@ -5,6 +7,30 @@ namespace ActiveSaga.FightGame
 {
     public class FightGameResultsUI : EndGameResultsViewBase
     {
+        [Header("Finish Game")]
+        [SerializeField] private string mainSceneName = "Main New";
+
+        private bool finishGameClicked;
+
+        public void FinishGame()
+        {
+            if (finishGameClicked)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(mainSceneName))
+            {
+                Debug.LogError("FightGameResultsUI: Main scene name is empty.");
+                return;
+            }
+
+            finishGameClicked = true;
+
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(mainSceneName);
+        }
+
         protected override void BuildGameSpecificStats(
             GameStatsSnapshot statsSnapshot,
             out ResultStat stat1,
