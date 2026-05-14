@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.XR;
 
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+
 namespace ActiveSaga.Common.GameSession
 {
     public class PauseInputController : MonoBehaviour
@@ -8,16 +12,25 @@ namespace ActiveSaga.Common.GameSession
         [Header("Keyboard Testing")]
         [SerializeField] private bool useEscapeKey = true;
 
-        [Header("XR Controller")]
+        [Header("Quest 3 Controller")]
         [SerializeField] private bool useXRControllerButton = true;
+
+        [Tooltip("Quest 3 A button is on the right controller.")]
         [SerializeField] private bool checkRightHand = true;
-        [SerializeField] private bool checkLeftHand = true;
-        [SerializeField] private bool useMenuButton = true;
-        [SerializeField] private bool usePrimaryButton = false;
+
+        [SerializeField] private bool checkLeftHand = false;
+
+        [Header("Quest 3 Button Mapping")]
+        [Tooltip("Quest 3 right controller A button = Primary Button.")]
+        [SerializeField] private bool usePrimaryButton = true;
+
+        [Tooltip("Quest 3 right controller B button = Secondary Button.")]
         [SerializeField] private bool useSecondaryButton = false;
 
+        [SerializeField] private bool useMenuButton = false;
+
         [Header("Headset Presence")]
-        [SerializeField] private bool pauseWhenHeadsetRemoved = true;
+        [SerializeField] private bool pauseWhenHeadsetRemoved = false;
         [SerializeField] private float headsetCheckInterval = 0.25f;
 
         private bool wasPausePressed;
@@ -42,7 +55,7 @@ namespace ActiveSaga.Common.GameSession
 
         private bool IsPausePressed()
         {
-            if (useEscapeKey && Input.GetKeyDown(KeyCode.Escape))
+            if (useEscapeKey && IsKeyboardPausePressed())
             {
                 return true;
             }
@@ -65,19 +78,38 @@ namespace ActiveSaga.Common.GameSession
             return false;
         }
 
+        private bool IsKeyboardPausePressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                return true;
+            }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                return true;
+            }
+#endif
+
+            return false;
+        }
+
         private bool IsControllerPausePressed(XRNode node)
         {
-            if (useMenuButton && ReadBoolFeature(node, CommonUsages.menuButton))
+            if (usePrimaryButton && ReadBoolFeature(node, UnityEngine.XR.CommonUsages.primaryButton))
             {
                 return true;
             }
 
-            if (usePrimaryButton && ReadBoolFeature(node, CommonUsages.primaryButton))
+            if (useSecondaryButton && ReadBoolFeature(node, UnityEngine.XR.CommonUsages.secondaryButton))
             {
                 return true;
             }
 
-            if (useSecondaryButton && ReadBoolFeature(node, CommonUsages.secondaryButton))
+            if (useMenuButton && ReadBoolFeature(node, UnityEngine.XR.CommonUsages.menuButton))
             {
                 return true;
             }
@@ -87,7 +119,7 @@ namespace ActiveSaga.Common.GameSession
 
         private bool ReadBoolFeature(XRNode node, InputFeatureUsage<bool> feature)
         {
-            InputDevice device = InputDevices.GetDeviceAtXRNode(node);
+            UnityEngine.XR.InputDevice device = InputDevices.GetDeviceAtXRNode(node);
 
             if (!device.isValid)
             {
@@ -105,6 +137,8 @@ namespace ActiveSaga.Common.GameSession
                 Debug.LogWarning("PauseInputController: GameSessionManager.Instance is null.");
                 return;
             }
+
+            Debug.Log("PauseInputController: Pause button detected.");
 
             GameSessionManager.Instance.TogglePauseGame();
         }
@@ -124,7 +158,7 @@ namespace ActiveSaga.Common.GameSession
             nextHeadsetCheckTime =
                 Time.unscaledTime + Mathf.Max(0.05f, headsetCheckInterval);
 
-            InputDevice hmd = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+            UnityEngine.XR.InputDevice hmd = InputDevices.GetDeviceAtXRNode(XRNode.Head);
 
             if (!hmd.isValid)
             {
@@ -133,7 +167,7 @@ namespace ActiveSaga.Common.GameSession
 
             bool userPresent;
 
-            if (!hmd.TryGetFeatureValue(CommonUsages.userPresence, out userPresent))
+            if (!hmd.TryGetFeatureValue(UnityEngine.XR.CommonUsages.userPresence, out userPresent))
             {
                 return;
             }
@@ -156,6 +190,7 @@ namespace ActiveSaga.Common.GameSession
 
             if (GameSessionManager.Instance.State == GameSessionState.Running)
             {
+                Debug.Log("PauseInputController: Headset removed, pausing game.");
                 GameSessionManager.Instance.PauseGame();
             }
         }
