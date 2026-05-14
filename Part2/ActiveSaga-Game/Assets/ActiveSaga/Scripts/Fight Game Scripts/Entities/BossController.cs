@@ -112,7 +112,7 @@ namespace ActiveSaga.BossFight.Entities
 
         private IEnumerator EndGameAsWonAfterDelay()
         {
-            yield return new WaitForSecondsRealtime(gameWonDelaySeconds);
+            yield return new WaitForSeconds(gameWonDelaySeconds);
 
             if (GameSessionManager.Instance != null)
             {

@@ -103,7 +103,7 @@ namespace ActiveSaga.BossFight.Waves
             {
                 entitySpawner = new WaveEntitySpawner(
                     bossSpawnPoint,
-                    CanContinueWaves
+                    CanRunWaveLogic
                 );
             }
 
@@ -138,15 +138,23 @@ namespace ActiveSaga.BossFight.Waves
         private IEnumerator WaveLoopRoutine()
         {
             yield return new WaitForSeconds(4f);
+            yield return WaitWhilePaused();
 
-            if (!CanContinueWaves())
+            if (!CanSessionContinue())
             {
                 waveLoopRoutine = null;
                 yield break;
             }
 
-            while (CanContinueWaves())
+            while (CanSessionContinue())
             {
+                yield return WaitWhilePaused();
+
+                if (!CanSessionContinue())
+                {
+                    break;
+                }
+
                 if (isWaveActive)
                 {
                     yield return null;
@@ -180,7 +188,7 @@ namespace ActiveSaga.BossFight.Waves
                     currentDynamicWave = null;
                 }
 
-                if (!CanContinueWaves())
+                if (!CanSessionContinue())
                 {
                     break;
                 }
@@ -188,8 +196,9 @@ namespace ActiveSaga.BossFight.Waves
                 currentWaveIndex++;
 
                 yield return new WaitForSeconds(2.0f);
+                yield return WaitWhilePaused();
 
-                if (!CanContinueWaves())
+                if (!CanSessionContinue())
                 {
                     break;
                 }
@@ -205,12 +214,19 @@ namespace ActiveSaga.BossFight.Waves
                 yield break;
             }
 
-            if (!CanContinueWaves())
+            yield return WaitWhilePaused();
+
+            if (!CanSessionContinue())
             {
                 yield break;
             }
 
             entityTracker.ResetWaveCounters();
+
+            if (GameSessionManager.Instance != null)
+            {
+                GameSessionManager.Instance.StartGameplayTimerIfNeeded();
+            }
 
             Debug.Log($"<color=cyan>Starting {data.waveType} Wave {currentWaveIndex + 1}: {data.waveName}</color>");
 
@@ -233,14 +249,22 @@ namespace ActiveSaga.BossFight.Waves
 
             if (animationStep != null)
             {
+                yield return WaitWhilePaused();
+
+                if (!CanSessionContinue())
+                {
+                    yield break;
+                }
+
                 if (BossController.Instance != null)
                 {
                     BossController.Instance.PlayAnimation(animationStep.animationTrigger);
                 }
 
                 yield return new WaitForSeconds(2.0f);
+                yield return WaitWhilePaused();
 
-                if (!CanContinueWaves())
+                if (!CanSessionContinue())
                 {
                     yield break;
                 }
@@ -248,7 +272,9 @@ namespace ActiveSaga.BossFight.Waves
 
             foreach (WaveStep step in data.steps)
             {
-                if (!CanContinueWaves())
+                yield return WaitWhilePaused();
+
+                if (!CanSessionContinue())
                 {
                     yield break;
                 }
@@ -261,8 +287,9 @@ namespace ActiveSaga.BossFight.Waves
                 entitySpawner.ExecuteStep(step, speedMult);
 
                 yield return new WaitForSeconds(step.delayAfterStep / speedMult);
+                yield return WaitWhilePaused();
 
-                if (!CanContinueWaves())
+                if (!CanSessionContinue())
                 {
                     yield break;
                 }
@@ -273,7 +300,9 @@ namespace ActiveSaga.BossFight.Waves
 
             while (timer < timeout)
             {
-                if (!CanContinueWaves())
+                yield return WaitWhilePaused();
+
+                if (!CanSessionContinue())
                 {
                     yield break;
                 }
@@ -293,7 +322,9 @@ namespace ActiveSaga.BossFight.Waves
                 yield return null;
             }
 
-            if (!CanContinueWaves())
+            yield return WaitWhilePaused();
+
+            if (!CanSessionContinue())
             {
                 yield break;
             }
@@ -303,7 +334,7 @@ namespace ActiveSaga.BossFight.Waves
                 entityTracker.ForceClearActiveEntities();
             }
 
-            if (!CanContinueWaves())
+            if (!CanSessionContinue())
             {
                 yield break;
             }
@@ -347,7 +378,21 @@ namespace ActiveSaga.BossFight.Waves
             }
         }
 
-        private bool CanContinueWaves()
+        private IEnumerator WaitWhilePaused()
+        {
+            while (IsSessionPaused())
+            {
+                yield return null;
+            }
+        }
+
+        private bool IsSessionPaused()
+        {
+            return GameSessionManager.Instance != null &&
+                   GameSessionManager.Instance.State == GameSessionState.Paused;
+        }
+
+        private bool CanSessionContinue()
         {
             if (GameSessionManager.Instance == null)
             {
@@ -360,13 +405,23 @@ namespace ActiveSaga.BossFight.Waves
                    state != GameSessionState.Ended;
         }
 
+        private bool CanRunWaveLogic()
+        {
+            return CanSessionContinue() && !IsSessionPaused();
+        }
+
         private bool CanCountWaveStats()
         {
-            return CanContinueWaves();
+            return CanSessionContinue();
         }
 
         private void Update()
         {
+            if (IsSessionPaused())
+            {
+                return;
+            }
+
             if (Time.frameCount % 30 == 0 && entityTracker != null)
             {
                 entityTracker.CleanupInactiveEntities();
