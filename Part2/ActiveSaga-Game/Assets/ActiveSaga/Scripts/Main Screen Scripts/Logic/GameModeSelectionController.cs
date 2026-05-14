@@ -1,4 +1,5 @@
 using ActiveSaga.Common.GameSession;
+using ActiveSaga.MainScreen.Data;
 using ActiveSaga.MainScreen.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -32,14 +33,43 @@ namespace ActiveSaga.MainScreen.Logic
         [SerializeField] private SelectedGameMode defaultGameMode = SelectedGameMode.Run;
         [SerializeField] private SelectedGameDifficulty defaultDifficulty = SelectedGameDifficulty.Easy;
 
+        private DashboardDataManager dashboardDataManager;
+
         private SelectedGameMode selectedGameMode = SelectedGameMode.None;
         private SelectedGameDifficulty selectedDifficulty = SelectedGameDifficulty.None;
+
+        private int playerLevel = 1;
+        private bool hasLoadedPlayerLevel = false;
 
         private void Awake()
         {
             if (gameModeSelectionUI == null)
             {
                 gameModeSelectionUI = GetComponent<GameModeSelectionUI>();
+            }
+
+            dashboardDataManager = DashboardDataManager.Instance;
+        }
+
+        private void OnEnable()
+        {
+            dashboardDataManager = DashboardDataManager.Instance;
+
+            if (dashboardDataManager != null)
+            {
+                dashboardDataManager.OnDashboardDataLoaded += HandleDashboardDataLoaded;
+
+                if (dashboardDataManager.CurrentData != null)
+                {
+                    HandleDashboardDataLoaded(dashboardDataManager.CurrentData);
+                }
+            }
+            else
+            {
+                Debug.LogWarning(
+                    "GameModeSelectionController: DashboardDataManager.Instance was not found. " +
+                    "Medium and Hard will stay locked until dashboard data is available."
+                );
             }
         }
 
@@ -53,12 +83,38 @@ namespace ActiveSaga.MainScreen.Logic
                 selectedDifficulty = defaultDifficulty;
             }
 
+            RefreshDifficultyLocks();
             RefreshUI();
+        }
+
+        private void OnDisable()
+        {
+            if (dashboardDataManager != null)
+            {
+                dashboardDataManager.OnDashboardDataLoaded -= HandleDashboardDataLoaded;
+            }
         }
 
         private void OnDestroy()
         {
             RemoveListeners();
+        }
+
+        private void HandleDashboardDataLoaded(DashboardData data)
+        {
+            if (data == null || data.profile == null)
+            {
+                Debug.LogWarning("GameModeSelectionController: Dashboard data or profile is missing.");
+                return;
+            }
+
+            playerLevel = Mathf.Max(1, data.profile.level);
+            hasLoadedPlayerLevel = true;
+
+            Debug.Log("GameModeSelectionController: Player level loaded: " + playerLevel);
+
+            RefreshDifficultyLocks();
+            RefreshUI();
         }
 
         private void AddListeners()
@@ -147,18 +203,80 @@ namespace ActiveSaga.MainScreen.Logic
 
         public void SelectMedium()
         {
+            if (!CanUseDifficulty(SelectedGameDifficulty.Medium))
+            {
+                Debug.LogWarning("Medium difficulty is locked. Player level: " + playerLevel);
+                return;
+            }
+
             selectedDifficulty = SelectedGameDifficulty.Medium;
             RefreshUI();
         }
 
         public void SelectHard()
         {
+            if (!CanUseDifficulty(SelectedGameDifficulty.Hard))
+            {
+                Debug.LogWarning("Hard difficulty is locked. Player level: " + playerLevel);
+                return;
+            }
+
             selectedDifficulty = SelectedGameDifficulty.Hard;
             RefreshUI();
         }
 
+        private bool CanUseDifficulty(SelectedGameDifficulty difficulty)
+        {
+            if (difficulty == SelectedGameDifficulty.Easy)
+            {
+                return true;
+            }
+
+            if (!hasLoadedPlayerLevel)
+            {
+                return false;
+            }
+
+            if (difficulty == SelectedGameDifficulty.Medium)
+            {
+                return playerLevel >= 11;
+            }
+
+            if (difficulty == SelectedGameDifficulty.Hard)
+            {
+                return playerLevel >= 21;
+            }
+
+            return false;
+        }
+
+        private void RefreshDifficultyLocks()
+        {
+            if (easyButton != null)
+            {
+                easyButton.interactable = true;
+            }
+
+            if (mediumButton != null)
+            {
+                mediumButton.interactable = CanUseDifficulty(SelectedGameDifficulty.Medium);
+            }
+
+            if (hardButton != null)
+            {
+                hardButton.interactable = CanUseDifficulty(SelectedGameDifficulty.Hard);
+            }
+
+            if (!CanUseDifficulty(selectedDifficulty))
+            {
+                selectedDifficulty = SelectedGameDifficulty.Easy;
+            }
+        }
+
         private void RefreshUI()
         {
+            RefreshDifficultyLocks();
+
             if (gameModeSelectionUI != null)
             {
                 gameModeSelectionUI.Render(selectedGameMode, selectedDifficulty);
@@ -179,7 +297,25 @@ namespace ActiveSaga.MainScreen.Logic
                 return;
             }
 
+            if (!CanUseDifficulty(selectedDifficulty))
+            {
+                Debug.LogWarning(
+                    "Selected difficulty is locked. Player level: " + playerLevel +
+                    ", Difficulty: " + selectedDifficulty
+                );
+
+                selectedDifficulty = SelectedGameDifficulty.Easy;
+                RefreshUI();
+                return;
+            }
+
             GameLaunchData.SetSelection(selectedGameMode, selectedDifficulty);
+
+            Debug.Log(
+                "Launching game. Mode: " + selectedGameMode +
+                ", Difficulty: " + selectedDifficulty +
+                ", Player level: " + playerLevel
+            );
 
             if (selectedGameMode == SelectedGameMode.Run)
             {

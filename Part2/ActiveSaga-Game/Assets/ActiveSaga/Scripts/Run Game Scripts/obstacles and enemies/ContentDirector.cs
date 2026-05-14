@@ -9,10 +9,11 @@ public class ContentDirector : MonoBehaviour
     [Header("State")]
     public GameDifficulty difficulty = GameDifficulty.Easy;
 
-    private int tileCounter = 0;
+    [SerializeField] private BiomeType selectedBiome = BiomeType.Forest;
 
     [Header("Data")]
     public List<BiomeData> biomeList;
+
     private Dictionary<BiomeType, BiomeData> biomeMap;
 
     [Header("Executor")]
@@ -25,24 +26,63 @@ public class ContentDirector : MonoBehaviour
         biomeMap = new Dictionary<BiomeType, BiomeData>();
 
         for (int i = 0; i < biomeList.Count; i++)
+        {
+            if (biomeList[i] == null)
+            {
+                continue;
+            }
+
             biomeMap[biomeList[i].biomeType] = biomeList[i];
+        }
     }
 
-    private void OnEnable() => TileManager.OnTileSpawned += OnTile;
-    private void OnDisable() => TileManager.OnTileSpawned -= OnTile;
+    private void OnEnable()
+    {
+        TileManager.OnTileSpawned += OnTile;
+    }
+
+    private void OnDisable()
+    {
+        TileManager.OnTileSpawned -= OnTile;
+    }
+
+    public void Configure(GameDifficulty newDifficulty, BiomeType newBiome)
+    {
+        difficulty = newDifficulty;
+        selectedBiome = newBiome;
+
+        Debug.Log(
+            "ContentDirector configured. Difficulty: " + difficulty +
+            ", Biome: " + selectedBiome
+        );
+    }
 
     private void OnTile(TileInfo tile)
     {
+        if (tile == null)
+        {
+            return;
+        }
+
         Debug.Log("OnTile CALLED for: " + tile.name);
 
-        // ✅ בדיקה שיש biome
+        if (tile.biomeType != selectedBiome)
+        {
+            Debug.Log(
+                "ContentDirector skipped tile. Tile biome: " +
+                tile.biomeType + ", Selected biome: " + selectedBiome
+            );
+
+            tile.ClearContent();
+            return;
+        }
+
         if (!biomeMap.TryGetValue(tile.biomeType, out BiomeData biome))
         {
             Debug.Log("NO BIOME FOUND for type: " + tile.biomeType);
             return;
         }
 
-        // ✅ בדיקה שיש spawn points
         int maxItems = tile.trackSpawnPoints.Count;
         Debug.Log("Spawn points count: " + maxItems);
 
@@ -57,7 +97,6 @@ public class ContentDirector : MonoBehaviour
 
         Debug.Log("Spawnables length: " + biome.spawnables.Length);
 
-        // 🔥 לולאת יצירה פשוטה ויציבה
         while (budget > 0 && plan.Count < maxItems)
         {
             tempPool.Clear();
@@ -67,10 +106,21 @@ public class ContentDirector : MonoBehaviour
             {
                 SpawnableItem item = biome.spawnables[i];
 
-                Debug.Log($"Checking item: {item.prefab?.name}, cost={item.cost}, weight={item.weight}");
+                Debug.Log(
+                    "Checking item: " + item.prefab?.name +
+                    ", cost=" + item.cost +
+                    ", weight=" + item.weight
+                );
 
-                if (item.cost > budget) continue;
-                if (item.weight <= 0) continue;
+                if (item.cost > budget)
+                {
+                    continue;
+                }
+
+                if (item.weight <= 0)
+                {
+                    continue;
+                }
 
                 tempPool.Add(item);
                 totalWeight += item.weight;
@@ -92,8 +142,18 @@ public class ContentDirector : MonoBehaviour
 
         if (plan.Count > 0)
         {
+            if (spawner == null)
+            {
+                Debug.LogError("ContentDirector: Missing ObstacleSpawner reference.");
+                return;
+            }
+
             Debug.Log("Calling Spawner.Execute...");
             spawner.Execute(tile, plan);
+        }
+        else
+        {
+            tile.ClearContent();
         }
     }
 
@@ -111,8 +171,11 @@ public class ContentDirector : MonoBehaviour
         for (int i = 0; i < items.Count; i++)
         {
             sum += items[i].weight;
+
             if (r < sum)
+            {
                 return items[i];
+            }
         }
 
         return items[0];
