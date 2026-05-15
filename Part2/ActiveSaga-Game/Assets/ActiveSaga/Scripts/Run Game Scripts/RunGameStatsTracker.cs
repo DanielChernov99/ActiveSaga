@@ -13,7 +13,7 @@ namespace ActiveSaga.RunGame
 
         private int obstacleCrashes;
         private int obstacleGrazes;
-
+        private int coinsCollected;
         public override GameType GameType => GameType.RunGame;
 
         public float DistanceMeters => distanceMeters;
@@ -22,6 +22,9 @@ namespace ActiveSaga.RunGame
         public int TotalSquats => totalSquats;
         public int ObstacleCrashes => obstacleCrashes;
         public int ObstacleGrazes => obstacleGrazes;
+        public int CoinsCollected => coinsCollected;
+
+
 
         public override void ResetStats()
         {
@@ -33,6 +36,7 @@ namespace ActiveSaga.RunGame
 
             obstacleCrashes = 0;
             obstacleGrazes = 0;
+            coinsCollected = 0;
         }
 
         public void SetDistance(float totalDistanceMeters)
@@ -53,6 +57,16 @@ namespace ActiveSaga.RunGame
         public void AddEnemyKill()
         {
             enemiesKilled++;
+        }
+
+        public void AddCoins(int amount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            coinsCollected += amount;
         }
 
         public void AddJump()
@@ -87,5 +101,7 @@ namespace ActiveSaga.RunGame
                 obstacleGrazes = obstacleGrazes
             };
         }
+
+        
     }
 }

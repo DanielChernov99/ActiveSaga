@@ -2102,6 +2102,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunGameLaunchReceiver
   contentDirector: {fileID: 1252747277}
+  tileManager: {fileID: 1842433765}
+  logLaunchData: 1
 --- !u!1 &682208998
 GameObject:
   m_ObjectHideFlags: 0
@@ -4408,6 +4410,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f221086043d88a47af47bbc84e63e58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObstacleSpawner
+  player: {fileID: 2133962744}
+  statsTracker: {fileID: 1112345725}
+  pathMinX: -1.3
+  pathMaxX: 1.3
+  obstacleY: 1
+  coinY: 1
+  enemyY: 1
+  enemySideX: 4
 --- !u!114 &1252747277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4421,9 +4431,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ContentDirector
   difficulty: 1
+  selectedBiome: 0
   biomeList:
   - {fileID: 11400000, guid: 29e7c28dc85558b47bf87b2298976ceb, type: 2}
   spawner: {fileID: 1252747276}
+  tileLength: 400
+  tileFrontPadding: 25
+  tileBackPadding: 25
+  easyObstacleDistance: {x: 130, y: 170}
+  mediumObstacleDistance: {x: 80, y: 120}
+  hardObstacleDistance: {x: 40, y: 60}
+  easyEnemyDistance: {x: 180, y: 240}
+  mediumEnemyDistance: {x: 110, y: 160}
+  hardEnemyDistance: {x: 70, y: 110}
+  easyCoinDistance: {x: 60, y: 100}
+  mediumCoinDistance: {x: 50, y: 90}
+  hardCoinDistance: {x: 40, y: 80}
 --- !u!1 &1271763528
 GameObject:
   m_ObjectHideFlags: 0
@@ -7727,6 +7750,10 @@ PrefabInstance:
     - target: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_Name
       value: XR Origin (XR Rig)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_TagString
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_RootOrder
