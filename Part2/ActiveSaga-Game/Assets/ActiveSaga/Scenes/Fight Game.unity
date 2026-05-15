@@ -8198,6 +8198,7 @@ GameObject:
   - component: {fileID: 1515233637}
   - component: {fileID: 1515233636}
   - component: {fileID: 1515233635}
+  - component: {fileID: 1515233640}
   m_Layer: 0
   m_Name: ResumeGameButton
   m_TagString: Untagged
@@ -8288,7 +8289,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1515233637}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 795353506}
+        m_TargetAssemblyTypeName: ActiveSaga.Common.UI.PauseMenuUI, Assembly-CSharp
+        m_MethodName: ResumeGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1515233637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8327,6 +8340,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1515233633}
   m_CullTransparentMesh: 1
+--- !u!114 &1515233640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515233633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b63c4ed3640c824389a393827828a51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.UI.VRUIButtonPointerDownClick
+  clickCooldown: 0.35
+  debugLogs: 0
 --- !u!1 &1518063040
 GameObject:
   m_ObjectHideFlags: 0
@@ -8875,6 +8902,14 @@ PrefabInstance:
       propertyPath: m_InteractionManager
       value: 
       objectReference: {fileID: 2002683105}
+    - target: {fileID: 1883230248363655243, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_InteractionLayers.m_Bits
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1883230248363655243, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_BlockUIOnInteractableSelection
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2190828208922718286, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -9275,7 +9310,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1783312463}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
@@ -9490,6 +9525,7 @@ GameObject:
   - component: {fileID: 1829898435}
   - component: {fileID: 1829898434}
   - component: {fileID: 1829898437}
+  - component: {fileID: 1829898438}
   m_Layer: 0
   m_Name: FinishGameButton
   m_TagString: Untagged
@@ -9619,6 +9655,20 @@ MonoBehaviour:
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &1829898438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1829898432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b63c4ed3640c824389a393827828a51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.UI.VRUIButtonPointerDownClick
+  clickCooldown: 0.35
+  debugLogs: 0
 --- !u!1 &1842832408
 GameObject:
   m_ObjectHideFlags: 0
@@ -10934,6 +10984,7 @@ GameObject:
   - component: {fileID: 2004427394}
   - component: {fileID: 2004427393}
   - component: {fileID: 2004427392}
+  - component: {fileID: 2004427396}
   m_Layer: 0
   m_Name: QuitGameButton
   m_TagString: Untagged
@@ -11024,7 +11075,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2004427394}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 795353506}
+        m_TargetAssemblyTypeName: ActiveSaga.Common.UI.PauseMenuUI, Assembly-CSharp
+        m_MethodName: QuitGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2004427394
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11063,6 +11126,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2004427390}
   m_CullTransparentMesh: 1
+--- !u!114 &2004427396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2004427390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b63c4ed3640c824389a393827828a51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.UI.VRUIButtonPointerDownClick
+  clickCooldown: 0.35
+  debugLogs: 0
 --- !u!1 &2042391745
 GameObject:
   m_ObjectHideFlags: 0
