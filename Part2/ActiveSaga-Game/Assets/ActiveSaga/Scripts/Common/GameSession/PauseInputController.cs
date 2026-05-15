@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 
 #if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
+using Keyboard = UnityEngine.InputSystem.Keyboard;
 #endif
 
 namespace ActiveSaga.Common.GameSession
@@ -12,74 +13,40 @@ namespace ActiveSaga.Common.GameSession
         [Header("Keyboard Testing")]
         [SerializeField] private bool useEscapeKey = true;
 
-        [Header("Quest 3 Controller")]
-        [SerializeField] private bool useXRControllerButton = true;
+        [Header("Quest 3")]
+        [SerializeField] private bool useRightControllerBButton = true;
 
-        [Tooltip("Quest 3 A button is on the right controller.")]
-        [SerializeField] private bool checkRightHand = true;
+        [Header("Debug")]
+        [SerializeField] private bool logOnlyWhenPauseTriggered = true;
 
-        [SerializeField] private bool checkLeftHand = false;
-
-        [Header("Quest 3 Button Mapping")]
-        [Tooltip("Quest 3 right controller A button = Primary Button.")]
-        [SerializeField] private bool usePrimaryButton = true;
-
-        [Tooltip("Quest 3 right controller B button = Secondary Button.")]
-        [SerializeField] private bool useSecondaryButton = false;
-
-        [SerializeField] private bool useMenuButton = false;
-
-        [Header("Headset Presence")]
-        [SerializeField] private bool pauseWhenHeadsetRemoved = false;
-        [SerializeField] private float headsetCheckInterval = 0.25f;
-
-        private bool wasPausePressed;
-
-        private bool hasLastUserPresence;
-        private bool lastUserPresence = true;
-        private float nextHeadsetCheckTime;
+        private bool wasBPressed;
+        private UnityEngine.XR.InputDevice cachedRightHand;
 
         private void Update()
         {
-            bool isPausePressed = IsPausePressed();
-
-            if (isPausePressed && !wasPausePressed)
+            if (IsEscapePressed())
             {
-                TogglePause();
+                TogglePause("Escape");
+                return;
             }
 
-            wasPausePressed = isPausePressed;
+            bool bPressed = useRightControllerBButton && IsRightControllerBPressed();
 
-            CheckHeadsetPresence();
+            if (bPressed && !wasBPressed)
+            {
+                TogglePause("Right Controller B");
+            }
+
+            wasBPressed = bPressed;
         }
 
-        private bool IsPausePressed()
+        private bool IsEscapePressed()
         {
-            if (useEscapeKey && IsKeyboardPausePressed())
-            {
-                return true;
-            }
-
-            if (!useXRControllerButton)
+            if (!useEscapeKey)
             {
                 return false;
             }
 
-            if (checkRightHand && IsControllerPausePressed(XRNode.RightHand))
-            {
-                return true;
-            }
-
-            if (checkLeftHand && IsControllerPausePressed(XRNode.LeftHand))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool IsKeyboardPausePressed()
-        {
 #if ENABLE_INPUT_SYSTEM
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
@@ -97,40 +64,57 @@ namespace ActiveSaga.Common.GameSession
             return false;
         }
 
-        private bool IsControllerPausePressed(XRNode node)
+        private bool IsRightControllerBPressed()
         {
-            if (usePrimaryButton && ReadBoolFeature(node, UnityEngine.XR.CommonUsages.primaryButton))
-            {
-                return true;
-            }
+            UnityEngine.XR.InputDevice rightHand = GetRightHandDevice();
 
-            if (useSecondaryButton && ReadBoolFeature(node, UnityEngine.XR.CommonUsages.secondaryButton))
-            {
-                return true;
-            }
-
-            if (useMenuButton && ReadBoolFeature(node, UnityEngine.XR.CommonUsages.menuButton))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool ReadBoolFeature(XRNode node, InputFeatureUsage<bool> feature)
-        {
-            UnityEngine.XR.InputDevice device = InputDevices.GetDeviceAtXRNode(node);
-
-            if (!device.isValid)
+            if (!rightHand.isValid)
             {
                 return false;
             }
 
-            bool value;
-            return device.TryGetFeatureValue(feature, out value) && value;
+            bool secondaryButtonPressed;
+
+            bool hasSecondaryButton = rightHand.TryGetFeatureValue(
+                CommonUsages.secondaryButton,
+                out secondaryButtonPressed
+            );
+
+            return hasSecondaryButton && secondaryButtonPressed;
         }
 
-        private void TogglePause()
+        private UnityEngine.XR.InputDevice GetRightHandDevice()
+        {
+            if (cachedRightHand.isValid)
+            {
+                return cachedRightHand;
+            }
+
+            cachedRightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+
+            if (cachedRightHand.isValid)
+            {
+                return cachedRightHand;
+            }
+
+            List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>();
+
+            InputDevices.GetDevicesWithCharacteristics(
+                InputDeviceCharacteristics.Right |
+                InputDeviceCharacteristics.Controller |
+                InputDeviceCharacteristics.HeldInHand,
+                devices
+            );
+
+            if (devices.Count > 0)
+            {
+                cachedRightHand = devices[0];
+            }
+
+            return cachedRightHand;
+        }
+
+        private void TogglePause(string source)
         {
             if (GameSessionManager.Instance == null)
             {
@@ -138,61 +122,12 @@ namespace ActiveSaga.Common.GameSession
                 return;
             }
 
-            Debug.Log("PauseInputController: Pause button detected.");
+            if (logOnlyWhenPauseTriggered)
+            {
+                Debug.Log($"PauseInputController: Pause triggered by {source}.");
+            }
 
             GameSessionManager.Instance.TogglePauseGame();
-        }
-
-        private void CheckHeadsetPresence()
-        {
-            if (!pauseWhenHeadsetRemoved)
-            {
-                return;
-            }
-
-            if (Time.unscaledTime < nextHeadsetCheckTime)
-            {
-                return;
-            }
-
-            nextHeadsetCheckTime =
-                Time.unscaledTime + Mathf.Max(0.05f, headsetCheckInterval);
-
-            UnityEngine.XR.InputDevice hmd = InputDevices.GetDeviceAtXRNode(XRNode.Head);
-
-            if (!hmd.isValid)
-            {
-                return;
-            }
-
-            bool userPresent;
-
-            if (!hmd.TryGetFeatureValue(UnityEngine.XR.CommonUsages.userPresence, out userPresent))
-            {
-                return;
-            }
-
-            if (hasLastUserPresence && lastUserPresence && !userPresent)
-            {
-                PauseOnly();
-            }
-
-            lastUserPresence = userPresent;
-            hasLastUserPresence = true;
-        }
-
-        private void PauseOnly()
-        {
-            if (GameSessionManager.Instance == null)
-            {
-                return;
-            }
-
-            if (GameSessionManager.Instance.State == GameSessionState.Running)
-            {
-                Debug.Log("PauseInputController: Headset removed, pausing game.");
-                GameSessionManager.Instance.PauseGame();
-            }
         }
     }
 }
