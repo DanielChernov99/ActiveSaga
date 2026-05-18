@@ -25,6 +25,7 @@ public class PlayerLocomotion : MonoBehaviour
     [SerializeField] private float jumpForce = 5f;
     [Tooltip("Higher gravity feels less 'floaty' in games. 20 is a good value.")]
     [SerializeField] private float gravity = 20f;
+    [SerializeField] private GameManager gameManager;
 
     // Internal State
     private float currentSpeed;
@@ -72,7 +73,11 @@ public class PlayerLocomotion : MonoBehaviour
 
     private void HandleJump()
     {
-        // Only jump if grounded and not squatting
+        if (gameManager != null && gameManager.IsPlayerStunned())
+        {
+            return;
+        }
+
         if (characterController.isGrounded && !isSquatting)
         {
             verticalVelocity = jumpForce;
@@ -83,11 +88,17 @@ public class PlayerLocomotion : MonoBehaviour
 
     private void UpdateSpeed()
     {
+        if (gameManager != null && gameManager.IsPlayerStunned())
+        {
+            currentSpeed = 0f;
+            runIntensity = 0f;
+            return;
+        }
+
         float targetSpeed = 0f;
 
         if (isSquatting)
         {
-            // Move slowly if squatting and trying to run
             targetSpeed = runIntensity > 0.1f ? squatSpeed : 0f;
         }
         else
@@ -95,7 +106,6 @@ public class PlayerLocomotion : MonoBehaviour
             targetSpeed = runSpeed * runIntensity;
         }
 
-        // Smoothly interpolate current speed towards target speed
         currentSpeed = Mathf.Lerp(
             currentSpeed,
             targetSpeed,
