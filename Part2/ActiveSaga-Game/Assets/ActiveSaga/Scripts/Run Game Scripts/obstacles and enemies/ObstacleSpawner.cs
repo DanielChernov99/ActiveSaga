@@ -18,7 +18,7 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField] private float enemyY = 1f;
 
     [Header("Enemy Side Spawn")]
-    [SerializeField] private float enemySideX = 4f;
+    [SerializeField] private float enemySideX = 1.5f;
 
     public void Execute(TileInfo tile, List<SpawnRequest> requests)
     {
@@ -54,6 +54,11 @@ public class ObstacleSpawner : MonoBehaviour
             if (enemyRunner != null)
             {
                 enemyRunner.Initialize(player, statsTracker);
+                Debug.Log(
+                    "Spawned " + item.type +
+                    " item: " + item.itemName +
+                    " at " + spawnPosition
+                );
             }
 
             CoinCollectible coin = obj.GetComponent<CoinCollectible>();
@@ -75,13 +80,13 @@ public class ObstacleSpawner : MonoBehaviour
             return new Vector3(sideX, enemyY, zPosition);
         }
 
-        float randomX = Random.Range(pathMinX, pathMaxX);
-
         if (type == SpawnType.Collectible)
         {
-            return new Vector3(randomX, coinY, zPosition);
+            float coinX = player != null ? player.position.x : 0f;
+            return new Vector3(coinX, coinY, zPosition);
         }
 
+        float randomX = Random.Range(pathMinX, pathMaxX);
         return new Vector3(randomX, obstacleY, zPosition);
     }
 }

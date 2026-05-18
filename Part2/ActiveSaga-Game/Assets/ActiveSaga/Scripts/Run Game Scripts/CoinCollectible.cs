@@ -21,6 +21,8 @@ public class CoinCollectible : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+            Debug.Log("Coin touched by: " + other.name + ", tag: " + other.tag);
+
         if (!other.CompareTag("Player"))
         {
             return;

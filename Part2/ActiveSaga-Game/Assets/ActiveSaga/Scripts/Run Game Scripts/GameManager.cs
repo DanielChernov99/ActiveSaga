@@ -41,6 +41,10 @@ public class GameManager : MonoBehaviour
     private bool isGameActive = false;
     private float gameStartTime;
 
+    [Header("Stun Settings")]
+    [SerializeField] private float stunDuration = 2f;
+    private float stunnedUntilTime = -1f;
+
     public event Action<float, int, int, float> OnStatsUpdated;
 
     private void Start()
@@ -87,7 +91,6 @@ public class GameManager : MonoBehaviour
         if (playerCollisionHandler != null)
         {
             playerCollisionHandler.OnObstacleCrash += HandleObstacleCrash;
-            playerCollisionHandler.OnObstacleGraze += HandleObstacleGraze;
         }
 
         if (monsterController != null)
@@ -116,7 +119,6 @@ public class GameManager : MonoBehaviour
         if (playerCollisionHandler != null)
         {
             playerCollisionHandler.OnObstacleCrash -= HandleObstacleCrash;
-            playerCollisionHandler.OnObstacleGraze -= HandleObstacleGraze;
         }
 
         if (monsterController != null)
@@ -173,6 +175,12 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (IsPlayerStunned())
+        {
+            currentSpeed = 0f;
+            return;
+        }
+
         currentSpeed = intensity * scoreSpeedMultiplier;
 
         currentDistance += currentSpeed * Time.deltaTime;
@@ -220,33 +228,17 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("GameManager received obstacle crash.");
+        Debug.Log("GameManager received obstacle crash. Player stunned.");
+
+        stunnedUntilTime = Time.time + stunDuration;
+        currentSpeed = 0f;
 
         if (runGameStatsTracker != null)
         {
             runGameStatsTracker.AddObstacleCrash();
         }
-
-        /*
-        אם בעתיד תרצה שהתנגשות חזקה תסיים משחק:
-        EndRunGame(GameEndReason.GameOver);
-        */
     }
 
-    private void HandleObstacleGraze()
-    {
-        if (!isGameActive)
-        {
-            return;
-        }
-
-        Debug.Log("GameManager received obstacle graze.");
-
-        if (runGameStatsTracker != null)
-        {
-            runGameStatsTracker.AddObstacleGraze();
-        }
-    }
 
     private void HandleMonsterCaughtPlayer()
     {
@@ -285,6 +277,11 @@ public class GameManager : MonoBehaviour
 
     public float GetPlayerSpeed()
     {
+        if (IsPlayerStunned())
+        {
+            return 0f;
+        }
+
         return currentSpeed;
     }
 
@@ -304,4 +301,8 @@ public class GameManager : MonoBehaviour
             runGameStatsTracker.SetDistance(currentDistance);
         }
     }
+    public bool IsPlayerStunned()
+{
+    return Time.time < stunnedUntilTime;
+}
 }

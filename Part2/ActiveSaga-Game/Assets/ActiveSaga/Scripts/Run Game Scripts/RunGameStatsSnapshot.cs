@@ -7,9 +7,11 @@ namespace ActiveSaga.RunGame
     {
         public float distanceMeters;
         public int enemiesKilled;
+        public int coinsCollected;
 
         public int totalJumps;
         public int totalSquats;
+        
 
         public int obstacleCrashes;
         public int obstacleGrazes;
@@ -26,7 +28,8 @@ namespace ActiveSaga.RunGame
                    + "\"totalJumps\":" + totalJumps + ","
                    + "\"totalSquats\":" + totalSquats + ","
                    + "\"obstacleCrashes\":" + obstacleCrashes + ","
-                   + "\"obstacleGrazes\":" + obstacleGrazes
+                   + "\"obstacleGrazes\":" + obstacleGrazes + ","
+                   + "\"coinsCollected\":" + coinsCollected
                    + "}";
         }
     }

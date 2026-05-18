@@ -98,7 +98,8 @@ namespace ActiveSaga.RunGame
                 totalJumps = totalJumps,
                 totalSquats = totalSquats,
                 obstacleCrashes = obstacleCrashes,
-                obstacleGrazes = obstacleGrazes
+                obstacleGrazes = obstacleGrazes,
+                coinsCollected = this.coinsCollected
             };
         }
 

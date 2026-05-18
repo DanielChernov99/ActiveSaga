@@ -26,7 +26,9 @@ public class ContentDirector : MonoBehaviour
     [SerializeField] private Vector2 hardObstacleDistance = new Vector2(40f, 60f);
 
     [Header("Enemy Distance Settings")]
-    [SerializeField] private Vector2 easyEnemyDistance = new Vector2(220f, 300f);
+
+    // enemy easy was before 220f and 300 changed to 30 and 30 to test if system works
+    [SerializeField] private Vector2 easyEnemyDistance = new Vector2(30f, 30f);
     [SerializeField] private Vector2 mediumEnemyDistance = new Vector2(140f, 210f);
     [SerializeField] private Vector2 hardEnemyDistance = new Vector2(80f, 140f);
 

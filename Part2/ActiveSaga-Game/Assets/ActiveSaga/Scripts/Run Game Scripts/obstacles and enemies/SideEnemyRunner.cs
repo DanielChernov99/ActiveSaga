@@ -4,27 +4,53 @@ using ActiveSaga.RunGame;
 public class SideEnemyRunner : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 4f;
-    [SerializeField] private float destroyAfterSeconds = 8f;
+    [SerializeField] private float moveSpeed = 8f;
+
+    [Header("Activation")]
+    [SerializeField] private float activationDistance = 35f;
+    [SerializeField] private float destroyBehindPlayerDistance = 10f;
 
     [Header("Kill Settings")]
     [SerializeField] private string weaponTag = "Sword";
 
     private Transform target;
     private RunGameStatsTracker statsTracker;
+    private bool isActivated = false;
 
     public void Initialize(Transform playerTarget, RunGameStatsTracker tracker)
     {
         target = playerTarget;
         statsTracker = tracker;
 
-        Destroy(gameObject, destroyAfterSeconds);
+        if (target == null)
+        {
+            Debug.LogError("SideEnemyRunner: Missing player target.");
+        }
     }
 
     private void Update()
     {
         if (target == null)
         {
+            return;
+        }
+
+        float zDistanceFromPlayer = transform.position.z - target.position.z;
+
+        if (!isActivated)
+        {
+            if (zDistanceFromPlayer > activationDistance)
+            {
+                return;
+            }
+
+            isActivated = true;
+            Debug.Log("SideEnemy activated: " + gameObject.name);
+        }
+
+        if (zDistanceFromPlayer < -destroyBehindPlayerDistance)
+        {
+            Destroy(gameObject);
             return;
         }
 
@@ -35,7 +61,7 @@ public class SideEnemyRunner : MonoBehaviour
 
         transform.position += direction * moveSpeed * Time.deltaTime;
 
-        if (direction != Vector3.zero)
+        if (direction.sqrMagnitude > 0.001f)
         {
             transform.rotation = Quaternion.LookRotation(direction);
         }
