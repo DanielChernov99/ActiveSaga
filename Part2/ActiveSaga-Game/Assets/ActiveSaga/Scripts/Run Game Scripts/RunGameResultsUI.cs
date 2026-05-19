@@ -1,6 +1,7 @@
 using ActiveSaga.Common.GameSession;
 using ActiveSaga.Common.Networking;
 using ActiveSaga.Common.UI;
+using UnityEngine.SceneManagement;
 
 namespace ActiveSaga.RunGame
 {
@@ -42,5 +43,11 @@ namespace ActiveSaga.RunGame
             stat2 = new ResultStat("ENEMIES KILLED", runStats.enemiesKilled.ToString());
             stat3 = new ResultStat("JUMPS", runStats.totalJumps.ToString());
         }
+
+        public void ReturnToMainNew()
+        {
+            SceneManager.LoadScene("Main New");
+        }
+
     }
 }

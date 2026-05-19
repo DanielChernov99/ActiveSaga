@@ -250,6 +250,10 @@ public class GameManager : MonoBehaviour
         EndRunGame(GameEndReason.GameOver);
     }
 
+    public void OnFinishGamePressed()
+    {
+        EndRunGame(GameEndReason.GameWon);
+    }
     public void EndRunGame(GameEndReason endReason)
     {
         if (!isGameActive)

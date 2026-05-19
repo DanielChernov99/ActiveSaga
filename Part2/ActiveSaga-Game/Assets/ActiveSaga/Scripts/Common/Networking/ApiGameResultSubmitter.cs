@@ -8,7 +8,7 @@ namespace ActiveSaga.Common.Networking
     public class ApiGameResultSubmitter : MonoBehaviour, IGameResultSubmitter
     {
         [Header("API Settings")]
-        [SerializeField] private string baseUrl = "http://localhost:5000";
+        [SerializeField] private string baseUrl = "http://localhost:3000";
         [SerializeField] private string completeGameEndpoint = "/api/game-sessions/complete";
 
         public async Task<ServerGameResultResponse> SubmitGameResultAsync(string jsonPayload)

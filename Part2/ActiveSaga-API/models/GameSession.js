@@ -31,12 +31,14 @@ const gameSessionSchema = new mongoose.Schema({
     },
 
     stats: {
-        distanceRun: { type: Number, default: 0 },
-        enemiesKilled: { type: Number, default: 0 },
-        dodges: { type: Number, default: 0 },
-        wavesCompleted: { type: Number, default: 0 },
-        obstaclesAvoided: { type: Number, default: 0 },
-        bossDamageDealt: { type: Number, default: 0 }
+    distanceRun: { type: Number, default: 0 },
+    jumps: { type: Number, default: 0 },
+    coinsCollected: { type: Number, default: 0 },
+    enemiesKilled: { type: Number, default: 0 },
+    dodges: { type: Number, default: 0 },
+    wavesCompleted: { type: Number, default: 0 },
+    obstaclesAvoided: { type: Number, default: 0 },
+    bossDamageDealt: { type: Number, default: 0 }
     },
 
     rewards: {
