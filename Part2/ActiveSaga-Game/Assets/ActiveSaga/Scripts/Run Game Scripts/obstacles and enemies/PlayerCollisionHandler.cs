@@ -48,16 +48,40 @@ public class PlayerCollisionHandler : MonoBehaviour
 
         OnObstacleCrash?.Invoke();
 
-        if (obstacleObject != null)
+        GameObject objectToDestroy = GetSafeObjectToDestroy(obstacleObject);
+
+        if (objectToDestroy != null)
         {
-            if (obstacleObject.transform.parent != null)
-            {
-                Destroy(obstacleObject.transform.parent.gameObject);
-            }
-            else
-            {
-                Destroy(obstacleObject);
-            }
+            Destroy(objectToDestroy);
         }
+    }
+
+    private GameObject GetSafeObjectToDestroy(GameObject hitObject)
+    {
+        if (hitObject == null)
+        {
+            return null;
+        }
+
+        Transform current = hitObject.transform;
+
+        while (current.parent != null)
+        {
+            Transform parent = current.parent;
+
+            if (parent.GetComponent<TileInfo>() != null)
+            {
+                return current.gameObject;
+            }
+
+            if (parent.name == "ContentRoot")
+            {
+                return current.gameObject;
+            }
+
+            current = parent;
+        }
+
+        return hitObject;
     }
 }
