@@ -3647,6 +3647,8 @@ MonoBehaviour:
   statsTracker: {fileID: 1112345725}
   submitterBehaviour: {fileID: 0}
   gameplayHUD: {fileID: 997664001}
+  pausePanel: {fileID: 0}
+  hideGameplayHUDWhilePaused: 0
   resultsUI: {fileID: 1743299712}
 --- !u!1 &1120739998
 GameObject:
@@ -4474,6 +4476,8 @@ MonoBehaviour:
   selectedBiome: 0
   biomeList:
   - {fileID: 11400000, guid: 29e7c28dc85558b47bf87b2298976ceb, type: 2}
+  - {fileID: 11400000, guid: 01a14189a0e72bd48af5fdfc385db418, type: 2}
+  - {fileID: 11400000, guid: 2d1db1d48594f95469c50b8602076d96, type: 2}
   spawner: {fileID: 1252747276}
   tileLength: 400
   tileFrontPadding: 25
@@ -4481,9 +4485,9 @@ MonoBehaviour:
   easyObstacleDistance: {x: 130, y: 170}
   mediumObstacleDistance: {x: 80, y: 120}
   hardObstacleDistance: {x: 40, y: 60}
-  easyEnemyDistance: {x: 30, y: 240}
-  mediumEnemyDistance: {x: 110, y: 160}
-  hardEnemyDistance: {x: 70, y: 110}
+  easyEnemyDistance: {x: 220, y: 300}
+  mediumEnemyDistance: {x: 140, y: 210}
+  hardEnemyDistance: {x: 80, y: 140}
   easyCoinDistance: {x: 60, y: 100}
   mediumCoinDistance: {x: 50, y: 90}
   hardCoinDistance: {x: 40, y: 80}

@@ -15,7 +15,7 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Obstacle_Crash"))
         {
-            HandleCrash();
+            HandleCrash(collision.gameObject);
         }
     }
 
@@ -23,7 +23,7 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         if (hit.gameObject.CompareTag("Obstacle_Crash"))
         {
-            HandleCrash();
+            HandleCrash(hit.gameObject);
         }
     }
 
@@ -31,11 +31,11 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         if (other.CompareTag("Obstacle_Crash"))
         {
-            HandleCrash();
+            HandleCrash(other.gameObject);
         }
     }
 
-    private void HandleCrash()
+    private void HandleCrash(GameObject obstacleObject)
     {
         if (Time.time - lastCrashTime < gracePeriod)
         {
@@ -45,6 +45,19 @@ public class PlayerCollisionHandler : MonoBehaviour
         lastCrashTime = Time.time;
 
         Debug.Log("CRASH! Hit the main obstacle.");
+
         OnObstacleCrash?.Invoke();
+
+        if (obstacleObject != null)
+        {
+            if (obstacleObject.transform.parent != null)
+            {
+                Destroy(obstacleObject.transform.parent.gameObject);
+            }
+            else
+            {
+                Destroy(obstacleObject);
+            }
+        }
     }
 }

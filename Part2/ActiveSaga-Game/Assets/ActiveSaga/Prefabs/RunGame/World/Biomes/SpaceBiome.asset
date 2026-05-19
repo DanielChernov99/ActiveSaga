@@ -13,4 +13,19 @@ MonoBehaviour:
   m_Name: SpaceBiome
   m_EditorClassIdentifier: Assembly-CSharp::BiomeData
   biomeType: 2
-  spawnables: []
+  spawnables:
+  - itemName: tunnel jump
+    prefab: {fileID: 931721001811557903, guid: b8234f174fc12c4429562c2e14c02853, type: 3}
+    cost: 1
+    weight: 10
+    type: 0
+  - itemName: coin
+    prefab: {fileID: 808907983557633464, guid: 5f88eee03c2339243bde97c0ae9b1acf, type: 3}
+    cost: 1
+    weight: 10
+    type: 4
+  - itemName: enemy
+    prefab: {fileID: 8345581499367287098, guid: d65675ddcacfa7440b6e3fbb57517189, type: 3}
+    cost: 1
+    weight: 10
+    type: 2
