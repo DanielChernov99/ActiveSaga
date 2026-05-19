@@ -53,12 +53,7 @@ public class ObstacleSpawner : MonoBehaviour
 
             if (enemyRunner != null)
             {
-                enemyRunner.Initialize(player, statsTracker);
-                Debug.Log(
-                    "Spawned " + item.type +
-                    " item: " + item.itemName +
-                    " at " + spawnPosition
-                );
+                enemyRunner.Initialize(player, statsTracker);              
             }
 
             CoinCollectible coin = obj.GetComponent<CoinCollectible>();
