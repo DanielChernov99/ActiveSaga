@@ -57,10 +57,10 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 116
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!136 &3445870391392631519
 CapsuleCollider:
@@ -99,6 +99,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Entities.EnemyController
   currentState: 0
   walkStateName: Walk
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  groundRayHeight: 3
+  groundRayDistance: 10
+  groundOffset: -0.5
 --- !u!1001 &294501592227783346
 PrefabInstance:
   m_ObjectHideFlags: 0
