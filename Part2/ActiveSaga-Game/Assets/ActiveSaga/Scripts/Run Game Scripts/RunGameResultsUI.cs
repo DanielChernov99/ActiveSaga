@@ -1,10 +1,26 @@
 using ActiveSaga.Common.GameSession;
+using ActiveSaga.Common.Networking;
 using ActiveSaga.Common.UI;
 
 namespace ActiveSaga.RunGame
 {
     public class RunGameResultsUI : EndGameResultsViewBase
     {
+        protected override string BuildMoneyEarnedText(
+            ServerGameResultResponse response,
+            GameStatsSnapshot statsSnapshot
+        )
+        {
+            RunGameStatsSnapshot runStats = statsSnapshot as RunGameStatsSnapshot;
+
+            if (runStats == null)
+            {
+                return "0";
+            }
+
+            return runStats.coinsCollected.ToString();
+        }
+
         protected override void BuildGameSpecificStats(
             GameStatsSnapshot statsSnapshot,
             out ResultStat stat1,

@@ -89,8 +89,7 @@ namespace ActiveSaga.Common.UI
 
             SetText(timeValueText, FormatDuration(durationSeconds));
             SetText(xpEarnedValueText, GetTotalXp(response).ToString());
-            SetText(moneyEarnedValueText, GetTotalMoney(response).ToString());
-
+            SetText(moneyEarnedValueText, BuildMoneyEarnedText(response, statsSnapshot));
             UpdateLevelSection(response);
             UpdateGameSpecificStats(statsSnapshot);
         }
@@ -119,6 +118,13 @@ namespace ActiveSaga.Common.UI
             out ResultStat stat2,
             out ResultStat stat3
         );
+        protected virtual string BuildMoneyEarnedText(
+        ServerGameResultResponse response,
+        GameStatsSnapshot statsSnapshot
+        )
+        {
+            return GetTotalMoney(response).ToString();
+        }
 
         private void UpdateLevelSection(ServerGameResultResponse response)
         {
