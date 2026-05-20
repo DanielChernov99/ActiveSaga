@@ -9,7 +9,7 @@ namespace ActiveSaga.Common.Networking
     {
         [Header("API Settings")]
         [SerializeField] private string baseUrl = "http://localhost:3000";
-        [SerializeField] private string completeGameEndpoint = "/api/game-sessions/complete";
+        [SerializeField] private string completeGameEndpoint = "/api/player/complete-game-session";
 
         public async Task<ServerGameResultResponse> SubmitGameResultAsync(string jsonPayload)
         {
