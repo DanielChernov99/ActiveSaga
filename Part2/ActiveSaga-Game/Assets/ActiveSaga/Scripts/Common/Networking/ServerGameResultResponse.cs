@@ -7,36 +7,56 @@ namespace ActiveSaga.Common.Networking
     {
         public bool success;
         public string message;
+        public bool alreadyProcessed;
 
-        public bool leveledUp;
-        public int previousLevel;
-
-        public ServerPlayerProgression player;
         public ServerRewardResult rewards;
+        public ServerLevelResult level;
+        public ServerUpdatedStats updatedStats;
 
         [NonSerialized] public string rawJson;
         [NonSerialized] public string errorMessage;
     }
 
     [Serializable]
-    public class ServerPlayerProgression
+    public class ServerRewardResult
     {
-        public int level;
-        public int currentXp;
-        public int xpNeededForNextLevel;
-        public int money;
-        public int totalEarnedXp;
+        public int gameXpEarned;
+        public int gameCoinsEarned;
+
+        public int questXpEarned;
+        public int questCoinsEarned;
+
+        public int totalXpEarned;
+        public int totalCoinsEarned;
     }
 
     [Serializable]
-    public class ServerRewardResult
+    public class ServerLevelResult
     {
-        public int gameplayXp;
-        public int missionBonusXp;
-        public int totalXp;
+        public int before;
+        public int after;
+        public bool leveledUp;
+        public ServerLevelInfo levelInfo;
+    }
 
-        public int gameplayMoney;
-        public int missionBonusMoney;
-        public int totalMoney;
+    [Serializable]
+    public class ServerLevelInfo
+    {
+        public int level;
+        public int currentLevelXp;
+        public int nextLevelXp;
+        public int xpIntoCurrentLevel;
+        public int xpNeededForNextLevel;
+    }
+
+    [Serializable]
+    public class ServerUpdatedStats
+    {
+        public int level;
+        public int xp;
+        public int coins;
+        public float totalDistanceRun;
+        public float totalTimeInGame;
+        public int totalJumps;
     }
 }

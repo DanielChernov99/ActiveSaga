@@ -128,7 +128,7 @@ namespace ActiveSaga.Common.UI
 
         private void UpdateLevelSection(ServerGameResultResponse response)
         {
-            if (response.player == null)
+            if (response.level == null || response.updatedStats == null)
             {
                 SetText(levelUpText, "PROGRESSION MISSING");
                 SetText(currentLevelText, "CURRENT LEVEL: -");
@@ -142,27 +142,35 @@ namespace ActiveSaga.Common.UI
                 return;
             }
 
-            if (response.leveledUp)
+            if (response.level.leveledUp)
             {
-                SetText(levelUpText, "LEVEL UP! " + response.previousLevel + " -> " + response.player.level);
+                SetText(levelUpText, "LEVEL UP! " + response.level.before + " -> " + response.level.after);
             }
             else
             {
                 SetText(levelUpText, "NO LEVEL UP");
             }
 
-            SetText(currentLevelText, "CURRENT LEVEL: " + response.player.level);
-            SetText(xpProgressText, "XP: " + response.player.currentXp + " / " + response.player.xpNeededForNextLevel);
+            SetText(currentLevelText, "CURRENT LEVEL: " + response.level.after);
+
+            int xpIntoCurrentLevel = 0;
+            int xpNeededForNextLevel = 0;
+
+            if (response.level.levelInfo != null)
+            {
+                xpIntoCurrentLevel = response.level.levelInfo.xpIntoCurrentLevel;
+                xpNeededForNextLevel = response.level.levelInfo.xpNeededForNextLevel;
+            }
+
+            SetText(xpProgressText, "XP: " + xpIntoCurrentLevel + " / " + xpNeededForNextLevel);
 
             if (xpBarFill != null)
             {
                 float fillAmount = 0f;
 
-                if (response.player.xpNeededForNextLevel > 0)
+                if (xpNeededForNextLevel > 0)
                 {
-                    fillAmount = Mathf.Clamp01(
-                        (float)response.player.currentXp / response.player.xpNeededForNextLevel
-                    );
+                    fillAmount = Mathf.Clamp01((float)xpIntoCurrentLevel / xpNeededForNextLevel);
                 }
 
                 xpBarFill.fillAmount = fillAmount;
@@ -208,7 +216,7 @@ namespace ActiveSaga.Common.UI
                 return 0;
             }
 
-            return response.rewards.totalXp;
+            return response.rewards.totalXpEarned;
         }
 
         private int GetTotalMoney(ServerGameResultResponse response)
@@ -218,7 +226,7 @@ namespace ActiveSaga.Common.UI
                 return 0;
             }
 
-            return response.rewards.totalMoney;
+            return response.rewards.totalCoinsEarned;
         }
 
         private string FormatDuration(float totalSeconds)

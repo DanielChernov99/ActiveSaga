@@ -33,6 +33,11 @@ namespace ActiveSaga.Common.Networking
             Token = token;
         }
 
+        public void ClearToken()
+        {
+            Token = "";
+        }
+
         public bool HasToken()
         {
             return !string.IsNullOrWhiteSpace(Token);

@@ -7,6 +7,7 @@ namespace ActiveSaga.FightGame
         public int wavesCompleted;
         public int enemiesKilled;
         public int successfulDodges;
+        public float bossDamageDealt;
 
         public override GameType GameType => GameType.FightGame;
 
@@ -15,7 +16,8 @@ namespace ActiveSaga.FightGame
             return "{"
                    + "\"wavesCompleted\":" + wavesCompleted + ","
                    + "\"enemiesKilled\":" + enemiesKilled + ","
-                   + "\"successfulDodges\":" + successfulDodges
+                   + "\"dodges\":" + successfulDodges + ","
+                   + "\"bossDamageDealt\":" + bossDamageDealt
                    + "}";
         }
     }

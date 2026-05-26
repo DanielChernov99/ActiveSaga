@@ -3619,9 +3619,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.GameSession.GameSessionManager
   gameType: 1
-  startSessionOnStart: 0
+  startSessionOnStart: 1
   statsTracker: {fileID: 1112345725}
-  submitterBehaviour: {fileID: 0}
+  submitterBehaviour: {fileID: 1112345727}
   gameplayHUD: {fileID: 997664001}
   pausePanel: {fileID: 0}
   hideGameplayHUDWhilePaused: 0

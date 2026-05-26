@@ -8,12 +8,14 @@ namespace ActiveSaga.FightGame
         private int wavesCompleted;
         private int enemiesKilled;
         private int successfulDodges;
+        private float bossDamageDealt;
 
         public override GameType GameType => GameType.FightGame;
 
         public int WavesCompleted => wavesCompleted;
         public int EnemiesKilled => enemiesKilled;
         public int SuccessfulDodges => successfulDodges;
+        public float BossDamageDealt => bossDamageDealt;
 
         private void OnEnable()
         {
@@ -34,6 +36,7 @@ namespace ActiveSaga.FightGame
             wavesCompleted = 0;
             enemiesKilled = 0;
             successfulDodges = 0;
+            bossDamageDealt = 0f;
         }
 
         public void AddWaveCompleted()
@@ -49,6 +52,16 @@ namespace ActiveSaga.FightGame
         public void AddSuccessfulDodge()
         {
             successfulDodges++;
+        }
+
+        public void AddBossDamage(float amount)
+        {
+            if (amount <= 0f)
+            {
+                return;
+            }
+
+            bossDamageDealt += amount;
         }
 
         private void OnWaveCompleted(WaveCompletedEvent e)
@@ -81,7 +94,8 @@ namespace ActiveSaga.FightGame
             {
                 wavesCompleted = wavesCompleted,
                 enemiesKilled = enemiesKilled,
-                successfulDodges = successfulDodges
+                successfulDodges = successfulDodges,
+                bossDamageDealt = bossDamageDealt
             };
         }
     }

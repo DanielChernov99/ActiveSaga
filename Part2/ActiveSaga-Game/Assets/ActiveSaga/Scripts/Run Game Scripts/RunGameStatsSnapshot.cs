@@ -11,7 +11,6 @@ namespace ActiveSaga.RunGame
 
         public int totalJumps;
         public int totalSquats;
-        
 
         public int obstacleCrashes;
         public int obstacleGrazes;
@@ -22,14 +21,14 @@ namespace ActiveSaga.RunGame
         {
             string distance = distanceMeters.ToString("0.###", CultureInfo.InvariantCulture);
 
+            int obstaclesAvoided = obstacleGrazes;
+
             return "{"
-                   + "\"distanceMeters\":" + distance + ","
+                   + "\"distanceRun\":" + distance + ","
+                   + "\"jumps\":" + totalJumps + ","
+                   + "\"coinsCollected\":" + coinsCollected + ","
                    + "\"enemiesKilled\":" + enemiesKilled + ","
-                   + "\"totalJumps\":" + totalJumps + ","
-                   + "\"totalSquats\":" + totalSquats + ","
-                   + "\"obstacleCrashes\":" + obstacleCrashes + ","
-                   + "\"obstacleGrazes\":" + obstacleGrazes + ","
-                   + "\"coinsCollected\":" + coinsCollected
+                   + "\"obstaclesAvoided\":" + obstaclesAvoided
                    + "}";
         }
     }

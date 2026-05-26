@@ -20,7 +20,7 @@ namespace ActiveSaga.Common.GameSession
 
             sb.Append("{");
 
-            AppendString(sb, "sessionId", sessionId);
+            AppendString(sb, "clientSessionId", sessionId);
             sb.Append(",");
 
             AppendString(sb, "startedUtc", startedUtc);
@@ -29,21 +29,54 @@ namespace ActiveSaga.Common.GameSession
             AppendString(sb, "endedUtc", endedUtc);
             sb.Append(",");
 
-            AppendString(sb, "gameType", gameType.ToString());
+            AppendString(sb, "gameType", ConvertGameTypeForServer(gameType));
             sb.Append(",");
 
-            AppendString(sb, "endReason", endReason.ToString());
+            AppendString(sb, "endReason", ConvertEndReasonForServer(endReason));
             sb.Append(",");
 
             AppendNumber(sb, "durationSeconds", durationSeconds);
             sb.Append(",");
 
-            sb.Append("\"gameStats\":");
+            sb.Append("\"stats\":");
             sb.Append(statsJson);
 
             sb.Append("}");
 
             return sb.ToString();
+        }
+
+        private static string ConvertGameTypeForServer(GameType gameType)
+        {
+            switch (gameType)
+            {
+                case GameType.RunGame:
+                    return "RUN";
+
+                case GameType.FightGame:
+                    return "FIGHT";
+
+                default:
+                    return gameType.ToString().ToUpperInvariant();
+            }
+        }
+
+        private static string ConvertEndReasonForServer(GameEndReason endReason)
+        {
+            switch (endReason)
+            {
+                case GameEndReason.GameOver:
+                    return "GAME_OVER";
+
+                case GameEndReason.GameWon:
+                    return "GAME_WON";
+
+                case GameEndReason.PlayerQuit:
+                    return "QUIT";
+
+                default:
+                    return "UNKNOWN";
+            }
         }
 
         private static void AppendString(StringBuilder sb, string key, string value)
