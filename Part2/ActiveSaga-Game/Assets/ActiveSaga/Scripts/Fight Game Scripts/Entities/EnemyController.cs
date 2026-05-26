@@ -15,6 +15,12 @@ namespace ActiveSaga.BossFight.Entities
         [Header("Animation")]
         [SerializeField] private string walkStateName = "Walk";
 
+        [Header("Ground Follow")]
+        [SerializeField] private LayerMask groundLayer = ~0;
+        [SerializeField] private float groundRayHeight = 3f;
+        [SerializeField] private float groundRayDistance = 10f;
+        [SerializeField] private float groundOffset = 0f;
+
         private EnemyData data;
         private Rigidbody rb;
         private Animator animator;
@@ -44,7 +50,6 @@ namespace ActiveSaga.BossFight.Entities
             rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
 
             rb.constraints =
-                RigidbodyConstraints.FreezePositionY |
                 RigidbodyConstraints.FreezeRotationX |
                 RigidbodyConstraints.FreezeRotationY |
                 RigidbodyConstraints.FreezeRotationZ;
@@ -72,6 +77,7 @@ namespace ActiveSaga.BossFight.Entities
 
             CalculateMoveDirection();
             ResetPhysics();
+            SnapToGround();
             PlayWalkAnimation();
 
             EventManager.Trigger(new EnemySpawnedEvent
@@ -149,13 +155,52 @@ namespace ActiveSaga.BossFight.Entities
             if (currentState != EnemyState.Moving)
                 return;
 
+            if (rb == null)
+                return;
+
             Vector3 newPosition =
                 rb.position +
                 moveDirection * currentSpeed * Time.fixedDeltaTime;
 
-            newPosition.y = rb.position.y;
+            if (TryGetGroundPosition(newPosition, out Vector3 groundedPosition))
+            {
+                newPosition = groundedPosition;
+            }
 
             rb.MovePosition(newPosition);
+        }
+
+        private bool TryGetGroundPosition(Vector3 position, out Vector3 groundPosition)
+        {
+            Vector3 rayOrigin = position + Vector3.up * groundRayHeight;
+            float rayDistance = groundRayHeight + groundRayDistance;
+
+            if (Physics.Raycast(
+                rayOrigin,
+                Vector3.down,
+                out RaycastHit hit,
+                rayDistance,
+                groundLayer,
+                QueryTriggerInteraction.Ignore))
+            {
+                groundPosition = position;
+                groundPosition.y = hit.point.y + groundOffset;
+                return true;
+            }
+
+            groundPosition = position;
+            return false;
+        }
+
+        private void SnapToGround()
+        {
+            if (rb == null)
+                return;
+
+            if (TryGetGroundPosition(rb.position, out Vector3 groundedPosition))
+            {
+                rb.position = groundedPosition;
+            }
         }
 
         private void OnTriggerEnter(Collider other)
