@@ -15,7 +15,7 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Obstacle_Crash"))
         {
-            HandleCrash();
+            HandleCrash(collision.gameObject);
         }
     }
 
@@ -23,7 +23,7 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         if (hit.gameObject.CompareTag("Obstacle_Crash"))
         {
-            HandleCrash();
+            HandleCrash(hit.gameObject);
         }
     }
 
@@ -31,11 +31,11 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         if (other.CompareTag("Obstacle_Crash"))
         {
-            HandleCrash();
+            HandleCrash(other.gameObject);
         }
     }
 
-    private void HandleCrash()
+    private void HandleCrash(GameObject obstacleObject)
     {
         if (Time.time - lastCrashTime < gracePeriod)
         {
@@ -45,6 +45,43 @@ public class PlayerCollisionHandler : MonoBehaviour
         lastCrashTime = Time.time;
 
         Debug.Log("CRASH! Hit the main obstacle.");
+
         OnObstacleCrash?.Invoke();
+
+        GameObject objectToDestroy = GetSafeObjectToDestroy(obstacleObject);
+
+        if (objectToDestroy != null)
+        {
+            Destroy(objectToDestroy);
+        }
+    }
+
+    private GameObject GetSafeObjectToDestroy(GameObject hitObject)
+    {
+        if (hitObject == null)
+        {
+            return null;
+        }
+
+        Transform current = hitObject.transform;
+
+        while (current.parent != null)
+        {
+            Transform parent = current.parent;
+
+            if (parent.GetComponent<TileInfo>() != null)
+            {
+                return current.gameObject;
+            }
+
+            if (parent.name == "ContentRoot")
+            {
+                return current.gameObject;
+            }
+
+            current = parent;
+        }
+
+        return hitObject;
     }
 }

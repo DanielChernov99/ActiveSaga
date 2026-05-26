@@ -185,24 +185,55 @@ namespace ActiveSaga.MainScreen.Logic
 
         public void SelectRunGame()
         {
-            selectedGameMode = SelectedGameMode.Run;
+            if (selectedGameMode == SelectedGameMode.Run)
+            {
+                selectedGameMode = SelectedGameMode.None;
+            }
+            else
+            {
+                selectedGameMode = SelectedGameMode.Run;
+            }
+
             RefreshUI();
         }
 
         public void SelectFightGame()
         {
-            selectedGameMode = SelectedGameMode.Fight;
+            if (selectedGameMode == SelectedGameMode.Fight)
+            {
+                selectedGameMode = SelectedGameMode.None;
+            }
+            else
+            {
+                selectedGameMode = SelectedGameMode.Fight;
+            }
+
             RefreshUI();
         }
 
         public void SelectEasy()
         {
-            selectedDifficulty = SelectedGameDifficulty.Easy;
+            if (selectedDifficulty == SelectedGameDifficulty.Easy)
+            {
+                selectedDifficulty = SelectedGameDifficulty.None;
+            }
+            else
+            {
+                selectedDifficulty = SelectedGameDifficulty.Easy;
+            }
+
             RefreshUI();
         }
 
         public void SelectMedium()
         {
+            if (selectedDifficulty == SelectedGameDifficulty.Medium)
+            {
+                selectedDifficulty = SelectedGameDifficulty.None;
+                RefreshUI();
+                return;
+            }
+
             if (!CanUseDifficulty(SelectedGameDifficulty.Medium))
             {
                 Debug.LogWarning("Medium difficulty is locked. Player level: " + playerLevel);
@@ -215,6 +246,13 @@ namespace ActiveSaga.MainScreen.Logic
 
         public void SelectHard()
         {
+            if (selectedDifficulty == SelectedGameDifficulty.Hard)
+            {
+                selectedDifficulty = SelectedGameDifficulty.None;
+                RefreshUI();
+                return;
+            }
+
             if (!CanUseDifficulty(SelectedGameDifficulty.Hard))
             {
                 Debug.LogWarning("Hard difficulty is locked. Player level: " + playerLevel);
@@ -267,9 +305,10 @@ namespace ActiveSaga.MainScreen.Logic
                 hardButton.interactable = CanUseDifficulty(SelectedGameDifficulty.Hard);
             }
 
-            if (!CanUseDifficulty(selectedDifficulty))
+            if (selectedDifficulty != SelectedGameDifficulty.None &&
+                !CanUseDifficulty(selectedDifficulty))
             {
-                selectedDifficulty = SelectedGameDifficulty.Easy;
+                selectedDifficulty = SelectedGameDifficulty.None;
             }
         }
 

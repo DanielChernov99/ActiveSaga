@@ -3571,7 +3571,7 @@ GameObject:
   - component: {fileID: 1112345723}
   - component: {fileID: 1112345726}
   - component: {fileID: 1112345725}
-  - component: {fileID: 1112345724}
+  - component: {fileID: 1112345727}
   m_Layer: 0
   m_Name: RunGameSessionManager
   m_TagString: Untagged
@@ -3594,30 +3594,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 514559903}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1112345724
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1112345722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de839aac9d8cfbd42bb657a7274766fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.Networking.MockGameResultSubmitter
-  delayMilliseconds: 500
-  mockGameplayXp: 120
-  mockMissionBonusXp: 50
-  mockGameplayMoney: 25
-  mockMissionBonusMoney: 10
-  mockLeveledUp: 0
-  mockPreviousLevel: 1
-  mockLevel: 2
-  mockCurrentXp: 70
-  mockXpNeededForNextLevel: 150
-  mockMoney: 200
-  mockTotalEarnedXp: 270
 --- !u!114 &1112345725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3643,11 +3619,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.GameSession.GameSessionManager
   gameType: 1
-  startSessionOnStart: 0
+  startSessionOnStart: 1
   statsTracker: {fileID: 1112345725}
-  submitterBehaviour: {fileID: 0}
+  submitterBehaviour: {fileID: 1112345727}
   gameplayHUD: {fileID: 997664001}
+  pausePanel: {fileID: 0}
+  hideGameplayHUDWhilePaused: 0
   resultsUI: {fileID: 1743299712}
+--- !u!114 &1112345727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112345722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d64ec6ef0affb8644b02138145c06ea1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.Networking.ApiGameResultSubmitter
+  baseUrl: http://localhost:3000
+  completeGameEndpoint: /api/player/complete-game-session
 --- !u!1 &1120739998
 GameObject:
   m_ObjectHideFlags: 0
@@ -3751,7 +3743,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1120740002}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1743299712}
+        m_TargetAssemblyTypeName: ActiveSaga.RunGame.RunGameResultsUI, Assembly-CSharp
+        m_MethodName: ReturnToMainNew
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1120740002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4474,6 +4478,8 @@ MonoBehaviour:
   selectedBiome: 0
   biomeList:
   - {fileID: 11400000, guid: 29e7c28dc85558b47bf87b2298976ceb, type: 2}
+  - {fileID: 11400000, guid: 01a14189a0e72bd48af5fdfc385db418, type: 2}
+  - {fileID: 11400000, guid: 2d1db1d48594f95469c50b8602076d96, type: 2}
   spawner: {fileID: 1252747276}
   tileLength: 400
   tileFrontPadding: 25
@@ -4481,9 +4487,9 @@ MonoBehaviour:
   easyObstacleDistance: {x: 130, y: 170}
   mediumObstacleDistance: {x: 80, y: 120}
   hardObstacleDistance: {x: 40, y: 60}
-  easyEnemyDistance: {x: 30, y: 240}
-  mediumEnemyDistance: {x: 110, y: 160}
-  hardEnemyDistance: {x: 70, y: 110}
+  easyEnemyDistance: {x: 220, y: 300}
+  mediumEnemyDistance: {x: 140, y: 210}
+  hardEnemyDistance: {x: 80, y: 140}
   easyCoinDistance: {x: 60, y: 100}
   mediumCoinDistance: {x: 50, y: 90}
   hardCoinDistance: {x: 40, y: 80}

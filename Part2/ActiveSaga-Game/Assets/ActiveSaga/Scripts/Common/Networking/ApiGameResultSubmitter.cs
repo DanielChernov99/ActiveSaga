@@ -8,8 +8,8 @@ namespace ActiveSaga.Common.Networking
     public class ApiGameResultSubmitter : MonoBehaviour, IGameResultSubmitter
     {
         [Header("API Settings")]
-        [SerializeField] private string baseUrl = "http://localhost:5000";
-        [SerializeField] private string completeGameEndpoint = "/api/game-sessions/complete";
+        [SerializeField] private string baseUrl = "http://localhost:3000";
+        [SerializeField] private string completeGameEndpoint = "/api/player/complete-game-session";
 
         public async Task<ServerGameResultResponse> SubmitGameResultAsync(string jsonPayload)
         {
@@ -24,14 +24,26 @@ namespace ActiveSaga.Common.Networking
 
                 request.SetRequestHeader("Content-Type", "application/json");
 
-                string token = AuthTokenProvider.Instance != null
-                    ? AuthTokenProvider.Instance.Token
-                    : "";
+                string token = PlayerApiService.GetToken();
 
-                if (!string.IsNullOrWhiteSpace(token))
+                if (string.IsNullOrWhiteSpace(token))
                 {
-                    request.SetRequestHeader("Authorization", "Bearer " + token);
+                    Debug.LogError("Cannot submit game result: missing auth token.");
+
+                    return new ServerGameResultResponse
+                    {
+                        success = false,
+                        message = "Missing auth token. Please login again.",
+                        rawJson = "",
+                        errorMessage = "Missing auth token"
+                    };
                 }
+
+                request.SetRequestHeader("Authorization", "Bearer " + token);
+
+                Debug.Log("Submitting game result to: " + url);
+                Debug.Log("Authorization header was added.");
+                Debug.Log("Payload: " + jsonPayload);
 
                 UnityWebRequestAsyncOperation operation = request.SendWebRequest();
 
@@ -41,6 +53,9 @@ namespace ActiveSaga.Common.Networking
                 }
 
                 string responseText = request.downloadHandler.text;
+
+                Debug.Log("Submit game result response code: " + request.responseCode);
+                Debug.Log("Submit game result response body: " + responseText);
 
                 if (request.result != UnityWebRequest.Result.Success)
                 {

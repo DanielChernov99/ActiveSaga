@@ -5,60 +5,80 @@ namespace ActiveSaga.Common.Networking
 {
     public class MockGameResultSubmitter : MonoBehaviour, IGameResultSubmitter
     {
-        [Header("Mock Delay")]
-        [SerializeField] private int delayMilliseconds = 500;
+        [Header("Mock Settings")]
+        [SerializeField] private float fakeDelaySeconds = 1f;
 
         [Header("Mock Rewards")]
-        [SerializeField] private int mockGameplayXp = 120;
-        [SerializeField] private int mockMissionBonusXp = 50;
-        [SerializeField] private int mockGameplayMoney = 25;
-        [SerializeField] private int mockMissionBonusMoney = 10;
+        [SerializeField] private int gameXpEarned = 50;
+        [SerializeField] private int gameCoinsEarned = 20;
+        [SerializeField] private int questXpEarned = 25;
+        [SerializeField] private int questCoinsEarned = 10;
 
-        [Header("Mock Level Up")]
-        [SerializeField] private bool mockLeveledUp = false;
-        [SerializeField] private int mockPreviousLevel = 1;
-
-        [Header("Mock Player State After Server")]
-        [SerializeField] private int mockLevel = 2;
-        [SerializeField] private int mockCurrentXp = 70;
-        [SerializeField] private int mockXpNeededForNextLevel = 150;
-        [SerializeField] private int mockMoney = 200;
-        [SerializeField] private int mockTotalEarnedXp = 270;
+        [Header("Mock Progression")]
+        [SerializeField] private int levelBefore = 1;
+        [SerializeField] private int levelAfter = 1;
+        [SerializeField] private int totalPlayerXp = 150;
+        [SerializeField] private int totalPlayerCoins = 80;
+        [SerializeField] private int xpIntoCurrentLevel = 150;
+        [SerializeField] private int xpNeededForNextLevel = 350;
 
         public async Task<ServerGameResultResponse> SubmitGameResultAsync(string jsonPayload)
         {
-            await Task.Delay(delayMilliseconds);
+            if (fakeDelaySeconds > 0f)
+            {
+                int delayMs = Mathf.RoundToInt(fakeDelaySeconds * 1000f);
+                await Task.Delay(delayMs);
+            }
+
+            int totalXpEarned = gameXpEarned + questXpEarned;
+            int totalCoinsEarned = gameCoinsEarned + questCoinsEarned;
 
             return new ServerGameResultResponse
             {
                 success = true,
-                message = "Mock server response",
-
-                leveledUp = mockLeveledUp,
-                previousLevel = mockPreviousLevel,
-
-                player = new ServerPlayerProgression
-                {
-                    level = mockLevel,
-                    currentXp = mockCurrentXp,
-                    xpNeededForNextLevel = mockXpNeededForNextLevel,
-                    money = mockMoney,
-                    totalEarnedXp = mockTotalEarnedXp
-                },
+                message = "Mock game session completed successfully",
+                alreadyProcessed = false,
 
                 rewards = new ServerRewardResult
                 {
-                    gameplayXp = mockGameplayXp,
-                    missionBonusXp = mockMissionBonusXp,
-                    totalXp = mockGameplayXp + mockMissionBonusXp,
+                    gameXpEarned = gameXpEarned,
+                    gameCoinsEarned = gameCoinsEarned,
 
-                    gameplayMoney = mockGameplayMoney,
-                    missionBonusMoney = mockMissionBonusMoney,
-                    totalMoney = mockGameplayMoney + mockMissionBonusMoney
+                    questXpEarned = questXpEarned,
+                    questCoinsEarned = questCoinsEarned,
+
+                    totalXpEarned = totalXpEarned,
+                    totalCoinsEarned = totalCoinsEarned
                 },
 
-                rawJson = jsonPayload,
-                errorMessage = null
+                level = new ServerLevelResult
+                {
+                    before = levelBefore,
+                    after = levelAfter,
+                    leveledUp = levelAfter > levelBefore,
+
+                    levelInfo = new ServerLevelInfo
+                    {
+                        level = levelAfter,
+                        currentLevelXp = 0,
+                        nextLevelXp = xpIntoCurrentLevel + xpNeededForNextLevel,
+                        xpIntoCurrentLevel = xpIntoCurrentLevel,
+                        xpNeededForNextLevel = xpNeededForNextLevel
+                    }
+                },
+
+                updatedStats = new ServerUpdatedStats
+                {
+                    level = levelAfter,
+                    xp = totalPlayerXp,
+                    coins = totalPlayerCoins,
+                    totalDistanceRun = 0f,
+                    totalTimeInGame = 0f,
+                    totalJumps = 0
+                },
+
+                rawJson = "",
+                errorMessage = ""
             };
         }
     }

@@ -9620,7 +9620,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.MainScreen.UI.CoinsDisplayUI
   dashboardDataManager: {fileID: 1028540169}
-  coinsText: {fileID: 1435728610}
+  coinsText: {fileID: 27085071}
 --- !u!1001 &443880991
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -41820,10 +41820,6 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunningProgressBar
-  fillImage: {fileID: 0}
-  playerIcon: {fileID: 0}
-  backgroundBar: {fileID: 0}
-  flagIcon: {fileID: 0}
 --- !u!222 &7728648534369297051
 CanvasRenderer:
   m_ObjectHideFlags: 0

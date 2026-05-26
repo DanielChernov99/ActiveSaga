@@ -85,7 +85,7 @@ function getQuestProgressIncrement(quest, gameResult, gameRewards) {
             return durationSeconds;
 
         case 'COINS':
-            return gameRewards.coinsEarned;
+            return stats.coinsCollected;
 
         case 'KILLS':
             return stats.enemiesKilled;

@@ -267,7 +267,7 @@ MonoBehaviour:
   biomeType: 2
   trackSpawnPoints: []
   sideSpawnPoints: []
-  contentRoot: {fileID: 0}
+  contentRoot: {fileID: 2731005526435854076}
 --- !u!1 &3198656556629334761
 GameObject:
   m_ObjectHideFlags: 0

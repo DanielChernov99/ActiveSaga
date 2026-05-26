@@ -41,6 +41,12 @@ namespace ActiveSaga.MainScreen.UI
         private void Logout()
         {
             PlayerApiService.ClearToken();
+
+            if (AuthTokenProvider.Instance != null)
+            {
+                AuthTokenProvider.Instance.ClearToken();
+            }
+
             GameLaunchData.Clear();
 
             SceneManager.LoadScene(loginSceneName);

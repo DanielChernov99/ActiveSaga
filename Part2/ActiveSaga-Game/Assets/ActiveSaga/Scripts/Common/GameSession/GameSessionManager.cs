@@ -130,7 +130,7 @@ namespace ActiveSaga.Common.GameSession
             startedRealtime = Time.realtimeSinceStartup;
             pausedStartedRealtime = 0f;
             totalPausedSeconds = 0f;
-            gameplayTimerStarted = false;
+            gameplayTimerStarted = false; //change if we want to count time before we start running 
 
             if (statsTracker != null)
             {

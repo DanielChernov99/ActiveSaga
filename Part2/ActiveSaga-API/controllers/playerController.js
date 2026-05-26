@@ -136,6 +136,7 @@ exports.completeGameSession = async (req, res) => {
                 .populate('dailyQuests.questId');
 
             return res.status(200).json({
+                success: true,
                 message: 'This game session was already processed',
                 alreadyProcessed: true,
                 session: existingSession,
@@ -202,6 +203,7 @@ exports.completeGameSession = async (req, res) => {
         });
 
         return res.status(200).json({
+            success: true,
             message: 'Game session completed successfully',
             alreadyProcessed: false,
 

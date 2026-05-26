@@ -31,6 +31,8 @@ const LEVEL_THRESHOLDS = [
     2100000
 ];
 
+
+
 function toSafeNumber(value) {
     const numberValue = Number(value);
 
@@ -51,15 +53,19 @@ function normalizeGameResult(body) {
         durationSeconds: toSafeNumber(body.durationSeconds),
 
         stats: {
-            distanceRun: toSafeNumber(stats.distanceRun),
-            enemiesKilled: toSafeNumber(stats.enemiesKilled),
-            dodges: toSafeNumber(stats.dodges),
-            wavesCompleted: toSafeNumber(stats.wavesCompleted),
-            obstaclesAvoided: toSafeNumber(stats.obstaclesAvoided),
-            bossDamageDealt: toSafeNumber(stats.bossDamageDealt)
+        distanceRun: toSafeNumber(stats.distanceRun),
+        jumps: toSafeNumber(stats.jumps),
+        coinsCollected: toSafeNumber(stats.coinsCollected),
+        enemiesKilled: toSafeNumber(stats.enemiesKilled),
+        dodges: toSafeNumber(stats.dodges),
+        wavesCompleted: toSafeNumber(stats.wavesCompleted),
+        obstaclesAvoided: toSafeNumber(stats.obstaclesAvoided),
+        bossDamageDealt: toSafeNumber(stats.bossDamageDealt)
         }
     };
 }
+
+const COIN_VALUE = 10;
 
 function calculateGameRewards(gameResult) {
     const { gameType, durationSeconds, stats } = gameResult;
@@ -74,12 +80,10 @@ function calculateGameRewards(gameResult) {
         xp += Math.floor(stats.distanceRun * 0.1);
         xp += stats.enemiesKilled * 8;
         xp += stats.obstaclesAvoided * 3;
+        xp += stats.jumps * 1;
         xp += timeXp;
 
-        coins += Math.floor(stats.distanceRun * 0.02);
-        coins += stats.enemiesKilled * 2;
-        coins += stats.obstaclesAvoided;
-        coins += timeCoins;
+        coins += stats.coinsCollected * COIN_VALUE;
     }
 
     if (gameType === 'FIGHT') {
@@ -134,6 +138,7 @@ function applyGameResultToProfile(profile, gameResult, gameRewards) {
 
     if (gameResult.gameType === 'RUN') {
         profile.totalDistanceRun += gameResult.stats.distanceRun;
+        profile.totalJumps += gameResult.stats.jumps;
     }
 }
 

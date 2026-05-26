@@ -67,6 +67,12 @@ const playerProfileSchema = new mongoose.Schema({
         default: 0
     },
 
+    totalJumps: {
+    type: Number,
+    default: 0
+    },
+
+
     inventory: {
         type: [String],
         default: []
