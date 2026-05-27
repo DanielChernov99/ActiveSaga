@@ -339,11 +339,16 @@ namespace ActiveSaga.BossFight.Waves
                 yield break;
             }
 
+            float bossDamagePerSuccessfulWave = difficultyConfig != null
+            ? difficultyConfig.GetBossDamagePerSuccessfulWave()
+            : 100f;
+
             bool waveSuccess = waveEvaluator.EvaluateWave(
                 data,
                 entityTracker.TotalSpawnedThisWave,
                 entityTracker.SuccessfullyHandledThisWave,
-                entityTracker.PlayerHitCountThisWave
+                entityTracker.PlayerHitCountThisWave,
+                bossDamagePerSuccessfulWave
             );
 
             Debug.Log($"Wave {currentWaveIndex + 1} Cleared.");

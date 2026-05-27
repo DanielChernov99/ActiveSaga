@@ -95,7 +95,8 @@ namespace ActiveSaga.FightGame
                 wavesCompleted = wavesCompleted,
                 enemiesKilled = enemiesKilled,
                 successfulDodges = successfulDodges,
-                bossDamageDealt = bossDamageDealt
+                bossDamageDealt = bossDamageDealt,
+                difficulty = GameLaunchData.GetDifficultyNumber()
             };
         }
     }

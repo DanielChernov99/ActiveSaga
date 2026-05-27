@@ -20962,8 +20962,8 @@ GameObject:
   - component: {fileID: 1424445904}
   - component: {fileID: 1424445907}
   - component: {fileID: 1424445906}
-  - component: {fileID: 1424445905}
   - component: {fileID: 1424445908}
+  - component: {fileID: 1424445909}
   m_Layer: 0
   m_Name: FightGameSessionManager
   m_TagString: Untagged
@@ -20986,30 +20986,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 336628290}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1424445905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1424445903}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de839aac9d8cfbd42bb657a7274766fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.Networking.MockGameResultSubmitter
-  delayMilliseconds: 500
-  mockGameplayXp: 120
-  mockMissionBonusXp: 50
-  mockGameplayMoney: 25
-  mockMissionBonusMoney: 10
-  mockLeveledUp: 0
-  mockPreviousLevel: 1
-  mockLevel: 2
-  mockCurrentXp: 70
-  mockXpNeededForNextLevel: 150
-  mockMoney: 200
-  mockTotalEarnedXp: 270
 --- !u!114 &1424445906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21037,7 +21013,7 @@ MonoBehaviour:
   gameType: 2
   startSessionOnStart: 1
   statsTracker: {fileID: 1424445906}
-  submitterBehaviour: {fileID: 1424445907}
+  submitterBehaviour: {fileID: 1424445909}
   gameplayHUD: {fileID: 219483824}
   pausePanel: {fileID: 795353504}
   hideGameplayHUDWhilePaused: 0
@@ -21057,6 +21033,20 @@ MonoBehaviour:
   useEscapeKey: 1
   useRightControllerBButton: 1
   logOnlyWhenPauseTriggered: 1
+--- !u!114 &1424445909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1424445903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d64ec6ef0affb8644b02138145c06ea1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.Networking.ApiGameResultSubmitter
+  baseUrl: http://localhost:3000
+  completeGameEndpoint: /api/player/complete-game-session
 --- !u!1001 &1447564777
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25852,7 +25842,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1783312463}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
