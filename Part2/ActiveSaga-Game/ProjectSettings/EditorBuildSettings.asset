@@ -17,7 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ActiveSaga/Scenes/Run Game.unity
     guid: 810d895738ac5b048a14ed25c30fdc93
-  - enabled: 0
+  - enabled: 1
     path: Assets/ActiveSaga/Scenes/Fight Game.unity
     guid: ac55cb9ce0858984d94304efc3ac8d0c
   m_configObjects:

@@ -1,6 +1,7 @@
 using UnityEngine;
 using ActiveSaga.BossFight.Data;
 using ActiveSaga.BossFight.Entities;
+using ActiveSaga.FightGame;
 
 namespace ActiveSaga.BossFight.Waves
 {
@@ -10,7 +11,8 @@ namespace ActiveSaga.BossFight.Waves
             WaveData data,
             int totalSpawnedThisWave,
             int successfullyHandledThisWave,
-            int playerHitCountThisWave)
+            int playerHitCountThisWave,
+            float bossDamagePerSuccessfulWave)
         {
             if (data == null)
             {
@@ -26,7 +28,7 @@ namespace ActiveSaga.BossFight.Waves
             }
 
             float successRate = (float)successfullyHandledThisWave / totalSpawnedThisWave;
-            bool success = successRate >= 0.7f;
+            bool success = successRate >= 0.8f;
 
             Debug.Log($"Wave {data.waveType} Result: Handled {successfullyHandledThisWave}/{totalSpawnedThisWave} ({successRate:P0}). Hit: {playerHitCountThisWave}");
 
@@ -36,7 +38,18 @@ namespace ActiveSaga.BossFight.Waves
 
                 if (BossController.Instance != null)
                 {
-                    BossController.Instance.TakeDamage(100f);
+                    BossController.Instance.TakeDamage(bossDamagePerSuccessfulWave);
+
+                    FightGameStatsTracker statsTracker = Object.FindFirstObjectByType<FightGameStatsTracker>();
+
+                    if (statsTracker != null)
+                    {
+                        statsTracker.AddBossDamage(bossDamagePerSuccessfulWave);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[WaveEvaluator] FightGameStatsTracker was not found, boss damage was not recorded in stats.");
+                    }
                 }
                 else
                 {

@@ -30,9 +30,9 @@ namespace ActiveSaga.BossFight.Waves
             dynamicWave.waveType = type;
             dynamicWave.steps = new List<WaveStep>();
 
-            float countMult = difficultyConfig != null
-                ? difficultyConfig.GetCountMultiplier(index)
-                : 1f;
+            int entityCount = difficultyConfig != null
+                ? difficultyConfig.GetEntityCount(index)
+                : 7;
 
             dynamicWave.steps.Add(new WaveStep
             {
@@ -43,37 +43,42 @@ namespace ActiveSaga.BossFight.Waves
 
             if (type == WaveType.Combat)
             {
-                int enemyCount = Mathf.RoundToInt(3 * countMult);
-
-                for (int i = 0; i < enemyCount; i++)
-                {
-                    dynamicWave.steps.Add(new WaveStep
-                    {
-                        type = WaveStep.StepType.SpawnEnemy,
-                        enemyData = GetRandomEnemyData(),
-                        spawnOffset = new Vector3(Random.Range(-3f, 3f), 0, Random.Range(4f, 8f)),
-                        delayAfterStep = Random.Range(0.5f, 1.5f)
-                    });
-                }
+                AddEnemySteps(dynamicWave, entityCount);
             }
             else
             {
-                int baseCount = Random.Range(3, 6);
-                int projectileCount = Mathf.Clamp(Mathf.RoundToInt(baseCount * countMult), 3, 7);
-
-                for (int i = 0; i < projectileCount; i++)
-                {
-                    dynamicWave.steps.Add(new WaveStep
-                    {
-                        type = WaveStep.StepType.SpawnProjectile,
-                        projectileData = GetRandomProjectileData(),
-                        spawnOffset = new Vector3(Random.Range(-3f, 3f), 1f, Random.Range(3f, 6f)),
-                        delayAfterStep = Random.Range(0.8f, 1.5f)
-                    });
-                }
+                AddProjectileSteps(dynamicWave, entityCount);
             }
 
             return dynamicWave;
+        }
+
+        private void AddEnemySteps(WaveData dynamicWave, int enemyCount)
+        {
+            for (int i = 0; i < enemyCount; i++)
+            {
+                dynamicWave.steps.Add(new WaveStep
+                {
+                    type = WaveStep.StepType.SpawnEnemy,
+                    enemyData = GetRandomEnemyData(),
+                    spawnOffset = new Vector3(Random.Range(-3f, 3f), 0, Random.Range(4f, 8f)),
+                    delayAfterStep = Random.Range(0.5f, 1.5f)
+                });
+            }
+        }
+
+        private void AddProjectileSteps(WaveData dynamicWave, int projectileCount)
+        {
+            for (int i = 0; i < projectileCount; i++)
+            {
+                dynamicWave.steps.Add(new WaveStep
+                {
+                    type = WaveStep.StepType.SpawnProjectile,
+                    projectileData = GetRandomProjectileData(),
+                    spawnOffset = new Vector3(Random.Range(-3f, 3f), 1f, Random.Range(3f, 6f)),
+                    delayAfterStep = Random.Range(0.8f, 1.5f)
+                });
+            }
         }
 
         private EnemyData GetRandomEnemyData()
