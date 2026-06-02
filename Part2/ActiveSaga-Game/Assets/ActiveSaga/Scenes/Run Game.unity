@@ -3192,9 +3192,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRHUDFollow
   headTransform: {fileID: 2133962748}
-  localOffset: {x: 0, y: -0.08, z: 0.85}
+  localOffset: {x: -0.5, y: -0.08, z: 1}
   followSpeed: 8
-  followRotation: 1
+  followRotation: 0
 --- !u!114 &997664007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6123,7 +6123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRHUDFollow
   headTransform: {fileID: 2133962748}
-  localOffset: {x: -1, y: 0, z: 3}
+  localOffset: {x: -1, y: 0.5, z: 3}
   followSpeed: 8
   followRotation: 1
 --- !u!1 &1752886871
@@ -7854,6 +7854,10 @@ PrefabInstance:
     - target: {fileID: 2626757739553014894, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3074471628601745017, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_CastDistance
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3904471525139099824, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
