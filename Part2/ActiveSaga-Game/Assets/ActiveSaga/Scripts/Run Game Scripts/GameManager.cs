@@ -137,6 +137,8 @@ public class GameManager : MonoBehaviour
         if (gameSessionManager != null)
         {
             gameSessionManager.StartSession();
+            gameSessionManager.StartGameplayTimerIfNeeded();
+
         }
         else
         {
