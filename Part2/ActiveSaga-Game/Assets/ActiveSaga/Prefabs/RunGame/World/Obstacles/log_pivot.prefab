@@ -31,8 +31,62 @@ Transform:
   m_Children:
   - {fileID: 6266473202749461767}
   - {fileID: 5778354640773783749}
+  - {fileID: 3174087412463777543}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2245574583843181874
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3174087412463777543}
+  - component: {fileID: 4470820413454126364}
+  m_Layer: 0
+  m_Name: Jump_Check_Zone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3174087412463777543
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2245574583843181874}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8093650496213778072}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4470820413454126364
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2245574583843181874}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 7.4000797, y: 0.7999351, z: 1.3118012}
+  m_Center: {x: -0.9698639, y: -0.100032434, z: -0.19059932}
 --- !u!1 &3237324073446057845
 GameObject:
   m_ObjectHideFlags: 0
@@ -49,7 +103,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6266473202749461767
 Transform:
   m_ObjectHideFlags: 0
@@ -84,8 +138,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.616662, y: 7.7723074, z: 1}
-  m_Center: {x: -0.19166905, y: 3.3861542, z: 0}
+  m_Size: {x: 0.49932218, y: 7.7723074, z: 0.25029773}
+  m_Center: {x: -0.25033897, y: 3.3861542, z: 0.0998704}
 --- !u!1001 &560678953981862062
 PrefabInstance:
   m_ObjectHideFlags: 0

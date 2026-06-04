@@ -28,6 +28,10 @@ public class JumpAnalyzer : MonoBehaviour
     // Public property for debugging in Inspector
     public int JumpCounter { get; private set; } = 0;
 
+    // Stores the time of the last valid jump.
+    // Used by obstacle jump zones to know if the player jumped near/in the zone.
+    public float LastJumpTime { get; private set; } = -999f;
+
     private float previousHeadY;
     private float currentCooldownTimer;
 
@@ -51,6 +55,7 @@ public class JumpAnalyzer : MonoBehaviour
     private void Update()
     {
         if (bodyTracker == null) return;
+
         if (Time.deltaTime <= 0f)
         {
             return;
@@ -88,6 +93,9 @@ public class JumpAnalyzer : MonoBehaviour
             // Valid Jump detected
             // Increment local counter
             JumpCounter++;
+
+            // Save the time of this valid jump
+            LastJumpTime = Time.time;
             
             // Notify listeners
             OnJump?.Invoke();
