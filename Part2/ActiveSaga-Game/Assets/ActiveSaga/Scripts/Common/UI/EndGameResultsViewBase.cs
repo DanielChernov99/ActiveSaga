@@ -165,7 +165,7 @@ namespace ActiveSaga.Common.UI
                 return;
             }
 
-            int xpIntoCurrentLevel = response.level.levelInfo.xpIntoCurrentLevel;
+            int totalPlayerXp = response.updatedStats.xp;
             int currentLevelXp = response.level.levelInfo.currentLevelXp;
             int nextLevelXp = response.level.levelInfo.nextLevelXp;
 
@@ -181,13 +181,14 @@ namespace ActiveSaga.Common.UI
                 return;
             }
 
-            int xpNeededForCurrentLevel = nextLevelXp - currentLevelXp;
-
-            SetText(xpProgressText, "XP: " + xpIntoCurrentLevel + " / " + xpNeededForCurrentLevel);
+            SetText(xpProgressText, "XP: " + totalPlayerXp + " / " + nextLevelXp);
 
             if (xpBarFill != null)
             {
                 float fillAmount = 0f;
+
+                int xpNeededForCurrentLevel = nextLevelXp - currentLevelXp;
+                int xpIntoCurrentLevel = totalPlayerXp - currentLevelXp;
 
                 if (xpNeededForCurrentLevel > 0)
                 {
