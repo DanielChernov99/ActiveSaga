@@ -153,24 +153,45 @@ namespace ActiveSaga.Common.UI
 
             SetText(currentLevelText, "CURRENT LEVEL: " + response.level.after);
 
-            int xpIntoCurrentLevel = 0;
-            int xpNeededForNextLevel = 0;
-
-            if (response.level.levelInfo != null)
+            if (response.level.levelInfo == null)
             {
-                xpIntoCurrentLevel = response.level.levelInfo.xpIntoCurrentLevel;
-                xpNeededForNextLevel = response.level.levelInfo.xpNeededForNextLevel;
+                SetText(xpProgressText, "XP: - / -");
+
+                if (xpBarFill != null)
+                {
+                    xpBarFill.fillAmount = 0f;
+                }
+
+                return;
             }
 
-            SetText(xpProgressText, "XP: " + xpIntoCurrentLevel + " / " + xpNeededForNextLevel);
+            int xpIntoCurrentLevel = response.level.levelInfo.xpIntoCurrentLevel;
+            int currentLevelXp = response.level.levelInfo.currentLevelXp;
+            int nextLevelXp = response.level.levelInfo.nextLevelXp;
+
+            if (nextLevelXp <= currentLevelXp)
+            {
+                SetText(xpProgressText, "XP: MAX");
+
+                if (xpBarFill != null)
+                {
+                    xpBarFill.fillAmount = 1f;
+                }
+
+                return;
+            }
+
+            int xpNeededForCurrentLevel = nextLevelXp - currentLevelXp;
+
+            SetText(xpProgressText, "XP: " + xpIntoCurrentLevel + " / " + xpNeededForCurrentLevel);
 
             if (xpBarFill != null)
             {
                 float fillAmount = 0f;
 
-                if (xpNeededForNextLevel > 0)
+                if (xpNeededForCurrentLevel > 0)
                 {
-                    fillAmount = Mathf.Clamp01((float)xpIntoCurrentLevel / xpNeededForNextLevel);
+                    fillAmount = Mathf.Clamp01((float)xpIntoCurrentLevel / xpNeededForCurrentLevel);
                 }
 
                 xpBarFill.fillAmount = fillAmount;
