@@ -32,18 +32,23 @@ public class PlayerLocomotion : MonoBehaviour
     private float verticalVelocity;
     private float runIntensity;
     private bool isSquatting;
+    private bool wasStunned;
 
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
-        
-        // Safety check
+    
         if (forwardReference == null)
         {
             Debug.LogError("PlayerLocomotion: Forward Reference is missing! Assign the Camera.");
             enabled = false;
         }
-    }
+
+        if (gameManager == null)
+        {
+            Debug.LogWarning("[PlayerLocomotion] GameManager reference is NULL. Assign it in the Inspector.");
+        }
+        }
 
     private void OnEnable()
     {
@@ -88,7 +93,9 @@ public class PlayerLocomotion : MonoBehaviour
 
     private void UpdateSpeed()
     {
-        if (gameManager != null && gameManager.IsPlayerStunned())
+        bool isStunned = gameManager != null && gameManager.IsPlayerStunned();
+
+        if (isStunned)
         {
             currentSpeed = 0f;
             runIntensity = 0f;

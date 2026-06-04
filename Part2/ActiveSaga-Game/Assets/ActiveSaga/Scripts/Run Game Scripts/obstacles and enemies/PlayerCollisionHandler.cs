@@ -3,6 +3,8 @@ using System;
 
 public class PlayerCollisionHandler : MonoBehaviour
 {
+    private const string ObstacleCrashTag = "Obstacle_Crash";
+
     [Header("Settings")]
     [Tooltip("How many seconds the player is immune after a hit")]
     [SerializeField] private float gracePeriod = 2.0f;
@@ -11,28 +13,94 @@ public class PlayerCollisionHandler : MonoBehaviour
 
     private float lastCrashTime = -10f;
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Obstacle_Crash"))
-        {
-            HandleCrash(collision.gameObject);
-        }
-    }
-
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (hit.gameObject.CompareTag("Obstacle_Crash"))
-        {
-            HandleCrash(hit.gameObject);
-        }
+        TryHandleCrash(hit.gameObject);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Obstacle_Crash"))
+        TryHandleCrash(other.gameObject);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        TryHandleCrash(collision.gameObject);
+    }
+
+    private void TryHandleCrash(GameObject hitObject)
+    {
+        GameObject obstacleObject = FindObstacleCrashObject(hitObject);
+
+        if (obstacleObject == null)
         {
-            HandleCrash(other.gameObject);
+            return;
         }
+
+        HandleCrash(obstacleObject);
+    }
+
+    private GameObject FindObstacleCrashObject(GameObject hitObject)
+    {
+        if (hitObject == null)
+        {
+            return null;
+        }
+
+        // Check object itself and its parents
+        Transform current = hitObject.transform;
+
+        while (current != null)
+        {
+            if (current.CompareTag(ObstacleCrashTag))
+            {
+                return current.gameObject;
+            }
+
+            current = current.parent;
+        }
+
+        // Check siblings under parent/prefab root
+        Transform parent = hitObject.transform.parent;
+
+        while (parent != null)
+        {
+            if (parent.name == "ContentRoot")
+            {
+                break;
+            }
+
+            if (parent.GetComponent<TileInfo>() != null)
+            {
+                break;
+            }
+
+            GameObject foundObject = FindTaggedChild(parent, ObstacleCrashTag);
+
+            if (foundObject != null)
+            {
+                return foundObject;
+            }
+
+            parent = parent.parent;
+        }
+
+        return null;
+    }
+
+    private GameObject FindTaggedChild(Transform root, string tagToFind)
+    {
+        Transform[] children = root.GetComponentsInChildren<Transform>(true);
+
+        for (int i = 0; i < children.Length; i++)
+        {
+            if (children[i].CompareTag(tagToFind))
+            {
+                return children[i].gameObject;
+            }
+        }
+
+        return null;
     }
 
     private void HandleCrash(GameObject obstacleObject)
@@ -43,8 +111,6 @@ public class PlayerCollisionHandler : MonoBehaviour
         }
 
         lastCrashTime = Time.time;
-
-        Debug.Log("CRASH! Hit the main obstacle.");
 
         OnObstacleCrash?.Invoke();
 
