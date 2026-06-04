@@ -20,6 +20,9 @@ namespace ActiveSaga.MainScreen.UI
         [Header("XP Bar")]
         [SerializeField] private Image xpFillImage;
 
+        [Header("Debug")]
+        [SerializeField] private bool logLoadedStats = false;
+
         private void OnEnable()
         {
             if (dashboardDataManager == null)
@@ -29,6 +32,7 @@ namespace ActiveSaga.MainScreen.UI
 
             if (dashboardDataManager == null)
             {
+                Debug.LogWarning("PlayerStatsScreenUI: DashboardDataManager is missing.");
                 return;
             }
 
@@ -58,16 +62,36 @@ namespace ActiveSaga.MainScreen.UI
             PlayerProfileData profile = data.profile;
             LevelInfoData levelInfo = data.levelInfo;
 
-            SetText(levelText, "level : " + profile.level);
+            if (logLoadedStats)
+            {
+                Debug.Log(
+                    "[PlayerStatsScreenUI] " +
+                    "profile.level=" + profile.level +
+                    ", profile.xp=" + profile.xp +
+                    ", totalDistanceRun=" + profile.totalDistanceRun +
+                    ", totalTimeInGame=" + profile.totalTimeInGame +
+                    ", totalJumps=" + profile.totalJumps +
+                    ", levelInfo.level=" + (levelInfo != null ? levelInfo.level.ToString() : "null") +
+                    ", currentLevelXp=" + (levelInfo != null ? levelInfo.currentLevelXp.ToString() : "null") +
+                    ", nextLevelXp=" + (levelInfo != null ? levelInfo.nextLevelXp.ToString() : "null") +
+                    ", xpIntoCurrentLevel=" + (levelInfo != null ? levelInfo.xpIntoCurrentLevel.ToString() : "null") +
+                    ", xpNeededForNextLevel=" + (levelInfo != null ? levelInfo.xpNeededForNextLevel.ToString() : "null")
+                );
+            }
+
+            int displayLevel = profile.level;
+
+            if (levelInfo != null)
+            {
+                displayLevel = levelInfo.level;
+            }
+
+            SetText(levelText, "level : " + displayLevel);
             RenderXp(profile, levelInfo);
 
             SetText(totalActiveTimeText, FormatTime(profile.totalTimeInGame));
             SetText(totalDistanceText, FormatDistance(profile.totalDistanceRun));
-
-            if (totalJumpsText != null)
-            {
-                totalJumpsText.text = "-";
-            }
+            SetText(totalJumpsText, profile.totalJumps.ToString());
         }
 
         private void RenderXp(PlayerProfileData profile, LevelInfoData levelInfo)
@@ -79,7 +103,7 @@ namespace ActiveSaga.MainScreen.UI
                 return;
             }
 
-            int xpInsideCurrentLevel = levelInfo.xpIntoCurrentLevel;
+            int totalXp = profile.xp;
             int currentLevelXp = levelInfo.currentLevelXp;
             int nextLevelXp = levelInfo.nextLevelXp;
 
@@ -90,7 +114,11 @@ namespace ActiveSaga.MainScreen.UI
                 return;
             }
 
+            SetText(xpText, "xp : " + totalXp + " / " + nextLevelXp);
+
             int xpNeededForThisLevel = nextLevelXp - currentLevelXp;
+            int xpInsideCurrentLevel = totalXp - currentLevelXp;
+
             float fill = 0f;
 
             if (xpNeededForThisLevel > 0)
@@ -98,7 +126,6 @@ namespace ActiveSaga.MainScreen.UI
                 fill = (float)xpInsideCurrentLevel / xpNeededForThisLevel;
             }
 
-            SetText(xpText, "xp : " + xpInsideCurrentLevel + " / " + xpNeededForThisLevel);
             SetFill(xpFillImage, fill);
         }
 

@@ -41,6 +41,7 @@ namespace ActiveSaga.MainScreen.Data
 
         public float totalDistanceRun;
         public float totalTimeInGame;
+        public int totalJumps;
 
         public DailyQuestEntryData[] dailyQuests;
         public string lastQuestReset;
