@@ -69,6 +69,22 @@ namespace ActiveSaga.Common.Networking
             );
         }
 
+        public IEnumerator GetDailyStreak(
+            Action<DailyStreakResponse> onSuccess,
+            Action<string> onError)
+        {
+            string url = BuildUrl("daily-streak");
+
+            yield return SendGetRequest(
+                url,
+                json =>
+                {
+                    DailyStreakResponse response = JsonUtility.FromJson<DailyStreakResponse>(json);
+                    onSuccess?.Invoke(response);
+                },
+                onError
+            );
+        }
         private string BuildUrl(string path)
         {
             string cleanBase = playerApiBaseUrl.TrimEnd('/');

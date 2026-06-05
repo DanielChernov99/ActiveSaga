@@ -23,6 +23,34 @@ const dailyQuestProgressSchema = new mongoose.Schema({
     }
 }, { _id: false });
 
+const weeklyStreakSchema = new mongoose.Schema({
+    weekStartDate: {
+        type: String,
+        default: ''
+    },
+
+    dailyPlaySeconds: {
+        type: Map,
+        of: Number,
+        default: {}
+    },
+
+    completedDates: {
+        type: [String],
+        default: []
+    },
+
+    rewardedDates: {
+        type: [String],
+        default: []
+    },
+
+    weeklyRewardClaimed: {
+        type: Boolean,
+        default: false
+    }
+}, { _id: false });
+
 const playerProfileSchema = new mongoose.Schema({
     accountId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -91,7 +119,13 @@ const playerProfileSchema = new mongoose.Schema({
     lastQuestReset: {
         type: Date,
         default: Date.now
+    },
+
+    weeklyStreak: {
+        type: weeklyStreakSchema,
+        default: () => ({})
     }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('PlayerProfile', playerProfileSchema);

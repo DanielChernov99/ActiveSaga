@@ -42,12 +42,17 @@ const gameSessionSchema = new mongoose.Schema({
     },
 
     rewards: {
-        gameXpEarned: { type: Number, default: 0 },
-        gameCoinsEarned: { type: Number, default: 0 },
-        questXpEarned: { type: Number, default: 0 },
-        questCoinsEarned: { type: Number, default: 0 },
-        totalXpEarned: { type: Number, default: 0 },
-        totalCoinsEarned: { type: Number, default: 0 }
+    gameXpEarned: { type: Number, default: 0 },
+    gameCoinsEarned: { type: Number, default: 0 },
+
+    questXpEarned: { type: Number, default: 0 },
+    questCoinsEarned: { type: Number, default: 0 },
+
+    streakXpEarned: { type: Number, default: 0 },
+    streakCoinsEarned: { type: Number, default: 0 },
+
+    totalXpEarned: { type: Number, default: 0 },
+    totalCoinsEarned: { type: Number, default: 0 }
     },
 
     completedQuests: [{
