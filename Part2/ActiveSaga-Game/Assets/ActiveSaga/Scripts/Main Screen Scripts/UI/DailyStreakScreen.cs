@@ -23,6 +23,8 @@ namespace ActiveSaga.MainScreen.UI
         [Header("Optional")]
         [SerializeField] private TMP_Text statusText;
 
+        [SerializeField] private TMP_Text todayPlayTimeText;
+
         private void OnEnable()
         {
             LoadDailyStreak();
@@ -91,7 +93,48 @@ namespace ActiveSaga.MainScreen.UI
                 statusText.text = response.completedDaysCount + " / " + response.requiredDays;
             }
 
+            UpdateTodayPlayTimeText(response);
             Debug.Log("[DailyStreakScreen] Daily streak loaded successfully.");
+        }
+
+        private void UpdateTodayPlayTimeText(DailyStreakResponse response)
+        {
+            if (todayPlayTimeText == null)
+            {
+                return;
+            }
+
+            if (response.todayProgress == null)
+            {
+                todayPlayTimeText.text = "Today: 00:00";
+                return;
+            }
+
+            string playedTime = FormatSeconds(response.todayProgress.playSeconds);
+            string requiredTime = FormatSeconds(response.todayProgress.requiredSeconds);
+            string remainingTime = FormatSeconds(response.todayProgress.remainingSeconds);
+
+            if (response.todayProgress.completedToday)
+            {
+                todayPlayTimeText.text =
+                    "Today: " + playedTime + " / " + requiredTime + "\nCompleted!";
+            }
+            else
+            {
+                todayPlayTimeText.text =
+                    "Today: " + playedTime + " / " + requiredTime + "\n" +
+                    remainingTime + " left";
+            }
+        }
+
+        private string FormatSeconds(float totalSeconds)
+        {
+            totalSeconds = Mathf.Max(0f, totalSeconds);
+
+            int minutes = Mathf.FloorToInt(totalSeconds / 60f);
+            int seconds = Mathf.FloorToInt(totalSeconds % 60f);
+
+            return minutes.ToString("00") + ":" + seconds.ToString("00");
         }
 
         private void HandleDailyStreakError(string error)

@@ -256,6 +256,21 @@ function updateDailyStreakAfterGame(profile, gameResult, levelInfo, now = new Da
 function buildDailyStreakResponse(profile, levelInfo, now = new Date()) {
     ensureCurrentWeek(profile, now);
 
+    const todayKey = getIsraelDateKey(now);
+
+    const todayPlaySeconds = getMapNumber(
+        profile.weeklyStreak.dailyPlaySeconds,
+        todayKey
+    );
+
+    const todayRemainingSeconds = Math.max(
+        0,
+        REQUIRED_PLAY_SECONDS - todayPlaySeconds
+    );
+
+    const completedToday =
+        profile.weeklyStreak.completedDates.includes(todayKey);
+
     const completedDaysCount = Math.min(
         REQUIRED_WEEKLY_DAYS,
         profile.weeklyStreak.completedDates.length
@@ -277,7 +292,17 @@ function buildDailyStreakResponse(profile, levelInfo, now = new Date()) {
         weekStartDate: profile.weeklyStreak.weekStartDate,
         completedDaysCount,
         requiredDays: REQUIRED_WEEKLY_DAYS,
+
+        todayProgress: {
+            date: todayKey,
+            playSeconds: todayPlaySeconds,
+            requiredSeconds: REQUIRED_PLAY_SECONDS,
+            remainingSeconds: todayRemainingSeconds,
+            completedToday
+        },
+
         dailyRewards,
+
         weeklyReward: {
             completed: completedDaysCount >= REQUIRED_WEEKLY_DAYS,
             claimed: profile.weeklyStreak.weeklyRewardClaimed,

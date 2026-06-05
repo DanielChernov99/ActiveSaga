@@ -8,8 +8,21 @@ namespace ActiveSaga.MainScreen.Data
         public string weekStartDate;
         public int completedDaysCount;
         public int requiredDays;
+
+        public TodayProgressDto todayProgress;
+
         public DailyRewardDto[] dailyRewards;
         public WeeklyRewardDto weeklyReward;
+    }
+
+    [Serializable]
+    public class TodayProgressDto
+    {
+        public string date;
+        public float playSeconds;
+        public float requiredSeconds;
+        public float remainingSeconds;
+        public bool completedToday;
     }
 
     [Serializable]
