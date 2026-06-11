@@ -47,6 +47,12 @@ MonoBehaviour:
   musicMixerGroup: {fileID: -6196501538073374399, guid: 83ad853957416cc4e81fdf52eb24c16d, type: 2}
   sfxMixerGroup: {fileID: -4181970480756408095, guid: 83ad853957416cc4e81fdf52eb24c16d, type: 2}
   uiMixerGroup: {fileID: -1956574405314973153, guid: 83ad853957416cc4e81fdf52eb24c16d, type: 2}
+  voiceMixerGroup: {fileID: 5562977938242641564, guid: 83ad853957416cc4e81fdf52eb24c16d, type: 2}
   musicSource: {fileID: 0}
   sfxSource: {fileID: 0}
   uiSource: {fileID: 0}
+  voiceSource: {fileID: 0}
+  musicVolume: 0.35
+  sfxVolume: 0.8
+  uiVolume: 0.7
+  voiceVolume: 0.9

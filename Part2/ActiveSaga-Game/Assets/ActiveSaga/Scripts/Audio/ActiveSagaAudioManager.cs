@@ -9,11 +9,26 @@ public class ActiveSagaAudioManager : MonoBehaviour
     [SerializeField] private AudioMixerGroup musicMixerGroup;
     [SerializeField] private AudioMixerGroup sfxMixerGroup;
     [SerializeField] private AudioMixerGroup uiMixerGroup;
+    [SerializeField] private AudioMixerGroup voiceMixerGroup;
 
     [Header("Audio Sources")]
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource sfxSource;
     [SerializeField] private AudioSource uiSource;
+    [SerializeField] private AudioSource voiceSource;
+
+    [Header("Default Volumes")]
+    [Range(0f, 1f)]
+    [SerializeField] private float musicVolume = 0.35f;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float sfxVolume = 0.8f;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float uiVolume = 0.7f;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float voiceVolume = 0.9f;
 
     private void Awake()
     {
@@ -27,27 +42,38 @@ public class ActiveSagaAudioManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         SetupSources();
+        ApplyDefaultVolumes();
     }
 
     private void SetupSources()
     {
         if (musicSource == null)
         {
-            musicSource = CreateAudioSource("Music Source", musicMixerGroup, true);
+            musicSource = CreateAudioSource("Music Source", musicMixerGroup, true, 0f);
         }
 
         if (sfxSource == null)
         {
-            sfxSource = CreateAudioSource("SFX Source", sfxMixerGroup, false);
+            sfxSource = CreateAudioSource("SFX Source", sfxMixerGroup, false, 0f);
         }
 
         if (uiSource == null)
         {
-            uiSource = CreateAudioSource("UI Source", uiMixerGroup, false);
+            uiSource = CreateAudioSource("UI Source", uiMixerGroup, false, 0f);
+        }
+
+        if (voiceSource == null)
+        {
+            voiceSource = CreateAudioSource("Voice Source", voiceMixerGroup, false, 0f);
         }
     }
 
-    private AudioSource CreateAudioSource(string sourceName, AudioMixerGroup mixerGroup, bool loop)
+    private AudioSource CreateAudioSource(
+        string sourceName,
+        AudioMixerGroup mixerGroup,
+        bool loop,
+        float spatialBlend
+    )
     {
         GameObject sourceObject = new GameObject(sourceName);
         sourceObject.transform.SetParent(transform);
@@ -55,10 +81,18 @@ public class ActiveSagaAudioManager : MonoBehaviour
         AudioSource source = sourceObject.AddComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = loop;
-        source.spatialBlend = 0f;
+        source.spatialBlend = spatialBlend;
         source.outputAudioMixerGroup = mixerGroup;
 
         return source;
+    }
+
+    private void ApplyDefaultVolumes()
+    {
+        SetMusicVolume(musicVolume);
+        SetSFXVolume(sfxVolume);
+        SetUIVolume(uiVolume);
+        SetVoiceVolume(voiceVolume);
     }
 
     public void PlayMusic(AudioClip musicClip)
@@ -80,6 +114,11 @@ public class ActiveSagaAudioManager : MonoBehaviour
 
     public void StopMusic()
     {
+        if (musicSource == null)
+        {
+            return;
+        }
+
         musicSource.Stop();
     }
 
@@ -101,5 +140,66 @@ public class ActiveSagaAudioManager : MonoBehaviour
         }
 
         uiSource.PlayOneShot(uiClip);
+    }
+
+    public void PlayVoice(AudioClip voiceClip)
+    {
+        if (voiceClip == null)
+        {
+            return;
+        }
+
+        voiceSource.PlayOneShot(voiceClip);
+    }
+
+    public void PlayRandomVoice(AudioClip[] voiceClips)
+    {
+        if (voiceClips == null || voiceClips.Length == 0)
+        {
+            return;
+        }
+
+        int randomIndex = Random.Range(0, voiceClips.Length);
+        PlayVoice(voiceClips[randomIndex]);
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        musicVolume = Mathf.Clamp01(volume);
+
+        if (musicSource != null)
+        {
+            musicSource.volume = musicVolume;
+        }
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        sfxVolume = Mathf.Clamp01(volume);
+
+        if (sfxSource != null)
+        {
+            sfxSource.volume = sfxVolume;
+        }
+    }
+
+    public void SetUIVolume(float volume)
+    {
+        uiVolume = Mathf.Clamp01(volume);
+
+        if (uiSource != null)
+        {
+            uiSource.volume = uiVolume;
+        }
+    }
+
+    public void SetVoiceVolume(float volume)
+    {
+        voiceVolume = Mathf.Clamp01(volume);
+
+        if (voiceSource != null)
+        {
+            voiceSource.volume = voiceVolume;
+        }
     }
 }
