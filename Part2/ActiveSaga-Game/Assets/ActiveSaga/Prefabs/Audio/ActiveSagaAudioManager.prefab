@@ -56,3 +56,4 @@ MonoBehaviour:
   sfxVolume: 0.8
   uiVolume: 0.7
   voiceVolume: 0.9
+  defaultClickClip: {fileID: 8300000, guid: de1b16800a08093448d5428f27e8cd6f, type: 3}

@@ -30,6 +30,9 @@ public class ActiveSagaAudioManager : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float voiceVolume = 0.9f;
 
+    [Header("Default UI Clips")]
+    [SerializeField] private AudioClip defaultClickClip;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -129,6 +132,11 @@ public class ActiveSagaAudioManager : MonoBehaviour
             return;
         }
 
+        if (sfxSource == null)
+        {
+            return;
+        }
+
         sfxSource.PlayOneShot(sfxClip);
     }
 
@@ -139,12 +147,22 @@ public class ActiveSagaAudioManager : MonoBehaviour
             return;
         }
 
+        if (uiSource == null)
+        {
+            return;
+        }
+
         uiSource.PlayOneShot(uiClip);
     }
 
     public void PlayVoice(AudioClip voiceClip)
     {
         if (voiceClip == null)
+        {
+            return;
+        }
+
+        if (voiceSource == null)
         {
             return;
         }
@@ -161,6 +179,11 @@ public class ActiveSagaAudioManager : MonoBehaviour
 
         int randomIndex = Random.Range(0, voiceClips.Length);
         PlayVoice(voiceClips[randomIndex]);
+    }
+
+    public void PlayDefaultClick()
+    {
+        PlayUI(defaultClickClip);
     }
 
     public void SetMusicVolume(float volume)
