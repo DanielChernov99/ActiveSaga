@@ -1513,6 +1513,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 253104387}
+  - component: {fileID: 253104388}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -1538,6 +1539,20 @@ Transform:
   - {fileID: 1147751294}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &253104388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 253104386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92f06325cfd67dd47b81807abaa108f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSoundInstaller
+  includeInactiveButtons: 1
+  installOnStart: 1
 --- !u!1 &268556188
 GameObject:
   m_ObjectHideFlags: 0
@@ -4268,6 +4283,7 @@ GameObject:
   - component: {fileID: 677851336}
   - component: {fileID: 677851335}
   - component: {fileID: 677851334}
+  - component: {fileID: 677851339}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -4377,6 +4393,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &677851339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 677851333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92f06325cfd67dd47b81807abaa108f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSoundInstaller
+  includeInactiveButtons: 1
+  installOnStart: 1
 --- !u!1 &692461857
 GameObject:
   m_ObjectHideFlags: 0
