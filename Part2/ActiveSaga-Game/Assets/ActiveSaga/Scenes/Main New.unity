@@ -21178,6 +21178,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ActiveSagaAudioManager
       objectReference: {fileID: 0}
+    - target: {fileID: 5115977688702766763, guid: 1ff94089a768fba45884a8552e566cf0, type: 3}
+      propertyPath: musicVolume
+      value: 0.02
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -43210,10 +43214,6 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunningProgressBar
-  fillImage: {fileID: 0}
-  playerIcon: {fileID: 0}
-  backgroundBar: {fileID: 0}
-  flagIcon: {fileID: 0}
 --- !u!222 &7728648534369297051
 CanvasRenderer:
   m_ObjectHideFlags: 0
