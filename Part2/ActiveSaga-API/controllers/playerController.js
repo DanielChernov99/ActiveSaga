@@ -14,6 +14,11 @@ const {
     updateDailyQuestProgress
 } = require('../services/questService');
 
+const {
+    updateDailyStreakAfterGame,
+    buildDailyStreakResponse
+} = require('../services/dailyStreakService');
+
 exports.getPlayerStats = async (req, res) => {
     try {
         const accountId = req.user.accountId;
@@ -77,6 +82,34 @@ exports.getDailyQuests = async (req, res) => {
     }
 };
 
+exports.getDailyStreak = async (req, res) => {
+    try {
+        const accountId = req.user.accountId;
+
+        const profile = await PlayerProfile.findOne({ accountId });
+
+        if (!profile) {
+            return res.status(404).json({
+                message: 'Player profile not found'
+            });
+        }
+
+        const levelInfo = calculateLevelFromXp(profile.xp);
+        const dailyStreak = buildDailyStreakResponse(profile, levelInfo);
+
+        await profile.save();
+
+        return res.status(200).json(dailyStreak);
+    } catch (error) {
+        console.error('Error fetching daily streak:', error);
+
+        return res.status(500).json({
+            message: 'Server error while fetching daily streak',
+            error: error.message
+        });
+    }
+};
+
 exports.forceGenerateDailyQuests = async (req, res) => {
     try {
         const accountId = req.user.accountId;
@@ -135,11 +168,27 @@ exports.completeGameSession = async (req, res) => {
                 .findOne({ accountId })
                 .populate('dailyQuests.questId');
 
+            const levelInfo = profile
+                ? calculateLevelFromXp(profile.xp)
+                : null;
+
             return res.status(200).json({
                 success: true,
                 message: 'This game session was already processed',
                 alreadyProcessed: true,
                 session: existingSession,
+                rewards: existingSession.rewards,
+                level: profile
+                    ? {
+                        before: existingSession.levelBefore,
+                        after: existingSession.levelAfter,
+                        leveledUp: existingSession.levelAfter > existingSession.levelBefore,
+                        levelInfo
+                    }
+                    : null,
+                dailyStreak: profile
+                    ? buildDailyStreakResponse(profile, levelInfo)
+                    : null,
                 updatedStats: profile
             });
         }
@@ -169,11 +218,26 @@ exports.completeGameSession = async (req, res) => {
             gameRewards
         );
 
+        const levelInfoBeforeStreak = calculateLevelFromXp(profile.xp);
+
+        const streakResult = updateDailyStreakAfterGame(
+            profile,
+            gameResult,
+            levelInfoBeforeStreak
+        );
+
+        profile.xp += streakResult.xpEarned;
+        profile.coins += streakResult.coinsEarned;
+
         const totalXpEarned =
-            gameRewards.xpEarned + questResult.questXpEarned;
+            gameRewards.xpEarned +
+            questResult.questXpEarned +
+            streakResult.xpEarned;
 
         const totalCoinsEarned =
-            gameRewards.coinsEarned + questResult.questCoinsEarned;
+            gameRewards.coinsEarned +
+            questResult.questCoinsEarned +
+            streakResult.coinsEarned;
 
         const levelInfo = calculateLevelFromXp(profile.xp);
         profile.level = levelInfo.level;
@@ -191,8 +255,13 @@ exports.completeGameSession = async (req, res) => {
             rewards: {
                 gameXpEarned: gameRewards.xpEarned,
                 gameCoinsEarned: gameRewards.coinsEarned,
+
                 questXpEarned: questResult.questXpEarned,
                 questCoinsEarned: questResult.questCoinsEarned,
+
+                streakXpEarned: streakResult.xpEarned,
+                streakCoinsEarned: streakResult.coinsEarned,
+
                 totalXpEarned,
                 totalCoinsEarned
             },
@@ -210,8 +279,13 @@ exports.completeGameSession = async (req, res) => {
             rewards: {
                 gameXpEarned: gameRewards.xpEarned,
                 gameCoinsEarned: gameRewards.coinsEarned,
+
                 questXpEarned: questResult.questXpEarned,
                 questCoinsEarned: questResult.questCoinsEarned,
+
+                streakXpEarned: streakResult.xpEarned,
+                streakCoinsEarned: streakResult.coinsEarned,
+
                 totalXpEarned,
                 totalCoinsEarned
             },
@@ -224,6 +298,8 @@ exports.completeGameSession = async (req, res) => {
             },
 
             completedQuests: questResult.completedQuests,
+            dailyStreak: buildDailyStreakResponse(profile, levelInfo),
+            streakResult,
             updatedStats: profile,
             session
         });

@@ -92,6 +92,10 @@ public class GameManager : MonoBehaviour
         {
             playerCollisionHandler.OnObstacleCrash += HandleObstacleCrash;
         }
+        else
+        {
+            Debug.LogError("[GameManager] playerCollisionHandler is NULL. Obstacle crashes will not work.");
+        }
 
         if (monsterController != null)
         {
@@ -225,8 +229,11 @@ public class GameManager : MonoBehaviour
 
     private void HandleObstacleCrash()
     {
+        Debug.Log("[GameManager] HandleObstacleCrash called. isGameActive = " + isGameActive);
+
         if (!isGameActive)
         {
+            Debug.LogWarning("[GameManager] Crash ignored because game is not active.");
             return;
         }
 
@@ -234,6 +241,8 @@ public class GameManager : MonoBehaviour
 
         stunnedUntilTime = Time.time + stunDuration;
         currentSpeed = 0f;
+
+        Debug.Log("[GameManager] Player stunned until: " + stunnedUntilTime + " | Current time: " + Time.time);
 
         if (runGameStatsTracker != null)
         {

@@ -15,6 +15,7 @@ namespace ActiveSaga.MainScreen.UI
 
             [Header("Texts")]
             public TMP_Text descriptionText;
+            public TMP_Text rewardText;
             public TMP_Text completedText;
 
             [Header("Medal")]
@@ -93,12 +94,14 @@ namespace ActiveSaga.MainScreen.UI
             if (quest == null)
             {
                 SetText(slot.descriptionText, "Missing quest data");
+                SetText(slot.rewardText, "");
                 SetText(slot.completedText, "");
                 SetMedal(slot, false);
                 return;
             }
 
             SetText(slot.descriptionText, quest.description);
+            SetText(slot.rewardText, BuildRewardText(quest));
 
             if (questEntry.isCompleted)
             {
@@ -110,6 +113,11 @@ namespace ActiveSaga.MainScreen.UI
                 SetText(slot.completedText, "");
                 SetMedal(slot, false);
             }
+        }
+
+        private string BuildRewardText(QuestData quest)
+        {
+            return "+" + quest.xpReward + " XP   +" + quest.coinsReward + " Coins";
         }
 
         private void SetMedal(QuestSlot slot, bool isCompleted)
