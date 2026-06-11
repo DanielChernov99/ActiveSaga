@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 0327651d6ba6a4b458626bda7ea41723
+guid: ada3bf7a8fd0f00488e0fdd3b49f7963
 AudioImporter:
   externalObjects: {}
   serializedVersion: 7
@@ -21,10 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 291338
-  packageName: Free Viking Folk Music Pack
-  packageVersion: 1.0
-  assetPath: Assets/Viking Music Pack/Loops/3. Saga of the Sea Wolves.wav
-  uploadId: 680243

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a7c934e32336d9c47b4340e9df0be20c
+guid: 12f64d9ee42726a4c90252df274c5e25
 AudioImporter:
   externalObjects: {}
   serializedVersion: 7
@@ -21,10 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 291338
-  packageName: Free Viking Folk Music Pack
-  packageVersion: 1.0
-  assetPath: Assets/Viking Music Pack/Tracks/5. Odin's Whisper.wav
-  uploadId: 680243
