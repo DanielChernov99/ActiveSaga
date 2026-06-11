@@ -9365,7 +9365,7 @@ PrefabInstance:
     - target: {fileID: 1441184335656521327, guid: 81168dc620be04f4982be79e6d2362ec, type: 3}
       propertyPath: sceneMusic
       value: 
-      objectReference: {fileID: 8300000, guid: 534fcbfa916975e4caaf376242a55e21, type: 3}
+      objectReference: {fileID: 8300000, guid: 30bcd1276d064b64b8b49d1035e823e6, type: 3}
     - target: {fileID: 1516272875836346666, guid: 81168dc620be04f4982be79e6d2362ec, type: 3}
       propertyPath: m_Name
       value: SceneAudioController
