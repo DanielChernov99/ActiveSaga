@@ -71,11 +71,22 @@ namespace ActiveSaga.BossFight.Waves
             if (BossFightGameManager.Instance != null &&
                 BossFightGameManager.Instance.PlayerTransform != null)
             {
-                forward = (BossFightGameManager.Instance.PlayerTransform.position - basePos).normalized;
-                forward.y = 0;
+                forward = BossFightGameManager.Instance.PlayerTransform.position - basePos;
+                forward.y = 0f;
+                forward.Normalize();
             }
 
-            Vector3 right = Vector3.Cross(Vector3.up, forward);
+            if (forward.sqrMagnitude < 0.001f)
+            {
+                forward = Vector3.forward;
+            }
+
+            Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
+
+            if (right.sqrMagnitude < 0.001f)
+            {
+                right = Vector3.right;
+            }
 
             Vector3 spawnPos =
                 basePos +
@@ -126,19 +137,11 @@ namespace ActiveSaga.BossFight.Waves
             }
 
             Vector3 basePos = bossSpawnPoint.position;
-            bool hasPlayer = BossFightGameManager.Instance?.PlayerTransform != null;
+            Vector3 playerPos = GetPlayerAimPosition(basePos);
+            float floorY = GetPlayerFloorY(basePos);
 
-            Vector3 playerPos = hasPlayer
-                ? BossFightGameManager.Instance.PlayerTransform.position
-                : basePos + Vector3.forward * 5f;
-
-            bool isHeadTarget = UnityEngine.Random.value > 0.5f;
-
-            float targetHeight = isHeadTarget ? 3.0f : 0.9f;
-
-            float floorY = hasPlayer
-                ? BossFightGameManager.Instance.PlayerTransform.position.y
-                : basePos.y;
+            ProjectileDodgeAction dodgeAction = data.ResolveDodgeAction();
+            float targetHeight = data.GetTargetHeight(dodgeAction) + offset.y;
 
             Vector3 targetPos = playerPos;
             targetPos.y = floorY + targetHeight;
@@ -146,11 +149,16 @@ namespace ActiveSaga.BossFight.Waves
             Vector3 spawnStartPos = basePos;
             spawnStartPos.y = floorY + targetHeight;
 
-            Vector3 direction = (targetPos - spawnStartPos).normalized;
+            Vector3 direction = targetPos - spawnStartPos;
+            direction.y = 0f;
 
             if (direction.sqrMagnitude < 0.001f)
             {
                 direction = Vector3.forward;
+            }
+            else
+            {
+                direction.Normalize();
             }
 
             Vector3 right = Vector3.Cross(Vector3.up, direction).normalized;
@@ -189,6 +197,51 @@ namespace ActiveSaga.BossFight.Waves
             }
 
             controller.Initialize(data, speedMultiplier);
+        }
+
+        private Vector3 GetPlayerAimPosition(Vector3 fallbackBasePosition)
+        {
+            if (BossFightGameManager.Instance != null)
+            {
+                if (BossFightGameManager.Instance.PlayerCamera != null)
+                {
+                    return BossFightGameManager.Instance.PlayerCamera.transform.position;
+                }
+
+                if (Camera.main != null)
+                {
+                    return Camera.main.transform.position;
+                }
+
+                if (BossFightGameManager.Instance.PlayerTransform != null)
+                {
+                    return BossFightGameManager.Instance.PlayerTransform.position;
+                }
+            }
+
+            return fallbackBasePosition + Vector3.forward * 5f;
+        }
+
+        private float GetPlayerFloorY(Vector3 fallbackBasePosition)
+        {
+            if (BossFightGameManager.Instance != null &&
+                BossFightGameManager.Instance.PlayerTransform != null)
+            {
+                return BossFightGameManager.Instance.PlayerTransform.position.y;
+            }
+
+            if (BossFightGameManager.Instance != null &&
+                BossFightGameManager.Instance.PlayerCamera != null)
+            {
+                return BossFightGameManager.Instance.PlayerCamera.transform.position.y - 1.6f;
+            }
+
+            if (Camera.main != null)
+            {
+                return Camera.main.transform.position.y - 1.6f;
+            }
+
+            return fallbackBasePosition.y;
         }
 
         private bool CanSpawn()

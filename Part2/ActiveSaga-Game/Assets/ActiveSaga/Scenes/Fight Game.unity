@@ -25093,6 +25093,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1719168098}
   - component: {fileID: 1719168099}
+  - component: {fileID: 1719168100}
   m_Layer: 0
   m_Name: PlayerHitbox
   m_TagString: PlayerHitbox
@@ -25138,6 +25139,24 @@ CapsuleCollider:
   m_Height: 1.6
   m_Direction: 1
   m_Center: {x: 0, y: -0.5668776, z: 0}
+--- !u!114 &1719168100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1719168097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb25d30f78ac94c43ad63e49d69207ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VRPlayerHitboxFollower
+  jumpAnalyzer: {fileID: 1177614213}
+  squatAnalyzer: {fileID: 1559971724}
+  jumpColliderOffset: 1.2
+  jumpDuration: 0.65
+  squatColliderOffset: 1.2
+  squatMoveSpeed: 12
 --- !u!1001 &1721147574
 PrefabInstance:
   m_ObjectHideFlags: 0

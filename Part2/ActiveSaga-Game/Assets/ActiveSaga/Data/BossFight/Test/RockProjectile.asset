@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: RockProjectile
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Data.ProjectileData
   projectileName: RockProjectile
-  prefab: {fileID: 6616318332622595014, guid: 6dd78f58432c4dc469911446e483565a, type: 3}
+  prefab: {fileID: 7468498409537363837, guid: 312d12ce3d0867644ba3bd4a5d8f39ec, type: 3}
   speed: 10
   damage: 15
   lifetime: 10
+  requiredDodgeAction: 0
+  jumpObstacleHeight: 2
+  duckObstacleHeight: 4
   pattern: 0
   amplitude: 1
   frequency: 2

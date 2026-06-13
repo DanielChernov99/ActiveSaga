@@ -75,8 +75,8 @@ namespace ActiveSaga.BossFight.Waves
                 {
                     type = WaveStep.StepType.SpawnProjectile,
                     projectileData = GetRandomProjectileData(),
-                    spawnOffset = new Vector3(Random.Range(-3f, 3f), 1f, Random.Range(3f, 6f)),
-                    delayAfterStep = Random.Range(0.8f, 1.5f)
+                    spawnOffset = new Vector3(Random.Range(-2.2f, 2.2f), 0f, Random.Range(3f, 6f)),
+                    delayAfterStep = Random.Range(0.9f, 1.6f)
                 });
             }
         }

@@ -17,6 +17,9 @@ MonoBehaviour:
   speed: 8
   damage: 15
   lifetime: 10
+  requiredDodgeAction: 0
+  jumpObstacleHeight: 2
+  duckObstacleHeight: 4
   pattern: 0
   amplitude: 1
   frequency: 2

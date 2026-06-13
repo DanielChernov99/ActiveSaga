@@ -48,33 +48,29 @@ namespace ActiveSaga.BossFight.Entities
 
             startPosition = transform.position;
 
-            // Ensure we have a valid forward direction
             forward = transform.forward.normalized;
             if (forward.sqrMagnitude < 0.001f)
             {
                 forward = Vector3.forward;
             }
-            
+
             right = Vector3.Cross(Vector3.up, forward).normalized;
             if (right.sqrMagnitude < 0.001f)
             {
                 right = Vector3.right;
             }
 
-            // --- CRITICAL RESET SEQUENCE ---
-            // Force wake up and clear all physics states for pooling consistency
             rb.isKinematic = false;
             rb.WakeUp();
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
-            // --------------------------------
 
             if (data.pattern == ProjectilePattern.Linear)
             {
                 float targetSpeed = data.speed * speedMultiplier;
-                if (targetSpeed <= 0) targetSpeed = 10f; // Safety fallback
-                
+                if (targetSpeed <= 0f) targetSpeed = 10f;
+
                 linearVelocity = forward * targetSpeed;
                 rb.linearVelocity = linearVelocity;
             }
@@ -97,7 +93,6 @@ namespace ActiveSaga.BossFight.Entities
             switch (data.pattern)
             {
                 case ProjectilePattern.Linear:
-                    // Keep constant velocity
                     rb.linearVelocity = linearVelocity;
                     break;
 
@@ -134,14 +129,17 @@ namespace ActiveSaga.BossFight.Entities
                 other.CompareTag("MainCamera") ||
                 other.CompareTag("Player"))
             {
+                PlayHitPlayerSFX();
+
                 if (BossFightGameManager.Instance != null)
+                {
                     BossFightGameManager.Instance.TakeDamage(data.damage);
+                }
 
                 DespawnInternal(false, true);
                 return;
             }
 
-            // Sword does not destroy dodge objects anymore
             if (other.CompareTag("Sword"))
             {
                 return;
@@ -153,6 +151,20 @@ namespace ActiveSaga.BossFight.Entities
             }
         }
 
+        private void PlayHitPlayerSFX()
+        {
+            if (data == null || data.hitPlayerSFX == null)
+            {
+                return;
+            }
+
+            AudioSource.PlayClipAtPoint(
+                data.hitPlayerSFX,
+                transform.position,
+                data.hitPlayerSFXVolume
+            );
+        }
+
         public void Despawn()
         {
             DespawnInternal(true, false);
@@ -161,7 +173,9 @@ namespace ActiveSaga.BossFight.Entities
         private void DespawnInternal(bool wasDodged, bool hitPlayer)
         {
             if (!isInitialized)
+            {
                 return;
+            }
 
             isInitialized = false;
 
@@ -176,9 +190,13 @@ namespace ActiveSaga.BossFight.Entities
             });
 
             if (PoolManager.Instance != null)
+            {
                 PoolManager.Instance.ReturnToPool(gameObject, data.projectileName);
+            }
             else
+            {
                 Destroy(gameObject);
+            }
         }
     }
 }

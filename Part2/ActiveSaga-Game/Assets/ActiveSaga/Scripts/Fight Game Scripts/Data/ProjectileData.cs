@@ -4,6 +4,13 @@ namespace ActiveSaga.BossFight.Data
 {
     public enum ProjectilePattern { Linear, Sine }
 
+    public enum ProjectileDodgeAction
+    {
+        Random,
+        Jump,
+        Duck
+    }
+
     [CreateAssetMenu(fileName = "NewProjectileData", menuName = "BossFight/ProjectileData")]
     public class ProjectileData : ScriptableObject
     {
@@ -23,6 +30,18 @@ namespace ActiveSaga.BossFight.Data
         [Min(0.1f)]
         public float lifetime = 5f;
 
+        [Header("Dodge Setup")]
+        [Tooltip("Jump = low obstacle. Duck = high obstacle. Random is useful only for generic test assets.")]
+        public ProjectileDodgeAction requiredDodgeAction = ProjectileDodgeAction.Random;
+
+        [Tooltip("Height above the player's floor for a low obstacle that should be jumped over.")]
+        [Min(0.05f)]
+        public float jumpObstacleHeight = 0.55f;
+
+        [Tooltip("Height above the player's floor for a high obstacle that should be ducked under.")]
+        [Min(0.05f)]
+        public float duckObstacleHeight = 1.35f;
+
         [Header("Movement Pattern")]
         public ProjectilePattern pattern = ProjectilePattern.Linear;
 
@@ -36,13 +55,42 @@ namespace ActiveSaga.BossFight.Data
         public GameObject impactVFX;
         public AudioClip launchSFX;
 
+        [Header("Hit Feedback")]
+        public AudioClip hitPlayerSFX;
+
+        [Range(0f, 1f)]
+        public float hitPlayerSFXVolume = 1f;
+
+        public ProjectileDodgeAction ResolveDodgeAction()
+        {
+            if (requiredDodgeAction == ProjectileDodgeAction.Random)
+            {
+                return Random.value > 0.5f
+                    ? ProjectileDodgeAction.Duck
+                    : ProjectileDodgeAction.Jump;
+            }
+
+            return requiredDodgeAction;
+        }
+
+        public float GetTargetHeight(ProjectileDodgeAction action)
+        {
+            if (action == ProjectileDodgeAction.Duck)
+            {
+                return duckObstacleHeight;
+            }
+
+            return jumpObstacleHeight;
+        }
+
         private void OnValidate()
         {
-            // Safety checks in Editor
-            if (speed < 0) speed = 0;
+            if (speed < 0f) speed = 0f;
             if (lifetime < 0.1f) lifetime = 0.1f;
-            if (frequency < 0) frequency = 0;
-            if (amplitude < 0) amplitude = 0;
+            if (frequency < 0f) frequency = 0f;
+            if (amplitude < 0f) amplitude = 0f;
+            if (jumpObstacleHeight < 0.05f) jumpObstacleHeight = 0.05f;
+            if (duckObstacleHeight < 0.05f) duckObstacleHeight = 0.05f;
 
             if (string.IsNullOrWhiteSpace(projectileName))
             {
