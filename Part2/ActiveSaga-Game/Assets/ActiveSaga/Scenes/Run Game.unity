@@ -9734,6 +9734,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1794141923}
+    - targetCorrespondingSourceObject: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2133962749}
   m_SourcePrefab: {fileID: 100100000, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
 --- !u!4 &2133962744 stripped
 Transform:
@@ -9760,6 +9763,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1767192434, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
   m_PrefabInstance: {fileID: 2133962743}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2133962749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 64397228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a3649b250abfd54d8f0238d38e01f5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RunPlayerAudio
+  gameManager: {fileID: 1976218460}
+  runAnalyzer: {fileID: 1335860147}
+  jumpAnalyzer: {fileID: 2036115307}
+  runningLoopSource: {fileID: 0}
+  runningLoopClip: {fileID: 8300000, guid: e788af884785f2841a19dad4f758533b, type: 3}
+  minRunIntensityForSound: 0.12
+  runEventTimeout: 0.25
+  jumpStartClip: {fileID: 8300000, guid: 1b6bf1c843628dd448d24b38148c8d45, type: 3}
+  landingClip: {fileID: 8300000, guid: de8f58d324a23c044ae6e39a3ede403b, type: 3}
+  minAirTimeForLandingSound: 0.15
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
