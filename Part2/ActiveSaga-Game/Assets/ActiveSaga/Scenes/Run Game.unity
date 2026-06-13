@@ -5444,18 +5444,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 01a14189a0e72bd48af5fdfc385db418, type: 2}
   - {fileID: 11400000, guid: 2d1db1d48594f95469c50b8602076d96, type: 2}
   spawner: {fileID: 1252747276}
-  tileLength: 400
+  tileLength: 200
   tileFrontPadding: 25
   tileBackPadding: 25
-  easyObstacleDistance: {x: 100, y: 120}
+  easyObstacleDistance: {x: 100, y: 150}
   mediumObstacleDistance: {x: 60, y: 100}
   hardObstacleDistance: {x: 20, y: 40}
-  easyEnemyDistance: {x: 100, y: 120}
-  mediumEnemyDistance: {x: 60, y: 100}
-  hardEnemyDistance: {x: 20, y: 40}
-  easyCoinDistance: {x: 120, y: 140}
-  mediumCoinDistance: {x: 100, y: 120}
-  hardCoinDistance: {x: 80, y: 100}
+  easyEnemyDistance: {x: 90, y: 110}
+  mediumEnemyDistance: {x: 50, y: 90}
+  hardEnemyDistance: {x: 15, y: 35}
+  easyCoinDistance: {x: 80, y: 120}
+  mediumCoinDistance: {x: 45, y: 75}
+  hardCoinDistance: {x: 35, y: 65}
 --- !u!1 &1271763528
 GameObject:
   m_ObjectHideFlags: 0
@@ -6048,7 +6048,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'ResumeButton
+  m_text: 'Resume Game
 
 '
   m_isRightToLeft: 0
@@ -8128,6 +8128,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8449004803641222730, guid: 635b9c60fe8860a4e9a5ab1a4658720f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1857278918}
+    - targetCorrespondingSourceObject: {fileID: 8449004803641222730, guid: 635b9c60fe8860a4e9a5ab1a4658720f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1857278920}
   m_SourcePrefab: {fileID: 100100000, guid: 635b9c60fe8860a4e9a5ab1a4658720f, type: 3}
 --- !u!4 &1857278916 stripped
 Transform:
@@ -8174,6 +8177,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.3627685, y: 2.3628888, z: 0.11519317}
   m_Center: {x: 0, y: 0.47956437, z: 0.00000023841858}
+--- !u!114 &1857278920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1857278917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8c3a4f96231f6f4e83d19c9b03b0ba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponAudioController
+  whooshSound: {fileID: 8300000, guid: 6f350a1e841675c4db5c84bc435568d7, type: 3}
+  velocityThreshold: 2.5
+  whooshCooldown: 0.35
+  movementReference: {fileID: 2133962748}
+  audioSource: {fileID: 0}
 --- !u!1 &1881070317
 GameObject:
   m_ObjectHideFlags: 0

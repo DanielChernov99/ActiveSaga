@@ -22,6 +22,9 @@ public class SideEnemyRunner : MonoBehaviour
     [Header("Optional Animation")]
     [SerializeField] private string walkingBool = "";
 
+    [Header("Game State")]
+    [SerializeField] private GameManager gameManager;
+
     private Transform target;
     private RunGameStatsTracker statsTracker;
     private bool isActivated = false;
@@ -34,6 +37,11 @@ public class SideEnemyRunner : MonoBehaviour
 
         isActivated = false;
         isDying = false;
+
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
 
         if (animator == null)
         {
@@ -52,6 +60,12 @@ public class SideEnemyRunner : MonoBehaviour
     {
         if (target == null || isDying)
         {
+            return;
+        }
+
+        if (!IsGameActive())
+        {
+            SetWalkingAnimation(false);
             return;
         }
 
@@ -74,6 +88,11 @@ public class SideEnemyRunner : MonoBehaviour
         }
 
         MoveTowardPlayer();
+    }
+
+    private bool IsGameActive()
+    {
+        return gameManager == null || gameManager.IsGameActive;
     }
 
     private void ActivateEnemy()
@@ -101,7 +120,7 @@ public class SideEnemyRunner : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isDying)
+        if (isDying || !IsGameActive())
         {
             return;
         }

@@ -26,9 +26,7 @@ public class ContentDirector : MonoBehaviour
     [SerializeField] private Vector2 hardObstacleDistance = new Vector2(40f, 60f);
 
     [Header("Enemy Distance Settings")]
-
-    // enemy easy was before 220f and 300 changed to 30 and 30 to test if system works
-    [SerializeField] private Vector2 easyEnemyDistance = new Vector2(30f, 30f);
+    [SerializeField] private Vector2 easyEnemyDistance = new Vector2(180f, 240f);
     [SerializeField] private Vector2 mediumEnemyDistance = new Vector2(140f, 210f);
     [SerializeField] private Vector2 hardEnemyDistance = new Vector2(80f, 140f);
 
@@ -151,6 +149,11 @@ public class ContentDirector : MonoBehaviour
         List<SpawnRequest> requests
     )
     {
+        while (nextDistance < tileStartZ)
+        {
+            nextDistance += Random.Range(distanceRange.x, distanceRange.y);
+        }
+
         while (nextDistance >= tileStartZ && nextDistance < tileEndZ)
         {
             SpawnableItem? item = PickRandomByType(biome, type);
