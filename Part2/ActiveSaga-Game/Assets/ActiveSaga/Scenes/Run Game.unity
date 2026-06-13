@@ -542,6 +542,55 @@ MonoBehaviour:
   monsterSpeed: 6
   maxCatchUpSpeed: 12
   catchUpStrength: 0.15
+--- !u!114 &108434431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 108434427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b04571f7297520343b94e604b157f1e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Random3DAudioEmitter
+  roarClips: []
+  lineClips: []
+  playAutomatically: 1
+  preventOverlappingSounds: 1
+  firstSoundMinDelay: 2
+  firstSoundMaxDelay: 5
+  minDelayBetweenSounds: 4
+  maxDelayBetweenSounds: 9
+  roarChance: 0.343
+  playAnimationsWithSounds: 0
+  animator: {fileID: 0}
+  roarTriggerName: Roar
+  lineTriggerName: Talk
+  outputMixerGroup: {fileID: 0}
+  volume: 1
+  spatialBlend: 1
+  minDistance: 8
+  maxDistance: 75
+--- !u!114 &108434432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 108434427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1568e4ffb328c34ab90d32a83dd8d58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Looping3DAudioEmitter
+  loopClip: {fileID: 8300000, guid: be61871ee1cc36d46abe027059d5f8fd, type: 3}
+  playOnEnable: 1
+  outputMixerGroup: {fileID: -4181970480756408095, guid: 83ad853957416cc4e81fdf52eb24c16d, type: 2}
+  volume: 0.7
+  spatialBlend: 1
+  minDistance: 3
+  maxDistance: 35
 --- !u!1 &129141382
 GameObject:
   m_ObjectHideFlags: 0
@@ -8251,6 +8300,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9137032837993464747, guid: d66c23583a584ef4195dbea312c0b2a7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 108434430}
+    - targetCorrespondingSourceObject: {fileID: 9137032837993464747, guid: d66c23583a584ef4195dbea312c0b2a7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 108434431}
+    - targetCorrespondingSourceObject: {fileID: 9137032837993464747, guid: d66c23583a584ef4195dbea312c0b2a7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 108434432}
   m_SourcePrefab: {fileID: 100100000, guid: d66c23583a584ef4195dbea312c0b2a7, type: 3}
 --- !u!1 &1936056471
 GameObject:
