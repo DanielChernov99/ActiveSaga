@@ -7,20 +7,40 @@ public class SideEnemyRunner : MonoBehaviour
     [SerializeField] private float moveSpeed = 8f;
 
     [Header("Activation")]
-    [SerializeField] private float activationDistance = 35f;
+    [SerializeField] private float activationDistance = 90f;
     [SerializeField] private float destroyBehindPlayerDistance = 10f;
 
     [Header("Kill Settings")]
     [SerializeField] private string weaponTag = "Sword";
+    [SerializeField] private float deathDestroyDelay = 1.2f;
+
+    [Header("Death Feedback")]
+    [SerializeField] private AudioClip deathSound;
+    [SerializeField] private Animator animator;
+    [SerializeField] private string deathTrigger = "Death";
+
+    [Header("Optional Animation")]
+    [SerializeField] private string walkingBool = "";
 
     private Transform target;
     private RunGameStatsTracker statsTracker;
     private bool isActivated = false;
+    private bool isDying = false;
 
     public void Initialize(Transform playerTarget, RunGameStatsTracker tracker)
     {
         target = playerTarget;
         statsTracker = tracker;
+
+        isActivated = false;
+        isDying = false;
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        SetWalkingAnimation(false);
 
         if (target == null)
         {
@@ -30,7 +50,7 @@ public class SideEnemyRunner : MonoBehaviour
 
     private void Update()
     {
-        if (target == null)
+        if (target == null || isDying)
         {
             return;
         }
@@ -44,8 +64,7 @@ public class SideEnemyRunner : MonoBehaviour
                 return;
             }
 
-            isActivated = true;
-            Debug.Log("SideEnemy activated: " + gameObject.name);
+            ActivateEnemy();
         }
 
         if (zDistanceFromPlayer < -destroyBehindPlayerDistance)
@@ -54,6 +73,19 @@ public class SideEnemyRunner : MonoBehaviour
             return;
         }
 
+        MoveTowardPlayer();
+    }
+
+    private void ActivateEnemy()
+    {
+        isActivated = true;
+        SetWalkingAnimation(true);
+
+        Debug.Log("SideEnemy activated: " + gameObject.name);
+    }
+
+    private void MoveTowardPlayer()
+    {
         Vector3 targetPosition = target.position;
         targetPosition.y = transform.position.y;
 
@@ -69,16 +101,82 @@ public class SideEnemyRunner : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (isDying)
+        {
+            return;
+        }
+
         if (!other.CompareTag(weaponTag))
         {
             return;
         }
+
+        KillEnemy();
+    }
+
+    private void KillEnemy()
+    {
+        isDying = true;
+        SetWalkingAnimation(false);
 
         if (statsTracker != null)
         {
             statsTracker.AddEnemyKill();
         }
 
-        Destroy(gameObject);
+        DisableColliders();
+        PlayDeathAnimation();
+        PlayDeathSound();
+
+        Destroy(gameObject, deathDestroyDelay);
+    }
+
+    private void DisableColliders()
+    {
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            colliders[i].enabled = false;
+        }
+    }
+
+    private void PlayDeathAnimation()
+    {
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        if (animator != null && !string.IsNullOrEmpty(deathTrigger))
+        {
+            animator.SetTrigger(deathTrigger);
+        }
+    }
+
+    private void PlayDeathSound()
+    {
+        if (deathSound == null)
+        {
+            return;
+        }
+
+        if (ActiveSagaAudioManager.Instance != null)
+        {
+            ActiveSagaAudioManager.Instance.PlaySFX(deathSound);
+            return;
+        }
+
+        AudioSource.PlayClipAtPoint(deathSound, transform.position);
+    }
+
+    private void SetWalkingAnimation(bool isWalking)
+    {
+        if (animator == null || string.IsNullOrEmpty(walkingBool))
+        {
+            return;
+        }
+
+        animator.SetBool(walkingBool, isWalking);
     }
 }

@@ -98,8 +98,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SideEnemyRunner
   moveSpeed: 4
-  destroyAfterSeconds: 8
+  activationDistance: 120
+  destroyBehindPlayerDistance: 10
   weaponTag: Sword
+  deathDestroyDelay: 1.2
+  deathSound: {fileID: 8300000, guid: 3fe6901cf27eb5845835813d8d0135f6, type: 3}
+  animator: {fileID: 5072857667965889819}
+  deathTrigger: Death
+  walkingBool: 
 --- !u!1001 &6274059538330978845
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -180,7 +186,7 @@ Animator:
   m_GameObject: {fileID: 6615935433150019404}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 22a2e433dc15b2c48bb8949335cf05f1, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b2e4020b802c4f74fb224b08d6621882, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
