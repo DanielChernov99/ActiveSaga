@@ -11,6 +11,9 @@ public class MonsterController : MonoBehaviour
     [SerializeField] private bool hideVisualsOnCatch = true;
     [SerializeField] private bool disableCollidersOnCatch = true;
 
+    [Header("Audio")]
+    [SerializeField] private bool stopAudioOnCatch = true;
+
     [Header("Settings")]
     public float startDistance = 50f;
     public float monsterSpeed = 5f;
@@ -24,18 +27,23 @@ public class MonsterController : MonoBehaviour
 
     private Renderer[] monsterRenderers;
     private Collider[] monsterColliders;
+    private AudioSource[] monsterAudioSources;
+    private Random3DAudioEmitter[] randomAudioEmitters;
+    private Looping3DAudioEmitter[] loopingAudioEmitters;
 
     public event Action OnMonsterCaughtPlayer;
 
     private void Awake()
     {
         CacheVisualParts();
+        CacheAudioParts();
     }
 
     private void Start()
     {
         SetMonsterVisible(true);
         ResetMonsterPosition();
+        SetMonsterAudioActive(false);
     }
 
     private void Update()
@@ -74,11 +82,13 @@ public class MonsterController : MonoBehaviour
 
         SetMonsterVisible(true);
         ResetMonsterPosition();
+        SetMonsterAudioActive(true);
     }
 
     public void StopChase()
     {
         isChasing = false;
+        SetMonsterAudioActive(false);
     }
 
     public void ResetMonsterPosition()
@@ -110,6 +120,11 @@ public class MonsterController : MonoBehaviour
             SetMonsterVisible(false);
         }
 
+        if (stopAudioOnCatch)
+        {
+            SetMonsterAudioActive(false);
+        }
+
         OnMonsterCaughtPlayer?.Invoke();
     }
 
@@ -119,6 +134,13 @@ public class MonsterController : MonoBehaviour
 
         monsterRenderers = targetRoot.GetComponentsInChildren<Renderer>(true);
         monsterColliders = targetRoot.GetComponentsInChildren<Collider>(true);
+    }
+
+    private void CacheAudioParts()
+    {
+        monsterAudioSources = GetComponentsInChildren<AudioSource>(true);
+        randomAudioEmitters = GetComponentsInChildren<Random3DAudioEmitter>(true);
+        loopingAudioEmitters = GetComponentsInChildren<Looping3DAudioEmitter>(true);
     }
 
     private void SetMonsterVisible(bool visible)
@@ -141,6 +163,42 @@ public class MonsterController : MonoBehaviour
                 if (monsterColliders[i] != null)
                 {
                     monsterColliders[i].enabled = visible;
+                }
+            }
+        }
+    }
+
+    private void SetMonsterAudioActive(bool active)
+    {
+        if (randomAudioEmitters != null)
+        {
+            for (int i = 0; i < randomAudioEmitters.Length; i++)
+            {
+                if (randomAudioEmitters[i] != null)
+                {
+                    randomAudioEmitters[i].enabled = active;
+                }
+            }
+        }
+
+        if (loopingAudioEmitters != null)
+        {
+            for (int i = 0; i < loopingAudioEmitters.Length; i++)
+            {
+                if (loopingAudioEmitters[i] != null)
+                {
+                    loopingAudioEmitters[i].enabled = active;
+                }
+            }
+        }
+
+        if (!active && monsterAudioSources != null)
+        {
+            for (int i = 0; i < monsterAudioSources.Length; i++)
+            {
+                if (monsterAudioSources[i] != null)
+                {
+                    monsterAudioSources[i].Stop();
                 }
             }
         }

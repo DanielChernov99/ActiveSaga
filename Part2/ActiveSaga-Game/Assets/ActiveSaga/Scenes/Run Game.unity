@@ -538,40 +538,11 @@ MonoBehaviour:
   visualRoot: {fileID: 0}
   hideVisualsOnCatch: 1
   disableCollidersOnCatch: 1
+  stopAudioOnCatch: 1
   startDistance: 50
   monsterSpeed: 6
   maxCatchUpSpeed: 12
   catchUpStrength: 0.15
---- !u!114 &108434431
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 108434427}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b04571f7297520343b94e604b157f1e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Random3DAudioEmitter
-  roarClips: []
-  lineClips: []
-  playAutomatically: 1
-  preventOverlappingSounds: 1
-  firstSoundMinDelay: 2
-  firstSoundMaxDelay: 5
-  minDelayBetweenSounds: 4
-  maxDelayBetweenSounds: 9
-  roarChance: 0.343
-  playAnimationsWithSounds: 0
-  animator: {fileID: 0}
-  roarTriggerName: Roar
-  lineTriggerName: Talk
-  outputMixerGroup: {fileID: 0}
-  volume: 1
-  spatialBlend: 1
-  minDistance: 8
-  maxDistance: 75
 --- !u!114 &108434432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -591,6 +562,63 @@ MonoBehaviour:
   spatialBlend: 1
   minDistance: 3
   maxDistance: 35
+--- !u!114 &108434433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 108434427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b04571f7297520343b94e604b157f1e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Random3DAudioEmitter
+  roarClips:
+  - {fileID: 8300000, guid: 066fb292331ee6b48a48870ab50f4a20, type: 3}
+  - {fileID: 8300000, guid: 5bdaf8ba407907f4fb612939a7c4ffbe, type: 3}
+  - {fileID: 8300000, guid: a9d0f384ed7806743836d1690566e06c, type: 3}
+  - {fileID: 8300000, guid: e9d1f502084b22a469a4996ec8ee209c, type: 3}
+  - {fileID: 8300000, guid: 86b7ab0976dcdce449375b0ea2c3f031, type: 3}
+  - {fileID: 8300000, guid: 63c67fd568ed7bb4084324b4cdf91d79, type: 3}
+  - {fileID: 8300000, guid: cb4752aaf40e3254390f77eda57999c7, type: 3}
+  - {fileID: 8300000, guid: 26e42b2e8bdd7c3428b9577bb55f7988, type: 3}
+  lineClips:
+  - {fileID: 8300000, guid: ed82718694dbb5641961e48103303938, type: 3}
+  - {fileID: 8300000, guid: ce13ce2461bdfc54a8090edef0cf082b, type: 3}
+  - {fileID: 8300000, guid: 412b4db140667b34e95f76899155aa15, type: 3}
+  - {fileID: 8300000, guid: 0bc18f9dba08aef4fa1668d7e39efc8f, type: 3}
+  - {fileID: 8300000, guid: 3814c3427daf3964890aa567f6bd7899, type: 3}
+  - {fileID: 8300000, guid: d0a2489680122224cac4303e774ba3da, type: 3}
+  - {fileID: 8300000, guid: 4ef7effd493c98040b6cb4e9021d142e, type: 3}
+  - {fileID: 8300000, guid: 4ae58799b9515cc4480e6a0dffd2766b, type: 3}
+  - {fileID: 8300000, guid: a8cc9a6cfd908a548bc574df471e6ec5, type: 3}
+  - {fileID: 8300000, guid: e5910b9b37bbc28489ad5b39aa4e0c06, type: 3}
+  - {fileID: 8300000, guid: 41269df6d8bd36e44b9b5b33dfd88938, type: 3}
+  - {fileID: 8300000, guid: 8cee5c75f28c5d741b3a84291f501c5e, type: 3}
+  - {fileID: 8300000, guid: 993c16eec0a9d6e49b40c93041bbff52, type: 3}
+  - {fileID: 8300000, guid: 377dc858b16bc6347a30a27774a0b3f2, type: 3}
+  - {fileID: 8300000, guid: 65a982e401d032240b24cb64322034f2, type: 3}
+  - {fileID: 8300000, guid: ae5cfeda3c168b148a99bac7c8836c1a, type: 3}
+  - {fileID: 8300000, guid: f6b5747f77dbdb9499640a40c70c4366, type: 3}
+  - {fileID: 8300000, guid: c30000f37ff243a448857ccd84a82ef6, type: 3}
+  - {fileID: 8300000, guid: fee1f786f8faaed4fba20a20f0fcb066, type: 3}
+  playAutomatically: 1
+  preventOverlappingSounds: 1
+  firstSoundMinDelay: 2
+  firstSoundMaxDelay: 5
+  minDelayBetweenSounds: 4
+  maxDelayBetweenSounds: 9
+  roarChance: 0.4
+  playAnimationsWithSounds: 0
+  animator: {fileID: 0}
+  roarTriggerName: Roar
+  lineTriggerName: Talk
+  outputMixerGroup: {fileID: 5562977938242641564, guid: 83ad853957416cc4e81fdf52eb24c16d, type: 2}
+  volume: 1
+  spatialBlend: 1
+  minDistance: 8
+  maxDistance: 75
 --- !u!1 &129141382
 GameObject:
   m_ObjectHideFlags: 0
@@ -8302,10 +8330,10 @@ PrefabInstance:
       addedObject: {fileID: 108434430}
     - targetCorrespondingSourceObject: {fileID: 9137032837993464747, guid: d66c23583a584ef4195dbea312c0b2a7, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 108434431}
+      addedObject: {fileID: 108434432}
     - targetCorrespondingSourceObject: {fileID: 9137032837993464747, guid: d66c23583a584ef4195dbea312c0b2a7, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 108434432}
+      addedObject: {fileID: 108434433}
   m_SourcePrefab: {fileID: 100100000, guid: d66c23583a584ef4195dbea312c0b2a7, type: 3}
 --- !u!1 &1936056471
 GameObject:
