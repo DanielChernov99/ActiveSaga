@@ -99,6 +99,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Entities.EnemyController
   currentState: 0
   walkStateName: Walk
+  deathTrigger: Death
+  deathSound: {fileID: 8300000, guid: 3fe6901cf27eb5845835813d8d0135f6, type: 3}
+  deathReturnDelay: 1.2
+  retargetPlayerWhileMoving: 1
+  retargetInterval: 0.1
+  rotationLerpSpeed: 10
+  continueStraightAfterReachingPlayer: 1
+  stopRetargetingDistance: 1.2
+  useRandomTargetLane: 1
+  targetLaneHalfWidth: 1.6
+  targetLaneMinAbs: 0.5
   groundLayer:
     serializedVersion: 2
     m_Bits: 4294967295
