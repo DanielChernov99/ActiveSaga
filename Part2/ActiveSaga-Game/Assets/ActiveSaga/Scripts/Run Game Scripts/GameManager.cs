@@ -27,6 +27,9 @@ public class GameManager : MonoBehaviour
     [Header("Game Settings")]
     [SerializeField] private float scoreSpeedMultiplier = 8f;
 
+    [Header("End Game Behavior")]
+    [SerializeField] private bool stopMusicWhenGameEnds = true;
+
     [Header("Level Goals")]
     public float levelTargetDistance = 100f;
     public int goalJumps = 10;
@@ -37,13 +40,15 @@ public class GameManager : MonoBehaviour
     public int totalJumps;
     public int totalSquats;
 
+    [Header("Stun Settings")]
+    [SerializeField] private float stunDuration = 2f;
+
     private float currentSpeed;
     private bool isGameActive = false;
     private float gameStartTime;
-
-    [Header("Stun Settings")]
-    [SerializeField] private float stunDuration = 2f;
     private float stunnedUntilTime = -1f;
+
+    public bool IsGameActive => isGameActive;
 
     public event Action<float, int, int, float> OnStatsUpdated;
 
@@ -142,7 +147,6 @@ public class GameManager : MonoBehaviour
         {
             gameSessionManager.StartSession();
             gameSessionManager.StartGameplayTimerIfNeeded();
-
         }
         else
         {
@@ -172,12 +176,14 @@ public class GameManager : MonoBehaviour
         totalJumps = 0;
         totalSquats = 0;
         currentSpeed = 0f;
+        stunnedUntilTime = -1f;
     }
 
     private void HandleRun(float intensity)
     {
         if (!isGameActive)
         {
+            currentSpeed = 0f;
             return;
         }
 
@@ -188,7 +194,6 @@ public class GameManager : MonoBehaviour
         }
 
         currentSpeed = intensity * scoreSpeedMultiplier;
-
         currentDistance += currentSpeed * Time.deltaTime;
 
         if (runGameStatsTracker != null)
@@ -229,8 +234,6 @@ public class GameManager : MonoBehaviour
 
     private void HandleObstacleCrash()
     {
-        Debug.Log("[GameManager] HandleObstacleCrash called. isGameActive = " + isGameActive);
-
         if (!isGameActive)
         {
             Debug.LogWarning("[GameManager] Crash ignored because game is not active.");
@@ -242,14 +245,11 @@ public class GameManager : MonoBehaviour
         stunnedUntilTime = Time.time + stunDuration;
         currentSpeed = 0f;
 
-        Debug.Log("[GameManager] Player stunned until: " + stunnedUntilTime + " | Current time: " + Time.time);
-
         if (runGameStatsTracker != null)
         {
             runGameStatsTracker.AddObstacleCrash();
         }
     }
-
 
     private void HandleMonsterCaughtPlayer()
     {
@@ -270,11 +270,19 @@ public class GameManager : MonoBehaviour
 
         isGameActive = false;
         currentSpeed = 0f;
+        stunnedUntilTime = -1f;
 
         if (monsterController != null)
         {
             monsterController.StopChase();
         }
+
+        if (stopMusicWhenGameEnds && ActiveSagaAudioManager.Instance != null)
+        {
+            ActiveSagaAudioManager.Instance.StopMusic();
+        }
+
+        OnStatsUpdated?.Invoke(currentDistance, totalJumps, totalSquats, Time.time - gameStartTime);
 
         if (gameSessionManager != null)
         {
@@ -288,7 +296,7 @@ public class GameManager : MonoBehaviour
 
     public float GetPlayerSpeed()
     {
-        if (IsPlayerStunned())
+        if (!isGameActive || IsPlayerStunned())
         {
             return 0f;
         }
@@ -300,20 +308,22 @@ public class GameManager : MonoBehaviour
     {
         if (!isGameActive)
         {
+            currentSpeed = 0f;
             return;
         }
 
-        float t = Time.time - gameStartTime;
+        float elapsedTime = Time.time - gameStartTime;
 
-        OnStatsUpdated?.Invoke(currentDistance, totalJumps, totalSquats, t);
+        OnStatsUpdated?.Invoke(currentDistance, totalJumps, totalSquats, elapsedTime);
 
         if (runGameStatsTracker != null)
         {
             runGameStatsTracker.SetDistance(currentDistance);
         }
     }
+
     public bool IsPlayerStunned()
-{
-    return Time.time < stunnedUntilTime;
-}
+    {
+        return Time.time < stunnedUntilTime;
+    }
 }

@@ -6,9 +6,9 @@ public class PlayerLocomotion : MonoBehaviour
     [Header("Core References")]
     [Tooltip("Reference to the camera or head to determine forward direction")]
     [SerializeField] private Transform forwardReference;
-    
-    // Auto-fetched in Awake
-    private CharacterController characterController;
+
+    [Header("Game State")]
+    [SerializeField] private GameManager gameManager;
 
     [Header("Analyzers Events")]
     [SerializeField] private RunAnalyzer runAnalyzer;
@@ -18,66 +18,122 @@ public class PlayerLocomotion : MonoBehaviour
     [Header("Movement Settings")]
     [SerializeField] private float runSpeed = 8f;
     [SerializeField] private float squatSpeed = 1.5f;
-    [Tooltip("How fast the player reaches max speed (Smoothing)")]
+
+    [Tooltip("How fast the player reaches max speed")]
     [SerializeField] private float acceleration = 6f;
 
     [Header("Jump & Gravity")]
     [SerializeField] private float jumpForce = 5f;
-    [Tooltip("Higher gravity feels less 'floaty' in games. 20 is a good value.")]
     [SerializeField] private float gravity = 20f;
-    [SerializeField] private GameManager gameManager;
 
-    // Internal State
+    private CharacterController characterController;
+
     private float currentSpeed;
     private float verticalVelocity;
     private float runIntensity;
     private bool isSquatting;
-    private bool wasStunned;
 
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
-    
+
         if (forwardReference == null)
         {
-            Debug.LogError("PlayerLocomotion: Forward Reference is missing! Assign the Camera.");
+            Debug.LogError("PlayerLocomotion: Forward Reference is missing! Assign the camera/head.");
             enabled = false;
+            return;
         }
 
         if (gameManager == null)
         {
-            Debug.LogWarning("[PlayerLocomotion] GameManager reference is NULL. Assign it in the Inspector.");
+            gameManager = FindObjectOfType<GameManager>();
         }
+
+        if (gameManager == null)
+        {
+            Debug.LogWarning("PlayerLocomotion: GameManager reference is missing.");
         }
+    }
 
     private void OnEnable()
     {
-        if (runAnalyzer) runAnalyzer.OnRunIntensity += HandleRun;
-        if (squatAnalyzer) squatAnalyzer.OnSquatStateChanged += HandleSquat;
-        if (jumpAnalyzer) jumpAnalyzer.OnJump += HandleJump;
+        if (runAnalyzer != null)
+        {
+            runAnalyzer.OnRunIntensity += HandleRun;
+        }
+
+        if (squatAnalyzer != null)
+        {
+            squatAnalyzer.OnSquatStateChanged += HandleSquat;
+        }
+
+        if (jumpAnalyzer != null)
+        {
+            jumpAnalyzer.OnJump += HandleJump;
+        }
     }
 
     private void OnDisable()
     {
-        if (runAnalyzer) runAnalyzer.OnRunIntensity -= HandleRun;
-        if (squatAnalyzer) squatAnalyzer.OnSquatStateChanged -= HandleSquat;
-        if (jumpAnalyzer) jumpAnalyzer.OnJump -= HandleJump;
+        if (runAnalyzer != null)
+        {
+            runAnalyzer.OnRunIntensity -= HandleRun;
+        }
+
+        if (squatAnalyzer != null)
+        {
+            squatAnalyzer.OnSquatStateChanged -= HandleSquat;
+        }
+
+        if (jumpAnalyzer != null)
+        {
+            jumpAnalyzer.OnJump -= HandleJump;
+        }
     }
 
     private void Update()
     {
+        if (!IsGameplayActive())
+        {
+            StopMovement();
+            return;
+        }
+
         UpdateSpeed();
         UpdateVerticalVelocity();
         Move();
     }
 
-    // --- Event Handlers ---
+    private void HandleRun(float intensity)
+    {
+        if (!IsGameplayActive())
+        {
+            runIntensity = 0f;
+            currentSpeed = 0f;
+            return;
+        }
 
-    private void HandleRun(float intensity) => runIntensity = intensity;
-    private void HandleSquat(bool state) => isSquatting = state;
+        runIntensity = intensity;
+    }
+
+    private void HandleSquat(bool state)
+    {
+        if (!IsGameplayActive())
+        {
+            isSquatting = false;
+            return;
+        }
+
+        isSquatting = state;
+    }
 
     private void HandleJump()
     {
+        if (!IsGameplayActive())
+        {
+            return;
+        }
+
         if (gameManager != null && gameManager.IsPlayerStunned())
         {
             return;
@@ -89,7 +145,18 @@ public class PlayerLocomotion : MonoBehaviour
         }
     }
 
-    // --- Physics Logic ---
+    private bool IsGameplayActive()
+    {
+        return gameManager == null || gameManager.IsGameActive;
+    }
+
+    private void StopMovement()
+    {
+        currentSpeed = 0f;
+        runIntensity = 0f;
+        verticalVelocity = 0f;
+        isSquatting = false;
+    }
 
     private void UpdateSpeed()
     {
@@ -124,27 +191,28 @@ public class PlayerLocomotion : MonoBehaviour
     {
         if (characterController.isGrounded)
         {
-            // Apply small downward force to stick to ground (prevents jitter)
             if (verticalVelocity < 0f)
+            {
                 verticalVelocity = -2f;
+            }
         }
         else
         {
-            // Apply Gravity
             verticalVelocity -= gravity * Time.deltaTime;
         }
     }
 
     private void Move()
     {
-        // 1. Get Forward Direction (Flattened on Y axis)
-        // This ensures looking down/up doesn't affect speed
-        Vector3 forward = Vector3.ProjectOnPlane(forwardReference.forward, Vector3.up).normalized;
+        Vector3 forward = Vector3.ProjectOnPlane(
+            forwardReference.forward,
+            Vector3.up
+        ).normalized;
 
-        // 2. Combine Forward Speed + Vertical Velocity (Gravity/Jump)
-        Vector3 velocity = (forward * currentSpeed) + (Vector3.up * verticalVelocity);
+        Vector3 velocity =
+            forward * currentSpeed +
+            Vector3.up * verticalVelocity;
 
-        // 3. Move the Character Controller
         characterController.Move(velocity * Time.deltaTime);
     }
 }
