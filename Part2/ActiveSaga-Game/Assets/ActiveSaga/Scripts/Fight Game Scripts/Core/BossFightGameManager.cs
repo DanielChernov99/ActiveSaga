@@ -1,5 +1,6 @@
 using UnityEngine;
 using ActiveSaga.BossFight.Waves;
+using ActiveSaga.BossFight.Entities;
 using ActiveSaga.Common.GameSession;
 
 namespace ActiveSaga.BossFight.Core
@@ -17,6 +18,14 @@ namespace ActiveSaga.BossFight.Core
         [SerializeField] private float maxPlayerHP = 100f;
         [SerializeField] private Transform playerTransform;
         [SerializeField] private Camera playerCamera;
+
+        [Header("Boss End Game References")]
+        [SerializeField] private Transform bossAudioRoot;
+
+        [Header("End Game Behavior")]
+        [SerializeField] private bool stopMusicWhenGameEnds = true;
+        [SerializeField] private bool stopBossAudioWhenGameEnds = true;
+        [SerializeField] private bool stopBossAnimationsWhenGameEnds = true;
 
         private float currentPlayerHP;
         private bool gameOverTriggered;
@@ -131,6 +140,18 @@ namespace ActiveSaga.BossFight.Core
             }
         }
 
+        public void StopFightGameBeforeQuit()
+        {
+            if (gameOverTriggered)
+            {
+                return;
+            }
+
+            gameOverTriggered = true;
+
+            StopBossAndMusic();
+        }
+
         private void OnGameOver()
         {
             if (gameOverTriggered)
@@ -148,6 +169,8 @@ namespace ActiveSaga.BossFight.Core
                 duration = 10f
             });
 
+            StopFightGameplaySystems();
+
             if (GameSessionManager.Instance != null)
             {
                 GameSessionManager.Instance.EndGameAsGameOver();
@@ -156,10 +179,90 @@ namespace ActiveSaga.BossFight.Core
             {
                 Debug.LogError("[BossFightGameManager] Cannot end game as GameOver because GameSessionManager.Instance is null.");
             }
+        }
 
+        private void StopFightGameplaySystems()
+        {
             if (waveManager != null)
             {
                 waveManager.StopWavesAfterGameEnded();
+            }
+
+            StopBossAndMusic();
+        }
+
+        private void StopBossAndMusic()
+        {
+            if (stopMusicWhenGameEnds && ActiveSagaAudioManager.Instance != null)
+            {
+                ActiveSagaAudioManager.Instance.StopMusic();
+            }
+
+            StopBossAfterGameEnded();
+        }
+
+        private void StopBossAfterGameEnded()
+        {
+            Transform targetRoot = bossAudioRoot;
+
+            if (targetRoot == null && BossController.Instance != null)
+            {
+                targetRoot = BossController.Instance.transform.parent;
+            }
+
+            if (targetRoot == null && BossController.Instance != null)
+            {
+                targetRoot = BossController.Instance.transform;
+            }
+
+            if (targetRoot == null)
+            {
+                return;
+            }
+
+            MonoBehaviour[] behaviours = targetRoot.GetComponentsInChildren<MonoBehaviour>(true);
+
+            for (int i = 0; i < behaviours.Length; i++)
+            {
+                if (behaviours[i] == null)
+                {
+                    continue;
+                }
+
+                string typeName = behaviours[i].GetType().Name;
+
+                if (typeName == "Random3DAudioEmitter" ||
+                    typeName == "Looping3DAudioEmitter")
+                {
+                    behaviours[i].enabled = false;
+                }
+            }
+
+            if (stopBossAudioWhenGameEnds)
+            {
+                AudioSource[] audioSources = targetRoot.GetComponentsInChildren<AudioSource>(true);
+
+                for (int i = 0; i < audioSources.Length; i++)
+                {
+                    if (audioSources[i] != null)
+                    {
+                        audioSources[i].Stop();
+                        audioSources[i].enabled = false;
+                    }
+                }
+            }
+
+            if (stopBossAnimationsWhenGameEnds)
+            {
+                Animator[] animators = targetRoot.GetComponentsInChildren<Animator>(true);
+
+                for (int i = 0; i < animators.Length; i++)
+                {
+                    if (animators[i] != null)
+                    {
+                        animators[i].enabled = false;
+                    }
+                }
             }
         }
     }

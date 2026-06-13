@@ -8107,6 +8107,10 @@ MonoBehaviour:
   maxPlayerHP: 100
   playerTransform: {fileID: 288671076}
   playerCamera: {fileID: 1629309589}
+  bossAudioRoot: {fileID: 1388009035}
+  stopMusicWhenGameEnds: 1
+  stopBossAudioWhenGameEnds: 1
+  stopBossAnimationsWhenGameEnds: 1
 --- !u!1001 &563232842
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11684,6 +11688,19 @@ MonoBehaviour:
       - m_Target: {fileID: 1147110116}
         m_TargetAssemblyTypeName: ActiveSaga.BossFight.Waves.WaveManager, Assembly-CSharp
         m_MethodName: StopWavesAfterGameEnded
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 563036530}
+        m_TargetAssemblyTypeName: ActiveSaga.BossFight.Core.BossFightGameManager,
+          Assembly-CSharp
+        m_MethodName: StopFightGameBeforeQuit
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -24323,6 +24340,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLocomotion
   forwardReference: {fileID: 1170996122}
+  gameManager: {fileID: 0}
   runAnalyzer: {fileID: 931168324}
   squatAnalyzer: {fileID: 1559971724}
   jumpAnalyzer: {fileID: 1177614213}
@@ -24331,7 +24349,6 @@ MonoBehaviour:
   acceleration: 6
   jumpForce: 5
   gravity: 20
-  gameManager: {fileID: 0}
 --- !u!135 &1629309585
 SphereCollider:
   m_ObjectHideFlags: 0

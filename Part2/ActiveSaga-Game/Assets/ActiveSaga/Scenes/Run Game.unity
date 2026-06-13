@@ -883,7 +883,7 @@ MonoBehaviour:
   headTransform: {fileID: 2133962748}
   positionCenter: {fileID: 2133962744}
   forwardDistance: 0.85
-  heightOffset: -0.08
+  verticalOffset: -200
   followSpeed: 8
   followRotation: 0
 --- !u!1 &171735494
@@ -2714,9 +2714,9 @@ MonoBehaviour:
   beforeQuit:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: ActiveSaga.BossFight.Waves.WaveManager, Assembly-CSharp
-        m_MethodName: StopWavesAfterGameEnded
+      - m_Target: {fileID: 1976218460}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: EndRunGameAsPlayerQuit
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7909,6 +7909,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLocomotion
   forwardReference: {fileID: 43382057}
+  gameManager: {fileID: 1976218460}
   runAnalyzer: {fileID: 1335860147}
   squatAnalyzer: {fileID: 321152836}
   jumpAnalyzer: {fileID: 2036115307}
@@ -7917,7 +7918,6 @@ MonoBehaviour:
   acceleration: 6
   jumpForce: 5
   gravity: 20
-  gameManager: {fileID: 1976218460}
 --- !u!1001 &1841646820
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8565,6 +8565,7 @@ MonoBehaviour:
   gameSessionManager: {fileID: 1112345726}
   runGameStatsTracker: {fileID: 1112345725}
   scoreSpeedMultiplier: 8
+  stopMusicWhenGameEnds: 1
   levelTargetDistance: 100
   goalJumps: 10
   goalSquats: 5

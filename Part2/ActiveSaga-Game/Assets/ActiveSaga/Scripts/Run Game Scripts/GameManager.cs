@@ -293,6 +293,10 @@ public class GameManager : MonoBehaviour
             Debug.LogError("GameManager: Cannot end game because GameSessionManager is missing.");
         }
     }
+    public void EndRunGameAsPlayerQuit()
+    {
+        EndRunGame(GameEndReason.PlayerQuit);
+    }
 
     public float GetPlayerSpeed()
     {

@@ -8,7 +8,7 @@ public class VRForwardOnlyFollow : MonoBehaviour
 
     [Header("Offset")]
     [SerializeField] private float forwardDistance = 0.85f;
-    [SerializeField] private float heightOffset = -0.08f;
+    [SerializeField] private float verticalOffset = -1.5f;
 
     [Header("Follow Settings")]
     [SerializeField] private float followSpeed = 8f;
@@ -35,7 +35,7 @@ public class VRForwardOnlyFollow : MonoBehaviour
         Vector3 targetPosition =
             center.position +
             flatForward * forwardDistance +
-            Vector3.up * heightOffset;
+            Vector3.up * verticalOffset;
 
         transform.position = Vector3.Lerp(
             transform.position,
