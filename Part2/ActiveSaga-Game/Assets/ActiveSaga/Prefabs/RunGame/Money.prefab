@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: eb5fa594cdb7656469a46570cc3b8df9, type: 3}
       propertyPath: m_Name
-      value: Money_temporary
+      value: Money
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -80,6 +80,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e388f9a9647bba64eb09e48816102f4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinCollectible
+  coinValue: 1
+  rotateSpeed: 120
+  collectSound: {fileID: 8300000, guid: c8ce547f6648d1d44af28c99c217b8b5, type: 3}
 --- !u!64 &6037986308047717419
 MeshCollider:
   m_ObjectHideFlags: 0
