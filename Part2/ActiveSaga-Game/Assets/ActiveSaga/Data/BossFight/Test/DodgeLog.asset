@@ -25,3 +25,5 @@ MonoBehaviour:
   frequency: 2
   impactVFX: {fileID: 0}
   launchSFX: {fileID: 0}
+  hitPlayerSFX: {fileID: 8300000, guid: d6dfdec42576d314fb41d444505469c1, type: 3}
+  hitPlayerSFXVolume: 1
