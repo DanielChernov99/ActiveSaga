@@ -236,12 +236,25 @@ namespace ActiveSaga.BossFight.Entities
                 return;
             }
 
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-
             ConfigureRigidbody();
+            StopRigidbodyMotion();
 
             rb.WakeUp();
+        }
+        private void StopRigidbodyMotion()
+        {
+            if (rb == null)
+            {
+                return;
+            }
+
+            if (rb.isKinematic)
+            {
+                return;
+            }
+
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
         }
 
         private void PlayWalkAnimation()
@@ -418,11 +431,7 @@ namespace ActiveSaga.BossFight.Entities
             isInitialized = false;
             currentState = EnemyState.Idle;
 
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
+            StopRigidbodyMotion();
         }
 
         public void Despawn(bool killedByPlayer)
@@ -441,11 +450,7 @@ namespace ActiveSaga.BossFight.Entities
             currentState = EnemyState.Dead;
             wasKilledByPlayer = killedByPlayer;
 
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
+            StopRigidbodyMotion();
 
             EventManager.Trigger(new EnemyDespawnedEvent
             {

@@ -75,6 +75,27 @@ namespace ActiveSaga.BossFight.Core
             obj.SetActive(false);
             return obj;
         }
+        private void ResetRigidbodyVelocity(GameObject obj)
+        {
+            Rigidbody rb = obj.GetComponent<Rigidbody>();
+
+            if (rb == null)
+            {
+                return;
+            }
+
+            bool wasKinematic = rb.isKinematic;
+
+            if (wasKinematic)
+            {
+                rb.isKinematic = false;
+            }
+
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            rb.isKinematic = wasKinematic;
+        }
 
         public GameObject SpawnFromPool(string poolName, Vector3 position, Quaternion rotation, bool isEnemy = true)
         {
@@ -105,12 +126,7 @@ namespace ActiveSaga.BossFight.Core
             if (_prefabLookup.ContainsKey(poolName))
                 obj.transform.localScale = _prefabLookup[poolName].transform.localScale;
 
-            Rigidbody rb = obj.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
+            ResetRigidbodyVelocity(obj);
 
             obj.SetActive(true);
             return obj;

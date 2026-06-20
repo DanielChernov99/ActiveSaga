@@ -12601,7 +12601,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 547841761}
-  - component: {fileID: 547841762}
   - component: {fileID: 547841763}
   m_Layer: 5
   m_Name: Screen_PlayerStats new
@@ -12636,18 +12635,6 @@ RectTransform:
   m_AnchoredPosition: {x: 409, y: 387}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &547841762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 547841760}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 066d0aceee6ab0a4593eb97911259972, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerStatsScreenUI
 --- !u!114 &547841763
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45800,7 +45787,6 @@ GameObject:
   - component: {fileID: 931360000290566170}
   - component: {fileID: 7728648534369297051}
   - component: {fileID: 428674461197413649}
-  - component: {fileID: 7672899430649899388}
   m_Layer: 2
   m_Name: Background
   m_TagString: Untagged
@@ -45808,18 +45794,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &7672899430649899388
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6727058644151080377}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RunningProgressBar
 --- !u!222 &7728648534369297051
 CanvasRenderer:
   m_ObjectHideFlags: 0

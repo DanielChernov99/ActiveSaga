@@ -48,11 +48,6 @@ public class PlayerLocomotion : MonoBehaviour
         {
             gameManager = FindFirstObjectByType<GameManager>();
         }
-
-        if (gameManager == null)
-        {
-            Debug.LogWarning("PlayerLocomotion: GameManager reference is missing.");
-        }
     }
 
     private void OnEnable()

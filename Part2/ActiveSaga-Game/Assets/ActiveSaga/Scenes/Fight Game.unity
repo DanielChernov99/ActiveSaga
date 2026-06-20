@@ -12858,7 +12858,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Combat.WeaponController
   handType: 0
-  velocityThreshold: 1
 --- !u!1001 &848446704
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13445,7 +13444,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Resume Button
+  m_text: 'Resume Game
 
 '
   m_isRightToLeft: 0
@@ -24323,7 +24322,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCollisionHandler
   gracePeriod: 2
-  jumpAnalyzer: {fileID: 0}
+  jumpAnalyzer: {fileID: 1177614213}
   jumpCheckZoneName: Jump_Check_Zone
   earlyJumpTolerance: 0.35
   destroyObstacleOnJumpSuccess: 1
@@ -28730,7 +28729,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Combat.WeaponController
   handType: 0
-  velocityThreshold: 1
 --- !u!1001 &1942351471
 PrefabInstance:
   m_ObjectHideFlags: 0
