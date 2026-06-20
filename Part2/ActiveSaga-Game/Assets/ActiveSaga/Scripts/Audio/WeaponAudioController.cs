@@ -26,7 +26,7 @@ public class WeaponAudioController : MonoBehaviour
 
         if (movementReference == null)
         {
-            CharacterController characterController = FindObjectOfType<CharacterController>();
+            CharacterController characterController = FindFirstObjectByType<CharacterController>();
 
             if (characterController != null)
             {

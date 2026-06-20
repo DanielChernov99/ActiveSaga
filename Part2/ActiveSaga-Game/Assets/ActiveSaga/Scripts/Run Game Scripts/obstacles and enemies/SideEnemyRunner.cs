@@ -40,7 +40,7 @@ public class SideEnemyRunner : MonoBehaviour
 
         if (gameManager == null)
         {
-            gameManager = FindObjectOfType<GameManager>();
+            gameManager = FindFirstObjectByType<GameManager>();
         }
 
         if (animator == null)

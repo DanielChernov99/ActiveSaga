@@ -46,7 +46,7 @@ public class PlayerLocomotion : MonoBehaviour
 
         if (gameManager == null)
         {
-            gameManager = FindObjectOfType<GameManager>();
+            gameManager = FindFirstObjectByType<GameManager>();
         }
 
         if (gameManager == null)

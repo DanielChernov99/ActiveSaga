@@ -6,7 +6,6 @@ namespace ActiveSaga.BossFight.Combat
     public class WeaponController : MonoBehaviour
     {
         [SerializeField] private HandType handType;
-        [SerializeField] private float velocityThreshold = 1.0f;
         
         private Vector3 lastPosition;
         private Vector3 currentVelocity;

@@ -32,7 +32,7 @@ public class RunPlayerAudio : MonoBehaviour
 
         if (gameManager == null)
         {
-            gameManager = FindObjectOfType<GameManager>();
+            gameManager = FindFirstObjectByType<GameManager>();
         }
 
         if (runningLoopSource == null)
