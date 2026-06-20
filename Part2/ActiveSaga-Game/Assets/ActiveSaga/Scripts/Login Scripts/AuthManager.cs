@@ -49,8 +49,8 @@ public class ErrorResponse
 public class AuthManager : MonoBehaviour
 {
     [Header("API")]
-    [SerializeField] private string authBaseUrl = "http://localhost:3000/api/auth";
-    [SerializeField] private string playerBaseUrl = "http://localhost:3000/api/player";
+    private string authBaseUrl = "https://active-saga-api.onrender.com/api/auth";
+    private string playerBaseUrl = "https://active-saga-api.onrender.com/api/player";
 
     [Header("Scenes")]
     [SerializeField] private string mainSceneName = "Main New";

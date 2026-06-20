@@ -11,7 +11,7 @@ namespace ActiveSaga.Common.Networking
         public const string AuthTokenKey = "ACTIVE_SAGA_AUTH_TOKEN";
 
         [Header("API")]
-        [SerializeField] private string playerApiBaseUrl = "http://localhost:3000/api/player";
+        [SerializeField] private string playerApiBaseUrl = "https://active-saga-api.onrender.com/api/player";
 
         public static void SaveToken(string token)
         {

@@ -8,7 +8,7 @@ namespace ActiveSaga.Common.Networking
     public class ApiGameResultSubmitter : MonoBehaviour, IGameResultSubmitter
     {
         [Header("API Settings")]
-        [SerializeField] private string baseUrl = "http://localhost:3000";
+        [SerializeField] private string baseUrl = "https://active-saga-api.onrender.com";
         [SerializeField] private string completeGameEndpoint = "/api/player/complete-game-session";
 
         public async Task<ServerGameResultResponse> SubmitGameResultAsync(string jsonPayload)
