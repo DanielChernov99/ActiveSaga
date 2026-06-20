@@ -5917,8 +5917,8 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 210935595}
-  m_LocalRotation: {x: 0, y: 0.7372774, z: 0, w: 0.67559016}
-  m_LocalPosition: {x: 0, y: 0, z: -1866}
+  m_LocalRotation: {x: -0, y: 0.80129194, z: -0, w: 0.5982735}
+  m_LocalPosition: {x: 0, y: 0, z: -1877}
   m_LocalScale: {x: 2.5894775, y: 2.6507878, z: 0.99989307}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5933,10 +5933,10 @@ RectTransform:
   - {fileID: 1908580406}
   - {fileID: 2116990417}
   m_Father: {fileID: 400600680}
-  m_LocalEulerAnglesHint: {x: 0, y: 95, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 106.507, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 869, y: 397.00003}
+  m_AnchoredPosition: {x: 720, y: 397.00003}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &210935597
@@ -18532,7 +18532,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4372973593729692, guid: 491dc122236ad9749a046177ea69736d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 79.37576
+      value: 85.543
       objectReference: {fileID: 0}
     - target: {fileID: 4372973593729692, guid: 491dc122236ad9749a046177ea69736d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -18540,7 +18540,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4372973593729692, guid: 491dc122236ad9749a046177ea69736d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 42.18247
+      value: 26.67
       objectReference: {fileID: 0}
     - target: {fileID: 4372973593729692, guid: 491dc122236ad9749a046177ea69736d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -45820,10 +45820,6 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunningProgressBar
-  fillImage: {fileID: 0}
-  playerIcon: {fileID: 0}
-  backgroundBar: {fileID: 0}
-  flagIcon: {fileID: 0}
 --- !u!222 &7728648534369297051
 CanvasRenderer:
   m_ObjectHideFlags: 0
