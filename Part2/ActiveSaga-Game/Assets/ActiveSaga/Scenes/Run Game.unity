@@ -4569,7 +4569,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d64ec6ef0affb8644b02138145c06ea1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.Networking.ApiGameResultSubmitter
-  baseUrl: http://localhost:3000
+  baseUrl: https://active-saga-api.onrender.com
   completeGameEndpoint: /api/player/complete-game-session
 --- !u!114 &1112345728
 MonoBehaviour:

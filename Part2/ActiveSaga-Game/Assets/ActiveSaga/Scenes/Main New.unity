@@ -21576,7 +21576,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcfda5463e7c35f4ea8746ae1cdc05a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.Common.Networking.PlayerApiService
-  playerApiBaseUrl: http://localhost:3000/api/player
+  playerApiBaseUrl: https://active-saga-api.onrender.com/api/player
 --- !u!114 &1028540171
 MonoBehaviour:
   m_ObjectHideFlags: 0

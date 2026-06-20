@@ -3224,53 +3224,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2782439222529678998, guid: 3fa00dcc0e0e277429b3f8dedaec5507, type: 3}
   m_PrefabInstance: {fileID: 245627670}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &253104386
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 253104387}
-  - component: {fileID: 253104388}
-  m_Layer: 0
-  m_Name: --- UI ---
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &253104387
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 253104386}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.2281825, z: -0, w: 0.9736184}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1147751294}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -26.38, z: 0}
---- !u!114 &253104388
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 253104386}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92f06325cfd67dd47b81807abaa108f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSoundInstaller
-  includeInactiveButtons: 1
-  installOnStart: 1
 --- !u!1001 &255141375
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14727,12 +14680,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1147751293}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.2281825, z: -0, w: 0.9736184}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 253104387}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1147751295
 MonoBehaviour:
@@ -14760,8 +14713,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e1a178c8ecd4cf43ad50d83cd0f313b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AuthManager
-  authBaseUrl: http://localhost:3000/api/auth
-  playerBaseUrl: http://localhost:3000/api/player
   mainSceneName: Main New
   loginErrorText: {fileID: 1929449499}
   registerErrorText: {fileID: 1430792113}
@@ -25083,7 +25034,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 379304558}
   - {fileID: 1549784804}
-  - {fileID: 253104387}
   - {fileID: 677851338}
   - {fileID: 1069283169}
   - {fileID: 194314113}
@@ -25091,3 +25041,4 @@ SceneRoots:
   - {fileID: 2704061573939523434}
   - {fileID: 2207552888389201687}
   - {fileID: 281144557}
+  - {fileID: 1147751294}
