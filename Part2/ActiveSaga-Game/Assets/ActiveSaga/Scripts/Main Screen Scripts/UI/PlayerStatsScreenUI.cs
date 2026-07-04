@@ -116,14 +116,11 @@ namespace ActiveSaga.MainScreen.UI
 
             SetText(xpText, "xp : " + totalXp + " / " + nextLevelXp);
 
-            int xpNeededForThisLevel = nextLevelXp - currentLevelXp;
-            int xpInsideCurrentLevel = totalXp - currentLevelXp;
-
             float fill = 0f;
 
-            if (xpNeededForThisLevel > 0)
+            if (nextLevelXp > 0)
             {
-                fill = (float)xpInsideCurrentLevel / xpNeededForThisLevel;
+                fill = (float)totalXp / nextLevelXp;
             }
 
             SetFill(xpFillImage, fill);

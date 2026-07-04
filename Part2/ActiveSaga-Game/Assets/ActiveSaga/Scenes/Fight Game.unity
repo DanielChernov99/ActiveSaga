@@ -1613,6 +1613,59 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 362233261922440916, guid: a80936f3e0ebc564689c598da1fcbeaa, type: 3}
   m_PrefabInstance: {fileID: 60272758}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &67884494
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 67884495}
+  - component: {fileID: 67884496}
+  m_Layer: 0
+  m_Name: FightKeepMovingController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &67884495
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67884494}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 336628290}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &67884496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67884494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 585637187f3913d4fb5234650a241784, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Core.FightKeepMovingController
+  headTransform: {fileID: 1629309580}
+  rightHandTransform: {fileID: 846808927}
+  minimumMovementSpeed: 0.12
+  idleWarningTime: 3.5
+  warningCooldown: 3
+  continuousMoveBonusTime: 8
+  keepMovingMessage: Keep moving!
+  bonusMessage: Energy Bonus +5
+  feedbackDuration: 1.2
 --- !u!1001 &68139035
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5524,6 +5577,8 @@ Transform:
   - {fileID: 563036529}
   - {fileID: 1424445904}
   - {fileID: 1518063041}
+  - {fileID: 1021108858}
+  - {fileID: 67884495}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &337642201 stripped
@@ -10690,6 +10745,7 @@ RectTransform:
   m_Children:
   - {fileID: 413833268}
   - {fileID: 601140938}
+  - {fileID: 914194006}
   - {fileID: 766606647}
   m_Father: {fileID: 219483825}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -13944,6 +14000,143 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 910250052}
   m_CullTransparentMesh: 1
+--- !u!1 &914194005
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 914194006}
+  - component: {fileID: 914194008}
+  - component: {fileID: 914194007}
+  m_Layer: 0
+  m_Name: FeedbackText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &914194006
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914194005}
+  m_LocalRotation: {x: -0.0018087338, y: -0.5242078, z: -0.001256759, w: 0.8515876}
+  m_LocalPosition: {x: 0, y: 0, z: -3.93}
+  m_LocalScale: {x: 0.0012, y: 0.0012, z: 0.0012}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 734740115}
+  m_LocalEulerAnglesHint: {x: -0.252, y: -63.23, z: -0.014}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 8.73, y: 2.45}
+  m_SizeDelta: {x: 500, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &914194007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914194005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: Keep moving!!!
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967040
+  m_fontColor: {r: 0, g: 1, b: 0.99999976, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 50
+  m_fontSizeBase: 50
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_characterHorizontalScale: 1
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &914194008
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914194005}
+  m_CullTransparentMesh: 1
 --- !u!1001 &914436994
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15645,6 +15838,61 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4908839433523931704, guid: 30d1d5d35318c08498c18fe0baad8f47, type: 3}
   m_PrefabInstance: {fileID: 1020409656}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1021108857
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1021108858}
+  - component: {fileID: 1021108859}
+  m_Layer: 0
+  m_Name: BonusGoldBarSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1021108858
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1021108857}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 336628290}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1021108859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1021108857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2565b4f1266843442a3a1b5a2e21920f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Core.BonusOrbSpawner
+  orbPrefab: {fileID: 4913591256338173881, guid: 9b06fb98035260f4aa2c6fa6864deddf, type: 3}
+  playerCamera: {fileID: 1629309580}
+  orbParent: {fileID: 0}
+  firstSpawnDelay: 4
+  minSpawnInterval: 6
+  maxSpawnInterval: 10
+  forwardDistance: 1.1
+  minSideDistance: 0.25
+  maxSideDistance: 0.55
+  minHeightOffsetFromCamera: -0.35
+  maxHeightOffsetFromCamera: 0.05
 --- !u!1 &1021302249
 GameObject:
   m_ObjectHideFlags: 0
@@ -17138,7 +17386,8 @@ MonoBehaviour:
   difficultyConfig: {fileID: 11400000, guid: dd2a4e81fbd7326429fed38ae019cd16, type: 2}
   bossSpawnPoint: {fileID: 2080900758}
   currentWaveIndex: 0
-  nextWaveType: 0
+  backgroundEnemyStartDelay: 3
+  enemySpawnRetryDelay: 0.4
   enemyMasterList:
   - {fileID: 11400000, guid: fcd7ed511fcedc0479f5d3807c338cc3, type: 2}
   - {fileID: 11400000, guid: ba6321d3d1fe09f4998cd0cbfdb6ef01, type: 2}
@@ -21050,6 +21299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSaga.BossFight.Core.UIManager
   playerHPBar: {fileID: 1866123146}
   waveText: {fileID: 413833266}
+  feedbackText: {fileID: 914194007}
 --- !u!1001 &1416562721
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24213,7 +24463,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3904471525139099824, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6175755461057057005, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_Enabled
@@ -25135,9 +25385,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.35
-  m_Height: 1.6
+  m_Height: 2.2163107
   m_Direction: 1
-  m_Center: {x: 0, y: -0.5668776, z: 0}
+  m_Center: {x: 0, y: 0.30815542, z: 0}
 --- !u!114 &1719168100
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25152,6 +25402,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VRPlayerHitboxFollower
   jumpAnalyzer: {fileID: 1177614213}
   squatAnalyzer: {fileID: 1559971724}
+  standingCenterY: 0.95
   jumpColliderOffset: 1.2
   jumpDuration: 0.65
   squatColliderOffset: 1.2

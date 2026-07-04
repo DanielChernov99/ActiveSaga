@@ -7,16 +7,20 @@ public class VRPlayerHitboxFollower : MonoBehaviour
     [SerializeField] private JumpAnalyzer jumpAnalyzer;
     [SerializeField] private SquatAnalyzer squatAnalyzer;
 
+    [Header("Base Collider Position")]
+    [Tooltip("Local Y position of the capsule center while standing.")]
+    [SerializeField] private float standingCenterY = 0.95f;
+
     [Header("Jump Collider Movement")]
     [Tooltip("How much the hitbox collider moves up when a jump is detected.")]
-    [SerializeField] private float jumpColliderOffset = 1.2f;
+    [SerializeField] private float jumpColliderOffset = 1.0f;
 
     [Tooltip("How long the hitbox stays in jump motion.")]
     [SerializeField] private float jumpDuration = 0.65f;
 
     [Header("Squat Collider Movement")]
     [Tooltip("How much the hitbox collider moves down while squatting. Use a positive value.")]
-    [SerializeField] private float squatColliderOffset = 1.2f;
+    [SerializeField] private float squatColliderOffset = 0.75f;
 
     [Tooltip("How fast the hitbox moves toward its squat/stand position.")]
     [SerializeField] private float squatMoveSpeed = 12f;
@@ -109,7 +113,9 @@ public class VRPlayerHitboxFollower : MonoBehaviour
         capsule.radius = originalRadius;
 
         Vector3 nextCenter = originalCenter;
-        nextCenter.y += currentSquatOffset + jumpOffset;
+
+        // Standing base height + squat offset + jump offset
+        nextCenter.y = standingCenterY + currentSquatOffset + jumpOffset;
 
         capsule.center = nextCenter;
     }

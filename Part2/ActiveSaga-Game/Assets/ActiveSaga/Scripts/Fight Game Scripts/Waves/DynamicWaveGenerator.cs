@@ -31,7 +31,7 @@ namespace ActiveSaga.BossFight.Waves
             dynamicWave.steps = new List<WaveStep>();
 
             int entityCount = difficultyConfig != null
-                ? difficultyConfig.GetEntityCount(index)
+                ? difficultyConfig.GetDodgeProjectileCount(index)
                 : 7;
 
             dynamicWave.steps.Add(new WaveStep
@@ -41,16 +41,29 @@ namespace ActiveSaga.BossFight.Waves
                 delayAfterStep = 1f
             });
 
+            // The main Fight Game flow is now always dodge waves.
+            // Combat enemies are spawned separately by WaveManager as a background system.
             if (type == WaveType.Combat)
             {
                 AddEnemySteps(dynamicWave, entityCount);
             }
             else
             {
-                AddProjectileSteps(dynamicWave, entityCount);
+                AddProjectileSteps(dynamicWave, entityCount, index);
             }
 
             return dynamicWave;
+        }
+
+        public WaveStep GenerateBackgroundEnemyStep(int waveIndex)
+        {
+            return new WaveStep
+            {
+                type = WaveStep.StepType.SpawnEnemy,
+                enemyData = GetRandomEnemyData(),
+                spawnOffset = GetBackgroundEnemySpawnOffset(waveIndex),
+                delayAfterStep = 0f
+            };
         }
 
         private void AddEnemySteps(WaveData dynamicWave, int enemyCount)
@@ -61,13 +74,13 @@ namespace ActiveSaga.BossFight.Waves
                 {
                     type = WaveStep.StepType.SpawnEnemy,
                     enemyData = GetRandomEnemyData(),
-                    spawnOffset = new Vector3(Random.Range(-3f, 3f), 0, Random.Range(4f, 8f)),
-                    delayAfterStep = Random.Range(0.5f, 1.5f)
+                    spawnOffset = GetFrontEnemySpawnOffset(),
+                    delayAfterStep = Random.Range(0.8f, 1.4f)
                 });
             }
         }
 
-        private void AddProjectileSteps(WaveData dynamicWave, int projectileCount)
+        private void AddProjectileSteps(WaveData dynamicWave, int projectileCount, int waveIndex)
         {
             for (int i = 0; i < projectileCount; i++)
             {
@@ -75,10 +88,45 @@ namespace ActiveSaga.BossFight.Waves
                 {
                     type = WaveStep.StepType.SpawnProjectile,
                     projectileData = GetRandomProjectileData(),
-                    spawnOffset = new Vector3(Random.Range(-2.2f, 2.2f), 0f, Random.Range(3f, 6f)),
-                    delayAfterStep = Random.Range(0.9f, 1.6f)
+                    spawnOffset = GetProjectileSpawnOffset(i),
+                    delayAfterStep = difficultyConfig != null
+                        ? difficultyConfig.GetRandomDodgeProjectileDelay(waveIndex)
+                        : Random.Range(0.9f, 1.3f)
                 });
             }
+        }
+
+        private Vector3 GetProjectileSpawnOffset(int projectileIndex)
+        {
+            // Keep the obstacle in a playable lane, but avoid sending everything exactly through the center.
+            // The Z range keeps enough distance for jump/duck reactions while the speed is higher.
+            float x = Random.Range(-1.9f, 1.9f);
+            float z = Random.Range(4.5f, 7.0f);
+
+            return new Vector3(x, 0f, z);
+        }
+
+        private Vector3 GetBackgroundEnemySpawnOffset(int waveIndex)
+        {
+            // Most enemies now enter from the sides so they feel like an additional threat
+            // and not like another front wave.
+            bool spawnFromSide = Random.value < 0.7f;
+
+            if (spawnFromSide)
+            {
+                float side = Random.value < 0.5f ? -1f : 1f;
+                float sideDistance = Random.Range(5.5f, 8.5f) * side;
+                float forwardDistance = Random.Range(1.5f, 5.0f);
+
+                return new Vector3(sideDistance, 0f, forwardDistance);
+            }
+
+            return GetFrontEnemySpawnOffset();
+        }
+
+        private Vector3 GetFrontEnemySpawnOffset()
+        {
+            return new Vector3(Random.Range(-2.8f, 2.8f), 0f, Random.Range(4.0f, 8.0f));
         }
 
         private EnemyData GetRandomEnemyData()

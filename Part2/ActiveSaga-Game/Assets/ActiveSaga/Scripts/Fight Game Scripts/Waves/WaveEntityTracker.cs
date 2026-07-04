@@ -8,12 +8,18 @@ namespace ActiveSaga.BossFight.Waves
 {
     public class WaveEntityTracker
     {
-        private readonly HashSet<GameObject> activeEntities = new HashSet<GameObject>();
+        private readonly HashSet<GameObject> activeWaveProjectiles = new HashSet<GameObject>();
+        private readonly HashSet<GameObject> activeBackgroundEnemies = new HashSet<GameObject>();
         private readonly Func<bool> canCountStats;
 
         private bool isSubscribed;
 
-        public int ActiveEntitiesCount => activeEntities.Count;
+        // This count is used by WaveManager to know when a dodge wave is finished.
+        public int ActiveEntitiesCount => activeWaveProjectiles.Count;
+
+        // This count is used only by the background enemy spawner to avoid enemy spam.
+        public int ActiveEnemiesCount => activeBackgroundEnemies.Count;
+
         public int TotalSpawnedThisWave { get; private set; }
         public int SuccessfullyHandledThisWave { get; private set; }
         public int PlayerHitCountThisWave { get; private set; }
@@ -30,9 +36,9 @@ namespace ActiveSaga.BossFight.Waves
                 return;
             }
 
-            EventManager.Subscribe<EnemySpawnedEvent>(OnEntitySpawned);
+            EventManager.Subscribe<EnemySpawnedEvent>(OnEnemySpawned);
             EventManager.Subscribe<EnemyDespawnedEvent>(OnEnemyDespawned);
-            EventManager.Subscribe<ProjectileSpawnedEvent>(OnEntitySpawned);
+            EventManager.Subscribe<ProjectileSpawnedEvent>(OnProjectileSpawned);
             EventManager.Subscribe<ProjectileDespawnedEvent>(OnProjectileDespawned);
 
             isSubscribed = true;
@@ -45,9 +51,9 @@ namespace ActiveSaga.BossFight.Waves
                 return;
             }
 
-            EventManager.Unsubscribe<EnemySpawnedEvent>(OnEntitySpawned);
+            EventManager.Unsubscribe<EnemySpawnedEvent>(OnEnemySpawned);
             EventManager.Unsubscribe<EnemyDespawnedEvent>(OnEnemyDespawned);
-            EventManager.Unsubscribe<ProjectileSpawnedEvent>(OnEntitySpawned);
+            EventManager.Unsubscribe<ProjectileSpawnedEvent>(OnProjectileSpawned);
             EventManager.Unsubscribe<ProjectileDespawnedEvent>(OnProjectileDespawned);
 
             isSubscribed = false;
@@ -62,32 +68,20 @@ namespace ActiveSaga.BossFight.Waves
 
         public void CleanupInactiveEntities()
         {
-            if (activeEntities.Count == 0)
-            {
-                return;
-            }
-
-            activeEntities.RemoveWhere(item => item == null || !item.activeInHierarchy);
+            activeWaveProjectiles.RemoveWhere(item => item == null || !item.activeInHierarchy);
+            activeBackgroundEnemies.RemoveWhere(item => item == null || !item.activeInHierarchy);
         }
 
         public void ForceClearActiveEntities()
         {
-            Debug.Log($"<color=orange>Force clearing {activeEntities.Count} entities.</color>");
+            Debug.Log($"<color=orange>Force clearing {activeWaveProjectiles.Count} active wave projectiles.</color>");
 
-            List<GameObject> toClear = new List<GameObject>(activeEntities);
+            List<GameObject> toClear = new List<GameObject>(activeWaveProjectiles);
 
             foreach (GameObject obj in toClear)
             {
                 if (obj == null)
                 {
-                    continue;
-                }
-
-                EnemyController enemy = obj.GetComponent<EnemyController>();
-
-                if (enemy != null)
-                {
-                    enemy.Despawn(false);
                     continue;
                 }
 
@@ -102,19 +96,23 @@ namespace ActiveSaga.BossFight.Waves
                 obj.SetActive(false);
             }
 
-            activeEntities.Clear();
+            activeWaveProjectiles.Clear();
         }
 
         public void ForceClearActiveEntitiesWithoutStats()
         {
-            if (activeEntities.Count == 0)
+            int totalCount = activeWaveProjectiles.Count + activeBackgroundEnemies.Count;
+
+            if (totalCount == 0)
             {
                 return;
             }
 
-            Debug.Log($"<color=orange>[WaveManager] Force clearing {activeEntities.Count} entities without adding stats.</color>");
+            Debug.Log($"<color=orange>[WaveManager] Force clearing {totalCount} entities without adding stats.</color>");
 
-            List<GameObject> toClear = new List<GameObject>(activeEntities);
+            List<GameObject> toClear = new List<GameObject>();
+            toClear.AddRange(activeWaveProjectiles);
+            toClear.AddRange(activeBackgroundEnemies);
 
             foreach (GameObject obj in toClear)
             {
@@ -126,33 +124,28 @@ namespace ActiveSaga.BossFight.Waves
                 obj.SetActive(false);
             }
 
-            activeEntities.Clear();
+            activeWaveProjectiles.Clear();
+            activeBackgroundEnemies.Clear();
         }
 
-        private void OnEntitySpawned(EnemySpawnedEvent e)
+        private void OnEnemySpawned(EnemySpawnedEvent e)
+        {
+            if (e.enemy != null && !activeBackgroundEnemies.Contains(e.enemy))
+            {
+                activeBackgroundEnemies.Add(e.enemy);
+            }
+        }
+
+        private void OnProjectileSpawned(ProjectileSpawnedEvent e)
         {
             if (!CanCountStats())
             {
                 return;
             }
 
-            if (e.enemy != null && !activeEntities.Contains(e.enemy))
+            if (e.projectile != null && !activeWaveProjectiles.Contains(e.projectile))
             {
-                activeEntities.Add(e.enemy);
-                TotalSpawnedThisWave++;
-            }
-        }
-
-        private void OnEntitySpawned(ProjectileSpawnedEvent e)
-        {
-            if (!CanCountStats())
-            {
-                return;
-            }
-
-            if (e.projectile != null && !activeEntities.Contains(e.projectile))
-            {
-                activeEntities.Add(e.projectile);
+                activeWaveProjectiles.Add(e.projectile);
                 TotalSpawnedThisWave++;
             }
         }
@@ -164,21 +157,7 @@ namespace ActiveSaga.BossFight.Waves
                 return;
             }
 
-            activeEntities.Remove(e.enemy);
-
-            if (!CanCountStats())
-            {
-                return;
-            }
-
-            if (e.wasKilledByPlayer)
-            {
-                SuccessfullyHandledThisWave++;
-            }
-            else
-            {
-                PlayerHitCountThisWave++;
-            }
+            activeBackgroundEnemies.Remove(e.enemy);
         }
 
         private void OnProjectileDespawned(ProjectileDespawnedEvent e)
@@ -188,7 +167,7 @@ namespace ActiveSaga.BossFight.Waves
                 return;
             }
 
-            activeEntities.Remove(e.projectile);
+            activeWaveProjectiles.Remove(e.projectile);
 
             if (!CanCountStats())
             {

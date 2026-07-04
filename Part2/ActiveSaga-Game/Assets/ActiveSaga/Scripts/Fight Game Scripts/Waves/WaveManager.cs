@@ -19,13 +19,17 @@ namespace ActiveSaga.BossFight.Waves
 
         [Header("Runtime State")]
         [SerializeField] private int currentWaveIndex = 0;
-        [SerializeField] private WaveType nextWaveType = WaveType.Combat;
+
+        [Header("Background Enemy Settings")]
+        [SerializeField] private float backgroundEnemyStartDelay = 3f;
+        [SerializeField] private float enemySpawnRetryDelay = 0.4f;
 
         [Header("Master Data (Dynamic Generator)")]
         [SerializeField] private List<EnemyData> enemyMasterList;
         [SerializeField] private List<ProjectileData> projectileMasterList;
 
         private Coroutine waveLoopRoutine;
+        private Coroutine backgroundEnemyLoopRoutine;
         private bool isWaveActive;
         private WaveData currentDynamicWave;
 
@@ -66,6 +70,7 @@ namespace ActiveSaga.BossFight.Waves
 
             StopAllCoroutines();
             waveLoopRoutine = null;
+            backgroundEnemyLoopRoutine = null;
         }
 
         private void Start()
@@ -84,7 +89,13 @@ namespace ActiveSaga.BossFight.Waves
                 StopCoroutine(waveLoopRoutine);
             }
 
+            if (backgroundEnemyLoopRoutine != null)
+            {
+                StopCoroutine(backgroundEnemyLoopRoutine);
+            }
+
             waveLoopRoutine = StartCoroutine(WaveLoopRoutine());
+            backgroundEnemyLoopRoutine = StartCoroutine(BackgroundEnemyLoopRoutine());
         }
 
         private void InitializeHelpers()
@@ -137,8 +148,7 @@ namespace ActiveSaga.BossFight.Waves
 
         private IEnumerator WaveLoopRoutine()
         {
-            yield return new WaitForSeconds(4f);
-            yield return WaitWhilePaused();
+            yield return WaitForSecondsWhileSessionActive(2f);
 
             if (!CanSessionContinue())
             {
@@ -161,17 +171,14 @@ namespace ActiveSaga.BossFight.Waves
                     continue;
                 }
 
+                // Main waves are now always dodge waves.
+                // Enemies are spawned in parallel by BackgroundEnemyLoopRoutine.
                 WaveData currentWave = dynamicWaveGenerator.Generate(
                     currentWaveIndex,
-                    nextWaveType
+                    WaveType.Dodge
                 );
 
                 currentDynamicWave = currentWave;
-
-                nextWaveType = nextWaveType == WaveType.Combat
-                    ? WaveType.Dodge
-                    : WaveType.Combat;
-
                 isWaveActive = true;
 
                 yield return StartCoroutine(PlayWave(currentWave));
@@ -195,8 +202,7 @@ namespace ActiveSaga.BossFight.Waves
 
                 currentWaveIndex++;
 
-                yield return new WaitForSeconds(2.0f);
-                yield return WaitWhilePaused();
+                yield return WaitForSecondsWhileSessionActive(1.0f);
 
                 if (!CanSessionContinue())
                 {
@@ -205,6 +211,53 @@ namespace ActiveSaga.BossFight.Waves
             }
 
             waveLoopRoutine = null;
+        }
+
+        private IEnumerator BackgroundEnemyLoopRoutine()
+        {
+            yield return WaitForSecondsWhileSessionActive(backgroundEnemyStartDelay);
+
+            while (CanSessionContinue())
+            {
+                yield return WaitWhilePaused();
+
+                if (!CanSessionContinue())
+                {
+                    break;
+                }
+
+                int maxConcurrentEnemies = difficultyConfig != null
+                    ? difficultyConfig.GetMaxConcurrentEnemies()
+                    : 2;
+
+                if (entityTracker != null &&
+                    entityTracker.ActiveEnemiesCount >= maxConcurrentEnemies)
+                {
+                    yield return WaitForSecondsWhileSessionActive(enemySpawnRetryDelay);
+                    continue;
+                }
+
+                WaveStep enemyStep = dynamicWaveGenerator.GenerateBackgroundEnemyStep(currentWaveIndex);
+
+                float enemySpeedMultiplier = difficultyConfig != null
+                    ? difficultyConfig.GetEnemySpeedMultiplier(currentWaveIndex)
+                    : 1f;
+
+                if (enemySpeedMultiplier <= 0f)
+                {
+                    enemySpeedMultiplier = 1f;
+                }
+
+                entitySpawner.ExecuteStep(enemyStep, enemySpeedMultiplier);
+
+                float spawnInterval = difficultyConfig != null
+                    ? difficultyConfig.GetEnemySpawnInterval(currentWaveIndex)
+                    : 3.5f;
+
+                yield return WaitForSecondsWhileSessionActive(spawnInterval);
+            }
+
+            backgroundEnemyLoopRoutine = null;
         }
 
         private IEnumerator PlayWave(WaveData data)
@@ -261,8 +314,7 @@ namespace ActiveSaga.BossFight.Waves
                     BossController.Instance.PlayAnimation(animationStep.animationTrigger);
                 }
 
-                yield return new WaitForSeconds(2.0f);
-                yield return WaitWhilePaused();
+                yield return WaitForSecondsWhileSessionActive(1.0f);
 
                 if (!CanSessionContinue())
                 {
@@ -286,8 +338,8 @@ namespace ActiveSaga.BossFight.Waves
 
                 entitySpawner.ExecuteStep(step, speedMult);
 
-                yield return new WaitForSeconds(step.delayAfterStep / speedMult);
-                yield return WaitWhilePaused();
+                float delayAfterStep = Mathf.Max(0.35f, step.delayAfterStep);
+                yield return WaitForSecondsWhileSessionActive(delayAfterStep);
 
                 if (!CanSessionContinue())
                 {
@@ -340,8 +392,8 @@ namespace ActiveSaga.BossFight.Waves
             }
 
             float bossDamagePerSuccessfulWave = difficultyConfig != null
-            ? difficultyConfig.GetBossDamagePerSuccessfulWave()
-            : 100f;
+                ? difficultyConfig.GetBossDamagePerSuccessfulWave()
+                : 100f;
 
             bool waveSuccess = waveEvaluator.EvaluateWave(
                 data,
@@ -369,6 +421,12 @@ namespace ActiveSaga.BossFight.Waves
                 waveLoopRoutine = null;
             }
 
+            if (backgroundEnemyLoopRoutine != null)
+            {
+                StopCoroutine(backgroundEnemyLoopRoutine);
+                backgroundEnemyLoopRoutine = null;
+            }
+
             isWaveActive = false;
 
             if (entityTracker != null)
@@ -387,6 +445,29 @@ namespace ActiveSaga.BossFight.Waves
         {
             while (IsSessionPaused())
             {
+                yield return null;
+            }
+        }
+
+        private IEnumerator WaitForSecondsWhileSessionActive(float duration)
+        {
+            if (duration <= 0f)
+            {
+                yield break;
+            }
+
+            float timer = 0f;
+
+            while (timer < duration)
+            {
+                yield return WaitWhilePaused();
+
+                if (!CanSessionContinue())
+                {
+                    yield break;
+                }
+
+                timer += Time.deltaTime;
                 yield return null;
             }
         }

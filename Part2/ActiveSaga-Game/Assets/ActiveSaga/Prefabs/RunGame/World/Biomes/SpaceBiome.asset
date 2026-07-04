@@ -24,7 +24,7 @@ MonoBehaviour:
     cost: 1
     weight: 10
     type: 4
-  - itemName: enemy
+  - itemName: Enemy
     prefab: {fileID: 8345581499367287098, guid: d65675ddcacfa7440b6e3fbb57517189, type: 3}
     cost: 1
     weight: 10
