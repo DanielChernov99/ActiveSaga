@@ -4,7 +4,7 @@ ActiveSaga is a standalone Virtual Reality fitness game for the Meta Quest platf
 The project turns home workouts into an interactive VR experience by using real body movements as gameplay controls.
 
 Players can run in place, jump, squat, dodge, and attack inside a fantasy-inspired VR environment.  
-The game includes two modes: **Run Game** and **Fight Game**, with progress saved through a backend server and MongoDB database.
+The game includes two modes: **Run Game** and **Fight Game**, with player progress saved through a deployed backend server and MongoDB database.
 
 ---
 
@@ -24,6 +24,9 @@ ActiveSaga/
 
 > **Part 1** contains the initial POC and documentation.  
 > **Part 2** contains the final runnable project.
+
+The final game is run from **Part2 / ActiveSaga-Game**.  
+The backend is already deployed on Render, so running the backend locally is not required for normal use.
 
 ---
 
@@ -66,6 +69,7 @@ ActiveSaga/
 - bcrypt password hashing
 - dotenv
 - CORS
+- Render deployment
 
 ---
 
@@ -79,54 +83,25 @@ Part2/
 
 The system has two parts:
 
-1. Backend API - `Part2/ActiveSaga-API`
-2. Unity VR Game - `Part2/ActiveSaga-Game`
+1. Unity VR Game - `Part2/ActiveSaga-Game`
+2. Backend API - `Part2/ActiveSaga-API`
 
----
-
-## 1. Backend Setup
-
-Go to the backend folder:
-
-```bash
-cd Part2/ActiveSaga-API
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Create a `.env` file inside `Part2/ActiveSaga-API`:
-
-```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-PORT=3000
-```
-
-Run the backend:
-
-```bash
-npm start
-```
-
-The backend should run locally on:
+For regular use, only the Unity project or the final APK is needed.  
+The backend already runs online on Render:
 
 ```text
-http://localhost:3000
+https://active-saga-api.onrender.com
 ```
 
-You can check that the server is running by opening:
+Health check:
 
 ```text
-http://localhost:3000/health
+https://active-saga-api.onrender.com/health
 ```
 
 ---
 
-## 2. Unity Project Setup
+## Unity Project Setup
 
 Open the Unity project from:
 
@@ -154,9 +129,9 @@ Required hardware:
 
 ---
 
-## 3. API URL Configuration
+## API URL Configuration
 
-The Unity client communicates with the backend through API service scripts.
+The Unity client communicates with the deployed backend through API service scripts.
 
 Main scripts to check:
 
@@ -165,44 +140,50 @@ PlayerApiService
 ApiGameResultSubmitter
 ```
 
-For the deployed backend, use:
+For the final APK version, the API URL should point to the deployed Render backend:
 
 ```text
 https://active-saga-api.onrender.com/api/player
 ```
 
-For local testing in the Unity Editor, use:
-
-```text
-http://localhost:3000/api/player
-```
-
-For testing on the Meta Quest headset with a local backend, do **not** use `localhost`.  
-Use the computer's local network IP address instead:
-
-```text
-http://192.168.x.x:3000/api/player
-```
-
-Example:
-
-```text
-http://192.168.1.25:3000/api/player
-```
+Local backend URLs are only needed for development or debugging.
 
 ---
 
-## 4. Building the APK
+## Running the Game on Meta Quest
+
+1. Build or install the ActiveSaga APK on the Meta Quest headset.
+2. Make sure the headset is connected to the internet.
+3. Launch ActiveSaga.
+4. Register a new account or log in with an existing account.
+5. Review progress, daily missions, and weekly activity.
+6. Select a game mode:
+   - Run Game
+   - Fight Game
+7. Select a difficulty level.
+8. Play the session using physical movements.
+9. View the end-game results.
+10. Return to the main menu and verify that progress was updated.
+
+---
+
+## Building the APK
 
 To build the game for Meta Quest:
 
 1. Open `Part2/ActiveSaga-Game` in Unity.
 2. Open Build Settings / Build Profiles.
 3. Select Android / Meta Quest as the target platform.
-4. Make sure the required scenes are included.
-5. Confirm that the API URL is correct.
-6. Build the project as an APK.
-7. Install the APK on the Meta Quest headset.
+4. Make sure Android Build Support is installed.
+5. Make sure the required scenes are included.
+6. Confirm that the API URL points to Render:
+
+```text
+https://active-saga-api.onrender.com/api/player
+```
+
+7. Build the project as an APK.
+8. Install the APK on the Meta Quest headset.
 
 Optional installation with ADB:
 
@@ -215,6 +196,28 @@ To replace an existing version:
 ```bash
 adb install -r ActiveSaga.apk
 ```
+
+---
+
+## Backend Information
+
+The backend source code is included in:
+
+```text
+Part2/ActiveSaga-API
+```
+
+The backend is implemented with Node.js and Express and is already deployed on Render.
+
+The Unity client uses the deployed backend for:
+
+- User registration
+- User login
+- Player profile loading
+- Daily missions
+- Weekly activity progress
+- Game session result submission
+- XP, coins, levels, and saved statistics
 
 ---
 
@@ -238,18 +241,76 @@ Authorization: Bearer <token>
 
 ---
 
-## Running the Game
+## Optional: Running the Backend Locally
 
-1. Launch ActiveSaga on the Meta Quest headset.
-2. Register or log in.
-3. Review progress, daily missions, and weekly activity.
-4. Select a game mode:
-   - Run Game
-   - Fight Game
-5. Select a difficulty level.
-6. Play the session using physical movements.
-7. View the end-game results.
-8. Return to the main menu and continue progressing.
+Running the backend locally is not required for the final game.  
+It is only needed if a developer wants to modify or debug the backend.
+
+Go to the backend folder:
+
+```bash
+cd Part2/ActiveSaga-API
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env` file inside `Part2/ActiveSaga-API`:
+
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+PORT=3000
+```
+
+Run the backend locally:
+
+```bash
+npm start
+```
+
+Local backend URL:
+
+```text
+http://localhost:3000
+```
+
+Local health check:
+
+```text
+http://localhost:3000/health
+```
+
+If testing a local backend from the Meta Quest headset, do **not** use `localhost`.  
+Use the computer's local network IP address instead:
+
+```text
+http://192.168.x.x:3000/api/player
+```
+
+---
+
+## Environment Variables
+
+The deployed backend uses environment variables configured in Render.
+
+Required backend variables:
+
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+PORT=3000
+```
+
+Important:
+
+- Do not commit `.env` to GitHub.
+- Do not expose the MongoDB connection string.
+- Do not expose the JWT secret.
+- In production, environment variables should be configured in Render.
 
 ---
 
